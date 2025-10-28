@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 
 export default function Create({ usuarios, carreras, tiposContrato, turnos }) {
     const { data, setData, post, processing, errors } = useForm({
