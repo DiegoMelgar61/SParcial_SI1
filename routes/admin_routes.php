@@ -4,508 +4,1141 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use App\Config;
+use App\Classes\Postgres_DB;
 
-
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-
-
-// helpers generales
 require_once app_path('/services/help_functs.php');
-// helper para permisos/roles (funciones user_permissions, user_has_permission)
-require_once app_path('/services/helper_rol_permisos.php');
 
-//ENDPOINT LOGOUT
-/*Route::get('/admin/import-users',function()
-{
-
-    return view('/import_user');
-});*/
-
-Route::match(['get','post'],'/admin/import-users',function(Request $request)
-{
-    //EVITAR ERRORES CORS
+//ENDPOINT GESTOR DE USUARIOS: ELIMINAR
+Route::post('/admin/users/delete', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
-    if (!Session::has('user_code'))
-    {
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $codigo_eliminar = $data['id'];
+
+    //OBTENER DATOS BITACORA
+    $accion = 'ELIMINAR USUARIO';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Eliminar un usuario indicado.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "  SELECT ci
+                FROM ex_g32.usuario
+                WHERE codigo= :codigo";
+        $params = [':codigo' => $codigo_eliminar];
+
+        $stmt = $db->execute_query($sql, $params);
+        $ci = $db->fetch_one($stmt);
+
+        if ($ci == null) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'El usuario no esta Registrado en el Sistema.'
+            ]);
+        }
+        $sql = "  DELETE FROM ex_g32.persona
+                WHERE ci= :ci";
+        $params = [':ci' => $ci['ci']];
+        $stmt = $db->execute_query($sql, $params);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario eliminado Exitosamente'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+//ENDPOINT GESTION DE USUARIO
+Route::get('/admin/users', function () {
+    //VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
         return redirect('/login');
     }
 
-    // Comprobar permiso específico para importación masiva
-    $userId = Session::get('user_code');
-    if (! user_has_permission($userId, 'IMPORTAR_USUARIOS')) {
-        if ($request->isMethod('get')) {
-            // devolver vista de acceso denegado o redirigir al inicio
-            return redirect('/')->with('error','No autorizado');
-        }
-        return response()->json(['success'=>false,'message'=>'No autorizado'],403);
+    //VALIDACION: USUARIO ADMIN
+    if (Session::get('user_role') != 'admin') {
+        return redirect('/');
     }
 
-    if ($request->isMethod('get'))
-    {
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        //REGISTRO DE BITACORA
+        $accion = 'GESTION DE USUARIOS';
+        $fecha = date('Y-m-d H:i:s');
+        $estado = 'ERROR';
+        $comentario = 'Consultar Usuarios Registrados.';
+        $codigo = Session::get('user_code');
+
+        //OBTENER BITACORA
+        $sql = "  SELECT u.codigo,u.ci,p.nomb_comp,p.tel,p.correo,r.nombre as rol
+                FROM ex_g32.usuario u
+                INNER JOIN ex_g32.persona p ON p.ci=u.ci
+                INNER JOIN ex_g32.rol r ON r.id =u.id_rol";
+        $stmt = $db->execute_query($sql);
+        $usuarios = $db->fetch_all($stmt);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        //RECUPERAR DATOS DEL USUARIO
+        $user = [
+            'nomb_comp' => Session::get('name'),  // Asegúrate de tener este dato en la sesión
+            'rol' => Session::get('user_role'),
+            'ci' => Session::get('ci'),
+            'correo' => Session::get('mail'),
+            'tel' => Session::get('tel'),
+        ];
+
+        return view('admin_users', ['usuarios' => $usuarios, 'user' => $user]);
+    } catch (Exception $e) {
+        return redirect('/admin')->with('error', 'Error al consultar usuarios: ' . $e->getMessage());
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//RUTA ENCARGADA DE LA BITACORA
+Route::get('/admin/bitacora', function () {
+    //VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
+
+    //VALIDACION: USUARIO ADMIN
+    if (Session::get('user_role') != 'admin') {
+        return redirect('/');
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        //REGISTRO DE BITACORA
+        $accion = 'CONSULTAR BITACORA';
+        $fecha = date('Y-m-d H:i:s');
+        $estado = 'ERROR';
+        $comentario = 'Consultar Historial de acciones.';
+        $codigo = Session::get('user_code');
+
+        //OBTENER BITACORA
+        $sql = "  SELECT *
+                FROM ex_g32.bitacora
+                ORDER BY fecha_hora DESC
+                LIMIT 30";
+        $stmt = $db->execute_query($sql);
+        $bitacora = $db->fetch_all($stmt);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        //RECUPERAR DATOS DEL USUARIO
+        $user = [
+            'nomb_comp' => Session::get('name'),  // Asegúrate de tener este dato en la sesión
+            'rol' => Session::get('user_role'),
+            'ci' => Session::get('ci'),
+            'correo' => Session::get('mail'),
+            'tel' => Session::get('tel'),
+        ];
+
+        return view('admin_bitacora', ['bitacora' => $bitacora, 'user' => $user]);
+    } catch (Exception $e) {
+        return redirect('/admin')->with('error', 'Error al consultar la bitácora: ' . $e->getMessage());
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT GESTOR DE USUARIOS: CREAR
+Route::post('/admin/users/store', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $ci = $data['ci'];
+    $nomb_comp = $data['nomb_comp'];
+    $fecha_n = $data['fecha_nac'];
+    $correo = $data['correo'];
+    $tel = $data['tel'];
+    $rol = $data['rol'];
+    $password = $data['password'];
+
+    //OBTENER DATOS BITACORA
+    $accion = 'CREAR USUARIO';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Registrar un usuario .';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+
+    try {
+
+        $db->create_conection();
+
+        // VALIDAR SI YA EXISTE EL CI EN LA TABLA PERSONA
+        $sql = "SELECT ci FROM ex_g32.persona WHERE ci = :ci";
+        $stmt = $db->execute_query($sql, [':ci' => $ci]);
+        $existingUser = $db->fetch_one($stmt);
+
+        if ($existingUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El usuario ya esta Registrado en el Sistema.'
+            ]);
+        }
+
+
+        // INSERTAR EN TABLA PERSONA
+        $sql = "
+                    INSERT INTO ex_g32.persona (ci, nomb_comp, fecha_n, correo, tel, profesion, tipo) 
+                    VALUES (:ci, :nomb_comp, :fecha_n, :correo, :tel, :profesion, :tipo)
+                ";
+        $params = [
+            ':ci' => $ci,
+            ':nomb_comp' => $nomb_comp,
+            ':fecha_n' => $fecha_n,
+            ':correo' => $correo,
+            ':tel' => $tel,
+            ':profesion' => $rol,
+            ':tipo' => strtolower($rol)
+        ];
+        $db->execute_query($sql, $params);
+
+        // DETERMINAR ROL SEGÚN EL TIPO
+
+        $rol_id = 0;
+        if (strtolower($rol) == 'docente')
+            $rol_id = 1;
+        elseif (strtolower($rol) == 'admin')
+            $rol_id = 2;
+        else
+            return response()->json([
+                'success' => false,
+                'message' => 'El rol no esta registrado en el Sistema.'
+            ]);
+
+
+        // INSERTAR EN TABLA USUARIO (CON HASH DE CONTRASEÑA)
+        $sql = "
+                    INSERT INTO ex_g32.usuario (password_hash, ci, id_rol) 
+                    VALUES (:password_hash, :ci, :id_rol)
+                ";
+        $params = [
+            ':password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            ':ci' => $ci,
+            ':id_rol' => $rol_id
+        ];
+        error_log(print_r($request->json()->all(), true));
+        $db->execute_query($sql, $params);
+
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario creado Exitosamente'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+//ENDPOINT GESTOR DE USUARIOS: Actualizar
+Route::post('/admin/users/update', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $ci = $data['ci'];
+    $nomb_comp = $data['nomb_comp'];
+    $fecha_n = $data['fecha_nac'];
+    $correo = $data['correo'];
+    $tel = $data['tel'];
+    $rol = $data['rol'];
+    $password = $data['password'];
+
+    //OBTENER DATOS BITACORA
+    $accion = 'CREAR USUARIO';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Registrar un usuario .';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+
+    try {
+
+        $db->create_conection();
+
+        // VALIDAR SI YA EXISTE EL CI EN LA TABLA PERSONA
+        $sql = "SELECT ci FROM ex_g32.persona WHERE ci = :ci";
+        $stmt = $db->execute_query($sql, [':ci' => $ci]);
+        $existingUser = $db->fetch_one($stmt);
+
+        if (!$existingUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El usuario no esta Registrado en el Sistema.'
+            ]);
+        }
+
+
+        // INSERTAR EN TABLA PERSONA
+        $sql = "
+                    UPDATE ex_g32.persona SET nomb_comp=:nomb_comp, correo=:correo, tel=:tel, tipo=:tipo
+                     WHERE ci=:ci
+                ";
+        $params = [
+            ':ci' => $ci,
+            ':nomb_comp' => $nomb_comp,
+            ':correo' => $correo,
+            ':tel' => $tel,
+            ':tipo' => strtolower($rol)
+        ];
+        $db->execute_query($sql, $params);
+
+        // DETERMINAR ROL SEGÚN EL TIPO
+
+        $rol_id = 0;
+        if (strtolower($rol) == 'docente')
+            $rol_id = 1;
+        elseif (strtolower($rol) == 'admin')
+            $rol_id = 2;
+        else
+            return response()->json([
+                'success' => false,
+                'message' => 'El rol no esta registrado en el Sistema.'
+            ]);
+
+
+        // INSERTAR EN TABLA USUARIO (CON HASH DE CONTRASEÑA)
+        if ($password != '') {
+            $sql = "
+                    UPDATE ex_g32.usuario SET password_hash=:password_hash
+                     WHERE ci=:ci
+                ";
+            $params = [
+                ':password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                ':ci' => $ci
+            ];
+        }
+
+        $sql = "
+                    UPDATE ex_g32.usuario SET id_rol=:id_rol
+                     WHERE ci=:ci
+                ";
+        $params = [
+            'id_rol' => $rol_id,
+            'ci' => $ci
+        ];
+error_log(print_r($request->json()->all(), true));
+
+        $db->execute_query($sql, params: $params);
+        error_log(print_r($request->json()->all(), true));
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario actualizado Exitosamente'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+//RUTA GESTORA DEL MODULO DE ADMINISTRADORES
+Route::get('/admin/mod-adm', function () {
+    // VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
+
+    // VALIDACION: USUARIO ADMIN
+    if (Session::get('user_role') != 'admin') {
+        return redirect('/');
+    }
+
+    try {
+        $db = Config::$db;
+        $db->create_conection(); // Crea la conexión
+
+        //CONTAR USUARIOS
+        $sql = "SELECT COUNT(*) as cant_user FROM ex_g32.usuario";
+        $stmt = $db->execute_query($sql);
+        $cant_usuarios = $db->fetch_one($stmt);
+
+        //CONTAR DOCENTES
+        $sql = "SELECT COUNT(U.codigo) as cant_docent
+                FROM ex_g32.usuario u
+                INNER JOIN ex_g32.rol r ON r.id = u.id_rol 
+                WHERE r.nombre = 'docente'";
+        $stmt = $db->execute_query($sql);
+        $cant_docente = $db->fetch_one($stmt);
+
+        //SELECCIONAR GESTION ACTUAL
+        $sql = "  SELECT nombre
+                FROM ex_g32.gestion  
+                WHERE CURRENT_DATE BETWEEN fecha_i AND fecha_f;";
+        $stmt = $db->execute_query($sql);
+        $gestion_actual = $db->fetch_one($stmt);
+
+        //REGISTRO DE BITACORA
+        $accion = 'ACCESO A MÓDULO ADMIN';
+        $fecha = date('Y-m-d H:i:s');
+        $estado = 'SUCCESS';
+        $comentario = 'Acceso al módulo de administración.';
+        $codigo = Session::get('user_code');
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        //RECUPERAR DATOS DEL USUARIO
+        $user = [
+            'nomb_comp' => Session::get('name'),  // Asegúrate de tener este dato en la sesión
+            'rol' => Session::get('user_role'),
+            'ci' => Session::get('ci'),
+            'correo' => Session::get('mail'),
+            'tel' => Session::get('tel'),
+        ];
+        //ENVIAR RESULTADOS A LA VISTA
+        return view('mod_admin', [
+            'cant_usuarios' => $cant_usuarios['cant_user'],
+            'cant_docente' => $cant_docente['cant_docent'],
+            'gestion_actual' => $gestion_actual['nombre'],
+            'user' => $user,
+        ]);
+    } catch (Exception $e) {
+        // Manejo de excepciones: Si la conexión falla, redirige al login
+        return redirect('/')->with('error', 'Error al conectar con la base de datos: ' . $e->getMessage());
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+
+//RUTA GESTORA DEL MODULO DE IMPORTACION DE USUARIOS
+Route::match(['get', 'post'], '/admin/import-users', function (Request $request) {
+    //EVITAR ERRORES CORS
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
+
+    if ($request->isMethod('get')) {
         return view('import_user');
     }
 
-    if (!$request->hasFile('archivo'))
-    {
+    if (!$request->hasFile('archivo')) {
         return response()->json([
-            'success'=>false,
-            'message'=>'No se ha enviado ningun archivo.'
-        ],400);
+            'success' => false,
+            'message' => 'No se ha enviado ningun archivo.'
+        ], 400);
     }
 
-    $file=$request->file('archivo');
+    $file = $request->file('archivo');
 
     //VERIFICAMOS EL TIPO DE ARCHIVO (.xlsx/.csv)
-    $allowed_extensions=['csv','xlsx'];
-    $extension=$file->getClientOriginalExtension();
+    $allowed_extensions = ['csv', 'xlsx'];
+    $extension = $file->getClientOriginalExtension();
 
-    if (!in_array($extension,$allowed_extensions))
-    {
+    if (!in_array($extension, $allowed_extensions)) {
         return response()->json([
             'success' => false,
             'message' => 'Formato de archivo no válido. Solo se permiten archivos .csv o .xlsx.'
         ], 400);
     }
 
-    //PROCESAR EL ARCHIVO
-    try
-    {
-        $result=importar_usuarios($file,$extension);
-         //VALIDAR SI HUBO ERROR EN LA FUNCION (importar_usuarios)
-        
+    //REGISTRAR BITACORA
+    $accion = 'IMPORTAR USUARIOS';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Inicio del proceso de importación de usuarios.';
+    $codigo = Session::get('user_code');
+    $db = Config::$db;
 
+    //PROCESAR EL ARCHIVO
+    try {
+
+        $result = importar_usuarios($file, $extension);
+
+        $db->create_conection();
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
         return response()->json([
-            'success'=>true,
-            'message'=>'Usuarios cargados exitosamente',
-            'data'=>$result
+            'success' => true,
+            'message' => 'Usuarios cargados exitosamente',
+            'data' => $result
         ]);
-    }
-    catch (\Exception $e)
-    {
+    } catch (\Exception $e) {
+        $estado = 'ERROR';
+        $comentario = 'Error durante la carga del archivo: ' . $e->getMessage();
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
         return response()->json([
-            'success'=>false,
-            'message'=>'Ocurrio un error al cargar los usuarios.',
-            'error'=>$e->getMessage()
+            'success' => false,
+            'message' => 'Ocurrio un error al cargar los usuarios.',
+            'error' => $e->getMessage()
         ]);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
     }
+
 });
 
 
-/*
-|--------------------------------------------------------------------------
-| Rutas CRUD para PERMISSIONS y ROLES (todo en routes/web.php)
-|--------------------------------------------------------------------------
-|
-| - Uso: AJAX desde el frontend (las vistas blade que ya creaste consumirán estas rutas).
-| - Autenticación simple: se verifica Session::has('user_code') (igual que import-users).
-| - Respuestas en JSON para que el JS las consuma fácilmente.
-|
-*/
 
-/**
- * ---------- PERMISSIONS ----------
- * Endpoints:
- *  - GET  /admin/permissions         -> lista permisos (JSON)
- *  - GET  /admin/permissions/{id}    -> detalle permiso (JSON)
- *  - POST /admin/permissions         -> crear permiso
- *  - PUT  /admin/permissions/{id}    -> actualizar permiso
- *  - DELETE /admin/permissions/{id}  -> eliminar permiso
- *
- * Nota: las vistas (si quieres una UI) deberían estar en resources/views/admin/permissions.blade.php
- * y enviar/recibir JSON a estas rutas.
- */
 
-Route::group([], function() {
+//ENDPOINT ADMINISTRAR ROLES Y PERMISOS
 
-    // Listar permisos (JSON)
-    Route::get('/admin/permissions', function(Request $request) {
-        // comprobación de sesión (igual que import-users)
-        if (! Session::has('user_code')) {
-            return redirect('/login');
-        }
+//GET PERMISOS
+Route::get('/admin/permisos', function () {
+    //VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
 
-        // Si la petición NO es AJAX, devolver la vista Blade para navegación en navegador
-        if (! $request->ajax()) {
-            // usa la plantilla en app/templates/admin/permisos.blade.php
-            return view('admin.permisos');
-        }
+    //VALIDACION: USUARIO ADMIN
+    if (Session::get('user_role') != 'admin') {
+        return redirect('/');
+    }
 
-        // Ajustado a la estructura: tabla `permisos` con columnas `id`, `nombre`, `descripcion`
-        $perms = DB::table('ex_g32.permisos')->orderBy('id')->get();
+    $db = Config::$db;
+    try {
+        $db->create_conection();
 
-        // Agregar permisos del usuario autenticado (para el frontend) -> 'can' flags
-        $userId = Session::get('user_code');
-        $can = [
-            'view' => user_has_permission($userId, 'VER_PERMISOS'),
-            'create' => user_has_permission($userId, 'CREAR_PERMISO'),
-            'edit' => user_has_permission($userId, 'EDITAR_PERMISO'),
-            'delete' => user_has_permission($userId, 'ELIMINAR_PERMISO')
+        //REGISTRO DE BITACORA
+        $accion = 'GESTION DE PERMISOS';
+        $fecha = date('Y-m-d H:i:s');
+        $estado = 'ERROR';
+        $comentario = 'Consultar permisos registrados.';
+        $codigo = Session::get('user_code');
+
+        //OBTENER BITACORA
+        $sql = "  SELECT id, nombre, descripcion
+                FROM ex_g32.permisos
+                ORDER BY nombre";
+        $stmt = $db->execute_query($sql);
+        $permisos = $db->fetch_all($stmt);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        //RECUPERAR DATOS DEL USUARIO
+        $user = [
+            'nomb_comp' => Session::get('name'),  // Asegúrate de tener este dato en la sesión
+            'rol' => Session::get('user_role'),
+            'ci' => Session::get('ci'),
+            'correo' => Session::get('mail'),
+            'tel' => Session::get('tel'),
         ];
 
-        return response()->json(['permissions' => $perms, 'can' => $can]);
-    });
+        return view('admin_permisos', ['permisos' => $permisos, 'user' => $user]);
+    } catch (Exception $e) {
+        return redirect('/admin')->with('error', 'Error al consultar usuarios: ' . $e->getMessage());
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
 
-    // Ver un permiso
-    Route::get('/admin/permissions/{id}', function(Request $request, $id) {
-        if (! Session::has('user_code')) return redirect('/login');
+// CREAR PERMISOS
+Route::post('/admin/permisos/create', function (Request $request) {
 
-    $perm = DB::table('ex_g32.permisos')->where('id', $id)->first();
-        if (! $perm) return response()->json(['success'=>false,'message'=>'Permiso no encontrado'],404);
 
-        // incluir flags de permiso (útil en UI de edición)
-        $userId = Session::get('user_code');
-        $can = [
-            'edit' => user_has_permission($userId, 'EDITAR_PERMISO'),
-            'delete' => user_has_permission($userId, 'ELIMINAR_PERMISO')
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $nombre_p = $data['nombre'];
+    $descripcion_p = $data['descripcion'];
+
+
+
+    //OBTENER DATOS BITACORA
+    $accion = 'CREAR PERMISO';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Creacion de permisos.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "  SELECT nombre
+                FROM ex_g32.permisos
+                WHERE nombre= :nombre";
+        $params = [':nombre' => $nombre_p];
+
+        $stmt = $db->execute_query($sql, $params);
+        $name = $db->fetch_one($stmt);
+
+        if ($name != null) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'El permiso ya existe en el sistema.'
+            ]);
+        }
+
+        $sql = " INSERT INTO ex_g32.permisos (nombre, descripcion)
+                VALUES (:nombre, :descripcion)";
+        $params = [':nombre' => $nombre_p, ':descripcion' => $descripcion_p];
+        $stmt = $db->execute_query($sql, $params);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Permiso creado exitosamente'
+        ]);
+    } catch (Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT ELIMINAR PERMISO
+
+Route::post('/admin/permisos/delete', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $id_eliminar = $data['id'];
+
+    //OBTENER DATOS BITACORA
+    $accion = 'ELIMINAR PERMISO';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Eliminar un permiso indicado.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "  SELECT id
+                FROM ex_g32.permisos
+                WHERE id= :id";
+        $params = [':id' => $id_eliminar];
+
+        $stmt = $db->execute_query($sql, $params);
+        $id = $db->fetch_one($stmt);
+
+        if ($id == null) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'El permiso no esta Registrado en el Sistema.'
+            ]);
+        }
+        $sql = "  DELETE FROM ex_g32.permisos
+                WHERE id= :id";
+        $params = [':id' => $id_eliminar];
+
+        $stmt = $db->execute_query($sql, $params);
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Permiso eliminado Exitosamente'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT ACTUALIZAR PERMISO
+
+Route::post('/admin/permisos/update', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $id_mod = $data['id'];
+    $nombre_p = $data['nombre'];
+    $descripcion_p = $data['descripcion'];
+
+    //OBTENER DATOS BITACORA
+    $accion = 'MOFICIAR PERMISO';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Modifica un permiso indicado.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "  SELECT id
+                FROM ex_g32.permisos
+                WHERE id= :id";
+        $params = [':id' => $id_mod];
+
+        $stmt = $db->execute_query($sql, $params);
+        $id = $db->fetch_one($stmt);
+
+        if ($id == null) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'El permiso no esta Registrado en el Sistema.'
+            ]);
+        }
+        $sql = "  UPDATE ex_g32.permisos
+                SET nombre= :nombre, descripcion= :descripcion
+                WHERE id= :id";
+        $params = [':id' => $id_mod, ':nombre' => $nombre_p, ':descripcion' => $descripcion_p];
+
+        $stmt = $db->execute_query($sql, $params);
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Permiso actualizado Exitosamente'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT ROLES GET
+
+//GET roles
+Route::get('/admin/roles', function () {
+    //VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
+
+    //VALIDACION: USUARIO ADMIN
+    if (Session::get('user_role') != 'admin') {
+        return redirect('/');
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        //REGISTRO DE BITACORA
+        $accion = 'GESTION DE ROLES';
+        $fecha = date('Y-m-d H:i:s');
+        $estado = 'ERROR';
+        $comentario = 'Consultar roles registrados.';
+        $codigo = Session::get('user_code');
+
+        //OBTENER ROLES
+        $sql = "  SELECT id, nombre, descripcion
+                FROM ex_g32.rol
+                ORDER BY nombre";
+        $stmt = $db->execute_query($sql);
+        $roles = $db->fetch_all($stmt);
+
+
+        //RECUPERAR DATOS DEL USUARIO
+        $user = [
+            'nomb_comp' => Session::get('name'),  // Asegúrate de tener este dato en la sesión
+            'rol' => Session::get('user_role'),
+            'ci' => Session::get('ci'),
+            'correo' => Session::get('mail'),
+            'tel' => Session::get('tel'),
         ];
 
-        return response()->json(['permission' => $perm, 'can' => $can]);
-    });
+        // SEGUNDO: PARA CADA ROL, OBTENER SUS PERMISOS
+        foreach ($roles as &$rol) {
+            $sql_permisos = "SELECT p.id, p.nombre 
+                            FROM ex_g32.permisos p, ex_g32.rol_permiso rp 
+                            WHERE rp.id_rol = :id AND rp.id_permiso = p.id";
 
-    // Crear permiso
-    Route::post('/admin/permissions', function(Request $request) {
-        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-        if (! Session::has('user_code')) return redirect('/login');
-
-        // Backend: validar que el usuario tenga permiso para crear permisos
-        $userId = Session::get('user_code');
-        if (! user_has_permission($userId, 'CREAR_PERMISO')) {
-            return response()->json(['success'=>false,'message'=>'No autorizado'],403);
+            $params = [':id' => $rol['id']];
+            $stmt_permisos = $db->execute_query($sql_permisos, $params);
+            $rol['permisos'] = $db->fetch_all($stmt_permisos);
         }
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
 
-        // Validación usando los nombres esperados: nombre, descripcion
-        $v = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:50',
-            'descripcion' => 'nullable|string|max:255'
-        ]);
-        if ($v->fails()) {
-            return response()->json(['success'=>false,'message'=>$v->errors()->first()],422);
+
+        return view('admin_roles', ['roles' => $roles, 'user' => $user]);
+    } catch (Exception $e) {
+        return redirect('/admin')->with('error', 'Error al consultar roles: ' . $e->getMessage());
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
         }
-        $nombre = strtoupper($request->input('nombre'));
-        $descripcion = $request->input('descripcion');
+    }
+});
 
-        // evitar duplicados (case-insensitive) sobre la columna `nombre`
-    $exists = DB::table('ex_g32.permisos')->whereRaw('upper(nombre) = ?', [$nombre])->first();
-        if ($exists) {
-            return response()->json(['success'=>false,'message'=>'El permiso ya existe.'],409);
-        }
-
-        $id = DB::table('ex_g32.permisos')->insertGetId([
-            'nombre' => $nombre,
-            'descripcion' => $descripcion
-        ]);
-
-        $perm = DB::table('ex_g32.permisos')->where('id', $id)->first();
-        return response()->json(['success'=>true,'message'=>'Permiso creado.','permission'=>$perm]);
-    });
-
-    // Actualizar permiso
-    Route::put('/admin/permissions/{id}', function(Request $request, $id) {
-        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-        if (! Session::has('user_code')) return redirect('/login');
-
-        // Backend: validar permiso de edición
-        $userId = Session::get('user_code');
-        if (! user_has_permission($userId, 'EDITAR_PERMISO')) {
-            return response()->json(['success'=>false,'message'=>'No autorizado'],403);
-        }
-
-    $perm = DB::table('ex_g32.permisos')->where('id', $id)->first();
-        if (! $perm) return response()->json(['success'=>false,'message'=>'Permiso no encontrado'],404);
-
-        $v = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:100',
-            'descripcion' => 'nullable|string|max:255'
-        ]);
-        if ($v->fails()) {
-            return response()->json(['success'=>false,'message'=>$v->errors()->first()],422);
-        }
-        $nombre = strtoupper($request->input('nombre'));
-        $descripcion = $request->input('descripcion');
-
-        // comprobar duplicado en otro id (columna nombre)
-    $dup = DB::table('ex_g32.permisos')->whereRaw('upper(nombre) = ?', [$nombre])->where('id','!=',$id)->first();
-        if ($dup) {
-            return response()->json(['success'=>false,'message'=>'El nombre ya existe en otro permiso.'],409);
-        }
-
-        DB::table('ex_g32.permisos')->where('id',$id)->update([
-            'nombre' => $nombre,
-            'descripcion' => $descripcion
-        ]);
-
-        $perm = DB::table('ex_g32.permisos')->where('id', $id)->first();
-        return response()->json(['success'=>true,'message'=>'Permiso actualizado.','permission'=>$perm]);
-    });
-
-    // Eliminar permiso
-    Route::delete('/admin/permissions/{id}', function(Request $request, $id) {
-        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-        if (! Session::has('user_code')) return redirect('/login');
-
-        // Backend: validar permiso de eliminación
-        $userId = Session::get('user_code');
-        if (! user_has_permission($userId, 'ELIMINAR_PERMISO')) {
-            return response()->json(['success'=>false,'message'=>'No autorizado'],403);
-        }
-
-    $perm = DB::table('ex_g32.permisos')->where('id', $id)->first();
-        if (! $perm) return response()->json(['success'=>false,'message'=>'Permiso no encontrado'],404);
-
-        // proteger permisos críticos (ajusta la lista según necesites)
-        $protected = ['VER_PERMISOS', 'VER_ROLES'];
-        if (in_array(strtoupper($perm->nombre), $protected)) {
-            return response()->json(['success'=>false,'message'=>'Permiso protegido, no se puede eliminar.'],403);
-        }
-
-        DB::transaction(function() use ($id) {
-            // tabla relacional `rol_permiso` usa columnas id_rol, id_permiso
-            DB::table('ex_g32.rol_permiso')->where('id_permiso',$id)->delete();
-            DB::table('ex_g32.permisos')->where('id',$id)->delete();
-        });
-
-        return response()->json(['success'=>true,'message'=>'Permiso eliminado.']);
-    });
-
-    /**
-     * ---------- ROLES ----------
-     * Endpoints:
-     *  - GET  /admin/roles
-     *  - GET  /admin/roles/{id}
-     *  - POST /admin/roles
-     *  - PUT  /admin/roles/{id}
-     *  - DELETE /admin/roles/{id}
-     */
+// Compatibility endpoints used by the frontend scripts
+// Listar todos los permisos (JSON)
+Route::get('/admin/permisos/listar', function () {
+    if (!Session::has('user_code')) {
+        return response()->json([], 401);
+    }
+    $db = Config::$db;
+    try {
 
 
-    // Listar roles con sus permisos
-    Route::get('/admin/roles', function(Request $request) {
-        if (! Session::has('user_code')) return redirect('/login');
+        $db->create_conection();
+        $sql = "SELECT id, nombre, descripcion FROM ex_g32.permisos ORDER BY nombre";
+        $stmt = $db->execute_query($sql);
+        $permisos = $db->fetch_all($stmt);
 
-        // Si la petición NO es AJAX, devolver la vista Blade para navegación en navegador
-        if (! $request->ajax()) {
-            // espera que exista resources/views/admin/roles.blade.php
-            return view('admin.roles');
-        }
+        return response()->json($permisos);
+    } catch (Exception $e) {
+        return response()->json([], 500);
+    } finally {
+        if (isset($db) && $db !== null)
+            $db->close_conection();
+    }
+});
 
-        // Usar la tabla `rol` (id, nombre, descripcion)
-        $roles = DB::table('ex_g32.rol')->orderBy('nombre')->get();
+// Obtener permisos asignados a un rol (compatibilidad con /admin/roles/get-permisos?role_id=)
+Route::get('/admin/roles/get-permisos', function (Request $request) {
+    if (!Session::has('user_code')) {
+        return response()->json([], 401);
+    }
+    $roleId = $request->query('role_id');
+    if (!$roleId)
+        return response()->json([], 400);
 
-        // mapear cada rol con sus permisos (array)
-        $rolesWithPerms = $roles->map(function($r) {
-            $perms = DB::table('ex_g32.rol_permiso')
-                        ->join('ex_g32.permisos','ex_g32.rol_permiso.id_permiso','=','ex_g32.permisos.id')
-                        ->where('ex_g32.rol_permiso.id_rol',$r->id)
-                        ->select('ex_g32.permisos.id','ex_g32.permisos.nombre','ex_g32.permisos.descripcion')
-                        ->get();
-            return [
-                'id' => $r->id,
-                'nombre' => $r->nombre,
-                'descripcion' => $r->descripcion ?? null,
-                'permissions' => $perms
-            ];
-        });
+    $db = Config::$db;
+    try {
 
-        // incluir flags de acción para frontend
-        $userId = Session::get('user_code');
-        $can = [
-            'view' => user_has_permission($userId, 'VER_ROLES'),
-            'create' => user_has_permission($userId, 'CREAR_ROL'),
-            'edit' => user_has_permission($userId, 'EDITAR_ROL'),
-            'delete' => user_has_permission($userId, 'ELIMINAR_ROL')
-        ];
 
-        return response()->json(['roles' => $rolesWithPerms, 'can' => $can]);
-    });
+        $db->create_conection();
+        $sql = "SELECT id_permiso FROM ex_g32.rol_permiso WHERE id_rol = :rol";
+        $params = [':rol' => $roleId];
+        $stmt = $db->execute_query($sql, $params);
+        $rows = $db->fetch_all($stmt);
+        $ids = array_map(function ($r) {
+            return $r['id_permiso'];
+        }, $rows);
+        return response()->json($ids);
+    } catch (Exception $e) {
+        return response()->json([], 500);
+    } finally {
+        if (isset($db) && $db !== null)
+            $db->close_conection();
+    }
+});
 
-    // Obtener rol por id
-    Route::get('/admin/roles/{id}', function(Request $request, $id) {
-        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-        if (! Session::has('user_code')) return redirect('/login');
+// Crear rol (compatibilidad POST)
+Route::post('/admin/roles/create', function (Request $request) {
+    if (!Session::has('user_code')) {
+        return response()->json(['success' => false, 'message' => 'Usuario no autenticado'], 401);
+    }
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json(['success' => false, 'message' => 'No autorizado'], 403);
+    }
 
-    $role = DB::table('ex_g32.rol')->where('id',$id)->first();
-        if (! $role) return response()->json(['success'=>false,'message'=>'Rol no encontrado'],404);
+    $data = $request->json()->all();
+    $nombre = $data['nombre'] ?? '';
+    $descripcion = $data['descripcion'] ?? '';
+    $permisos = $data['permisos'] ?? [];
 
-    $perms = DB::table('ex_g32.rol_permiso')
-            ->join('ex_g32.permisos','ex_g32.rol_permiso.id_permiso','=','ex_g32.permisos.id')
-            ->where('ex_g32.rol_permiso.id_rol',$id)
-            ->select('ex_g32.permisos.id','ex_g32.permisos.nombre','ex_g32.permisos.descripcion')
-            ->get();
+    $db = Config::$db;
+    try {
 
-        // incluir flags de acción para el frontend (editar/eliminar)
-        $userId = Session::get('user_code');
-        $can = [
-            'edit' => user_has_permission($userId, 'EDITAR_ROL'),
-            'delete' => user_has_permission($userId, 'ELIMINAR_ROL')
-        ];
+        //REGISTRO DE BITACORA
+        $accion = 'CREAR ROL';
+        $fecha = date('Y-m-d H:i:s');
+        $estado = 'ERROR';
+        $comentario = 'Crea un nuevo rol.';
+        $codigo = Session::get('user_code');
 
-        return response()->json(['role' => ['id'=>$role->id,'nombre'=>$role->nombre,'descripcion'=>$role->descripcion ?? null,'permissions'=>$perms], 'can' => $can]);
-    });
+        $db->create_conection();
+        $pdo = $db->get_connection();
+        $pdo->beginTransaction();
 
-    // Crear rol (con permisos)
-    Route::post('/admin/roles', function(Request $request) {
-        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-        if (! Session::has('user_code')) return redirect('/login');
+        $sql = "INSERT INTO ex_g32.rol (nombre, descripcion) VALUES (:nombre, :descripcion) RETURNING id";
+        $params = [':nombre' => $nombre, ':descripcion' => $descripcion];
+        $stmt = $db->execute_query($sql, $params);
+        $row = $db->fetch_one($stmt);
+        $newId = $row['id'] ?? null;
 
-        // Backend: validar permiso de creación de roles
-        $userId = Session::get('user_code');
-        if (! user_has_permission($userId, 'CREAR_ROL')) {
-            return response()->json(['success'=>false,'message'=>'No autorizado'],403);
-        }
-
-        $v = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:100',
-            'descripcion' => 'nullable|string|max:255',
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'integer'
-        ]);
-        if ($v->fails()) return response()->json(['success'=>false,'message'=>$v->errors()->first()],422);
-
-        $nombre = strtoupper($request->input('nombre'));
-        $descripcion = $request->input('descripcion');
-        $permIds = $request->input('permissions', []);
-
-        // Validar que los permisos enviados existen en el esquema ex_g32 (evita usar Rule::exists con schema-qualified name)
-        if (!empty($permIds)) {
-            $found = DB::table('ex_g32.permisos')->whereIn('id', array_map('intval', $permIds))->pluck('id')->toArray();
-            $unique = array_values(array_unique(array_map('intval', $permIds)));
-            if (count($found) !== count($unique)) {
-                return response()->json(['success'=>false,'message'=>'Alguno de los permisos no existe.'],422);
+        if ($newId && !empty($permisos)) {
+            foreach ($permisos as $pid) {
+                $sql2 = "INSERT INTO ex_g32.rol_permiso (id_rol, id_permiso) VALUES (:rol, :perm)";
+                $db->execute_query($sql2, [':rol' => $newId, ':perm' => $pid]);
             }
         }
 
-        // prevenir rol duplicado
-    $exists = DB::table('ex_g32.rol')->whereRaw('upper(nombre) = ?', [$nombre])->first();
-        if ($exists) return response()->json(['success'=>false,'message'=>'El rol ya existe.'],409);
+        $pdo->commit();
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json(['success' => true, 'message' => 'Rol creado', 'id' => $newId]);
+    } catch (Exception $e) {
+        if (isset($pdo) && $pdo->inTransaction())
+            $pdo->rollBack();
+        return response()->json(['success' => false, 'message' => 'Error al crear rol', 'error' => $e->getMessage()], 500);
+    } finally {
+        if (isset($db) && $db !== null)
+            $db->close_conection();
+    }
+});
 
-        try {
-            DB::beginTransaction();
-            $roleId = DB::table('ex_g32.rol')->insertGetId(['nombre' => $nombre, 'descripcion' => $descripcion]);
+// Actualizar rol (compatibilidad POST)
+Route::post('/admin/roles/update', function (Request $request) {
+    if (!Session::has('user_code')) {
+        return response()->json(['success' => false, 'message' => 'Usuario no autenticado'], 401);
+    }
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json(['success' => false, 'message' => 'No autorizado'], 403);
+    }
 
-            if (!empty($permIds)) {
-                $inserts = [];
-                foreach ($permIds as $pid) {
-                    $inserts[] = ['id_rol'=>$roleId,'id_permiso'=>(int)$pid];
-                }
-                if (!empty($inserts)) DB::table('ex_g32.rol_permiso')->insert($inserts);
-            }
+    //REGISTRO DE BITACORA
+    $accion = 'ACTUALIZACION DE ROLES';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Actualizar roles registrados.';
+    $codigo = Session::get('user_code');
 
-            DB::commit();
 
-            $role = DB::table('ex_g32.rol')->where('id',$roleId)->first();
-            $perms = DB::table('ex_g32.rol_permiso')
-                        ->join('ex_g32.permisos','ex_g32.rol_permiso.id_permiso','=','ex_g32.permisos.id')
-                        ->where('ex_g32.rol_permiso.id_rol',$roleId)
-                        ->select('ex_g32.permisos.id','ex_g32.permisos.nombre','ex_g32.permisos.descripcion')
-                        ->get();
+    $data = $request->json()->all();
+    $id = $data['id'] ?? null;
+    $nombre = $data['nombre'] ?? '';
+    $descripcion = $data['descripcion'] ?? '';
+    $permisos = $data['permisos'] ?? [];
 
-            return response()->json(['success'=>true,'message'=>'Rol creado.','role'=>['id'=>$role->id,'nombre'=>$role->nombre,'descripcion'=>$role->descripcion ?? null,'permissions'=>$perms]]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success'=>false,'message'=>'Error al crear rol: '.$e->getMessage()],500);
-        }
-    });
+    if (!$id)
+        return response()->json(['success' => false, 'message' => 'id requerido'], 400);
 
-    // Actualizar rol
-    Route::put('/admin/roles/{id}', function(Request $request, $id) {
-        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-        if (! Session::has('user_code')) return redirect('/login');
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+        $pdo = $db->get_connection();
+        $pdo->beginTransaction();
 
-        // Backend: validar permiso de edición
-        $userId = Session::get('user_code');
-        if (! user_has_permission($userId, 'EDITAR_ROL')) {
-            return response()->json(['success'=>false,'message'=>'No autorizado'],403);
-        }
+        $sql = "UPDATE ex_g32.rol SET nombre = :nombre, descripcion = :descripcion WHERE id = :id";
+        $db->execute_query($sql, [':nombre' => $nombre, ':descripcion' => $descripcion, ':id' => $id]);
 
-    $role = DB::table('ex_g32.rol')->where('id',$id)->first();
-        if (! $role) return response()->json(['success'=>false,'message'=>'Rol no encontrado'],404);
-
-        $v = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:100',
-            'descripcion' => 'nullable|string|max:255',
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'integer'
-        ]);
-        if ($v->fails()) return response()->json(['success'=>false,'message'=>$v->errors()->first()],422);
-
-        $nombre = strtoupper($request->input('nombre'));
-        $descripcion = $request->input('descripcion');
-        $permIds = $request->input('permissions', []);
-
-        // Validar que los permisos enviados existen en el esquema ex_g32 (evita usar Rule::exists con schema-qualified name)
-        if (!empty($permIds)) {
-            $found = DB::table('ex_g32.permisos')->whereIn('id', array_map('intval', $permIds))->pluck('id')->toArray();
-            $unique = array_values(array_unique(array_map('intval', $permIds)));
-            if (count($found) !== count($unique)) {
-                return response()->json(['success'=>false,'message'=>'Alguno de los permisos no existe.'],422);
+        // reemplazar permisos
+        $db->execute_query("DELETE FROM ex_g32.rol_permiso WHERE id_rol = :id", [':id' => $id]);
+        if (!empty($permisos)) {
+            foreach ($permisos as $pid) {
+                $db->execute_query("INSERT INTO ex_g32.rol_permiso (id_rol, id_permiso) VALUES (:rol, :perm)", [':rol' => $id, ':perm' => $pid]);
             }
         }
 
-        // check duplicate nombre
-    $dup = DB::table('ex_g32.rol')->whereRaw('upper(nombre) = ?', [$nombre])->where('id','!=',$id)->first();
-        if ($dup) return response()->json(['success'=>false,'message'=>'Ya existe otro rol con ese nombre.'],409);
+        $pdo->commit();
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json(['success' => true, 'message' => 'Rol actualizado']);
+    } catch (Exception $e) {
+        if (isset($pdo) && $pdo->inTransaction())
+            $pdo->rollBack();
+        return response()->json(['success' => false, 'message' => 'Error al actualizar rol', 'error' => $e->getMessage()], 500);
+    } finally {
+        if (isset($db) && $db !== null)
+            $db->close_conection();
+    }
+});
 
-        try {
-            DB::beginTransaction();
-            DB::table('ex_g32.rol')->where('id',$id)->update(['nombre'=>$nombre,'descripcion'=>$descripcion]);
+// Eliminar rol (compatibilidad POST)
+Route::post('/admin/roles/delete', function (Request $request) {
+    if (!Session::has('user_code')) {
+        return response()->json(['success' => false, 'message' => 'Usuario no autenticado'], 401);
+    }
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json(['success' => false, 'message' => 'No autorizado'], 403);
+    }
 
-            // sincronizar permisos: borrar y volver a insertar en rol_permiso
-            DB::table('ex_g32.rol_permiso')->where('id_rol',$id)->delete();
-            if (!empty($permIds)) {
-                $inserts = [];
-                foreach ($permIds as $pid) $inserts[] = ['id_rol'=>$id,'id_permiso'=>$pid];
-                if (!empty($inserts)) DB::table('ex_g32.rol_permiso')->insert($inserts);
-            }
+    //REGISTRO DE BITACORA
+    $accion = 'ELIMINAR ROL';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Eliminando rol.';
+    $codigo = Session::get('user_code');
 
-            DB::commit();
 
-            $perms = DB::table('ex_g32.rol_permiso')
-                        ->join('ex_g32.permisos','ex_g32.rol_permiso.id_permiso','=','ex_g32.permisos.id')
-                        ->where('ex_g32.rol_permiso.id_rol',$id)
-                        ->select('ex_g32.permisos.id','ex_g32.permisos.nombre','ex_g32.permisos.descripcion')
-                        ->get();
+    $data = $request->json()->all();
+    $id = $data['id'] ?? null;
+    if (!$id)
+        return response()->json(['success' => false, 'message' => 'id requerido'], 400);
 
-            return response()->json(['success'=>true,'message'=>'Rol actualizado.','role'=>['id'=>$id,'nombre'=>$nombre,'descripcion'=>$descripcion ?? null,'permissions'=>$perms]]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success'=>false,'message'=>'Error al actualizar rol: '.$e->getMessage()],500);
-        }
-    });
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+        $pdo = $db->get_connection();
+        $pdo->beginTransaction();
 
-    // Eliminar rol
-    Route::delete('/admin/roles/{id}', function(Request $request, $id) {
-        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-        if (! Session::has('user_code')) return redirect('/login');
+        $db->execute_query("DELETE FROM ex_g32.rol_permiso WHERE id_rol = :id", [':id' => $id]);
+        $db->execute_query("DELETE FROM ex_g32.rol WHERE id = :id", [':id' => $id]);
 
-        // Backend: validar permiso de eliminación
-        $userId = Session::get('user_code');
-        if (! user_has_permission($userId, 'ELIMINAR_ROL')) {
-            return response()->json(['success'=>false,'message'=>'No autorizado'],403);
-        }
+        $pdo->commit();
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json(['success' => true, 'message' => 'Rol eliminado']);
+    } catch (Exception $e) {
+        if (isset($pdo) && $pdo->inTransaction())
+            $pdo->rollBack();
+        return response()->json(['success' => false, 'message' => 'Error al eliminar rol', 'error' => $e->getMessage()], 500);
+    } finally {
+        if (isset($db) && $db !== null)
+            $db->close_conection();
+    }
+});
 
-    $role = DB::table('ex_g32.rol')->where('id',$id)->first();
-        if (! $role) return response()->json(['success'=>false,'message'=>'Rol no encontrado'],404);
-
-        // proteger rol especial
-        if (strtoupper($role->nombre) === 'SUPER_ADMIN') {
-            return response()->json(['success'=>false,'message'=>'No se puede eliminar SUPER_ADMIN'],403);
-        }
-
-        try {
-            DB::beginTransaction();
-            DB::table('ex_g32.rol_permiso')->where('id_rol',$id)->delete();
-            // no se borra user_role aquí porque el esquema de usuarios puede variar
-            DB::table('ex_g32.rol')->where('id',$id)->delete();
-            DB::commit();
-
-            return response()->json(['success'=>true,'message'=>'Rol eliminado.']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success'=>false,'message'=>'Error al eliminar rol: '.$e->getMessage()],500);
-        }
-    });
-
-}); // fin group

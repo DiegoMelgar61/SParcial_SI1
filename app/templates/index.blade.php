@@ -20,7 +20,7 @@
       <div class="flex items-center gap-4">
         <div class="hidden sm:block text-right">
           <p class="font-medium text-gray-800">{{ $user['nomb_comp'] }}</p>
-          <p class="text-xs text-gray-500">{{ ucfirst($user['nombre']) }}</p>
+          <p class="text-xs text-gray-500">{{ ucfirst($user['rol']) }}</p>
         </div>
 
         <!-- Avatar con hover -->
@@ -52,7 +52,7 @@
         <div>
           <p class="font-semibold text-gray-800 leading-tight">{{ $user['nomb_comp'] }}</p>
           <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-            {{ ucfirst($user['nombre']) }}
+            {{ ucfirst($user['rol']) }}
           </span>
         </div>
       </div>
@@ -86,67 +86,6 @@
     <!-- Tarjetas -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-      <!-- Panel de Administración - Se muestra solo si tiene algún permiso administrativo -->
-      @php
-        $canViewPermissions = user_has_permission($user['codigo'], 'VER_PERMISOS');
-        $canViewRoles = user_has_permission($user['codigo'], 'VER_ROLES');
-        $canImportUsers = user_has_permission($user['codigo'], 'IMPORTAR_USUARIOS');
-        $showAdminPanel = $canViewPermissions || $canViewRoles || $canImportUsers;
-      @endphp
-      
-      @if($showAdminPanel)
-      <div class="bg-gradient-to-br from-indigo-50 to-white p-6 rounded-xl shadow-sm border border-indigo-100 hover:shadow-md transition col-span-1 sm:col-span-2 lg:col-span-3">
-        <h3 class="text-lg font-semibold text-indigo-700 mb-4 flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-          </svg>
-          Panel de Administración
-        </h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Gestión de Roles -->
-          @if($canViewRoles)
-          <a href="/admin/roles" class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-indigo-300 hover:shadow transition group">
-            <div class="flex items-center mb-2">
-              <svg class="w-5 h-5 text-indigo-600 group-hover:text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-              <h4 class="ml-2 font-medium text-gray-800">Roles</h4>
-            </div>
-            <p class="text-sm text-gray-600">Gestionar roles y sus permisos</p>
-          </a>
-          @endif
-
-          <!-- Gestión de Permisos -->
-          @if($canViewPermissions)
-          <a href="/admin/permissions" class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-indigo-300 hover:shadow transition group">
-            <div class="flex items-center mb-2">
-              <svg class="w-5 h-5 text-indigo-600 group-hover:text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-              </svg>
-              <h4 class="ml-2 font-medium text-gray-800">Permisos</h4>
-            </div>
-            <p class="text-sm text-gray-600">Administrar permisos del sistema</p>
-          </a>
-          @endif
-
-          <!-- Registro masivo de usuarios -->
-          @if($canImportUsers)
-          <a href="/admin/import-users" class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-indigo-300 hover:shadow transition group">
-            <div class="flex items-center mb-2">
-              <svg class="w-5 h-5 text-indigo-600 group-hover:text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4m0 0h8"></path>
-              </svg>
-              <h4 class="ml-2 font-medium text-gray-800">Registro masivo de usuarios</h4>
-            </div>
-            <p class="text-sm text-gray-600">Cargar archivo CSV/XLSX para crear múltiples usuarios</p>
-          </a>
-          @endif
-        </div>
-      </div>
-      @endif
-
       <!-- Datos personales -->
       <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
         <h3 class="text-base font-semibold text-indigo-700 mb-3">Datos personales</h3>
@@ -154,25 +93,39 @@
           <li><span class="font-medium">CI:</span> {{ $user['ci'] }}</li>
           <li><span class="font-medium">Correo:</span> {{ $user['correo'] ?? '—' }}</li>
           <li><span class="font-medium">Teléfono:</span> {{ $user['tel'] ?? '—' }}</li>
-          <li><span class="font-medium">Rol:</span> {{ ucfirst($user['nombre']) }}</li>
+          <li><span class="font-medium">Rol:</span> {{ ucfirst($user['rol']) }}</li>
         </ul>
       </div>
 
-      @php $rol = strtolower($user['nombre']); @endphp
+      @php $rol = strtolower($user['rol']); @endphp
 
       <!-- ADMIN -->
       @if ($rol === 'admin')
-        <div class="bg-gradient-to-br from-indigo-50 to-gray-50 p-6 rounded-xl border border-indigo-100 shadow-sm hover:shadow-md transition">
-          <h3 class="text-base font-semibold text-indigo-700 mb-3">Administración general</h3>
-          <ul class="text-sm text-gray-600 space-y-1 leading-relaxed">
-            <li>Gestión de usuarios y roles</li>
-            <li>Asignación de materias y grupos</li>
-            <li>Administración de aulas</li>
-            <li>Reportes globales y consolidación de datos</li>
-          </ul>
+        <div id="import-users-card" 
+             class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition cursor-pointer">
+          <h3 class="text-base font-semibold text-gray-800 mb-2">Modulo de Administracion</h3>
+          <p class="text-sm text-gray-600 mb-4">
+            Accede al modulo administrativo para gestionar usuarios,docentes, materias, etc.
+            <span class="font-medium">.xlsx</span> o <span class="font-medium">.csv</span>.
+          </p>
+          <button id="btn-mod-adm"
+                  class="w-full text-center py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition">
+            Ir al Modulo de Administracion
+          </button>
         </div>
 
-        
+        <div id="import-users-card" 
+             class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition cursor-pointer">
+          <h3 class="text-base font-semibold text-gray-800 mb-2">Registro masivo de usuarios</h3>
+          <p class="text-sm text-gray-600 mb-4">
+            Permite cargar nuevos usuarios al sistema mediante archivos 
+            <span class="font-medium">.xlsx</span> o <span class="font-medium">.csv</span>.
+          </p>
+          <button id="btn-import-users"
+                  class="w-full text-center py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition">
+            Ir al Modulo de Importación
+          </button>
+        </div>
       @elseif ($rol === 'autoridad')
         <div class="bg-gradient-to-br from-purple-50 to-gray-50 p-6 rounded-xl border border-purple-100 shadow-sm hover:shadow-md transition">
           <h3 class="text-base font-semibold text-purple-700 mb-3">Panel de autoridad</h3>

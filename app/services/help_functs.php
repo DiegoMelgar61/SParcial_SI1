@@ -66,7 +66,7 @@ function importar_usuarios($file, $extension)
                     ':correo' => $row[3],
                     ':tel' => $row[4],
                     ':profesion' => $row[5],
-                    ':tipo' => $row[6]
+                    ':tipo' => strtolower($row[6])
                 ];
                 $db->execute_query($sql, $params);
 

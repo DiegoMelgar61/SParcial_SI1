@@ -20,9 +20,15 @@ Route::match(['get','post'],'/login',function(Request $request)
     $data=$request->json()->all();
     $codigo=$data['codigo'];
     $password=$data['password'];
+    $accion='INICIO DE SESION';
+    $estado='ERROR';
+    $fecha=date('Y-m-d H:i:s');
+    $comentario='Registro de inicio de Sesion';
+    $db=Config::$db;
 
     if (!$codigo || !$password)
     {
+        $db->save_log_bitacora($accion,$fecha,$estado,$comentario,$codigo);
         return response()->json([
             'success'=>false,
             'message'=>'Debe enviar todos los datos'
@@ -30,13 +36,13 @@ Route::match(['get','post'],'/login',function(Request $request)
     }
     try
     {
-        $db=Config::$db;
         $db->create_conection();
 
         //VALIDACION:VERIFICAR SI EL USUARIO CON EL CODIGO INGRESADO EXISTE
         $sql="
-            SELECT codigo,password_hash
-            FROM ex_g32.usuario
+            SELECT u.codigo,u.password_hash,r.nombre as rol
+            FROM ex_g32.usuario u
+            INNER JOIN ex_g32.rol r ON r.id=u.id_rol
             WHERE codigo= :codigo
         ";
         $params=[
@@ -48,6 +54,7 @@ Route::match(['get','post'],'/login',function(Request $request)
 
         if (!$usuario)
         {
+            $db->save_log_bitacora($accion,$fecha,$estado,$comentario,$codigo);
             return response()->json([
                 'success'=>false,
                 'message'=>'El usuario no existe.'
@@ -56,6 +63,7 @@ Route::match(['get','post'],'/login',function(Request $request)
         //VALIDAR CONTRASEÑA
         if (!password_verify($password,$usuario['password_hash']))
         {
+            $db->save_log_bitacora($accion,$fecha,$estado,$comentario,$codigo);
             return response()->json([
                 'success'=>false,
                 'message'=>'Contraseña incorrecta.'
@@ -64,7 +72,10 @@ Route::match(['get','post'],'/login',function(Request $request)
 
         //SI LA CONTRASEÑA ES CORRECTA GUARDAR SESION
         Session::put('user_code',$usuario['codigo']);
+        Session::put('user_role',$usuario['rol']);
+        $estado='SUCCESS';
 
+        $db->save_log_bitacora($accion,$fecha,$estado,$comentario,$codigo);
         return response()->json([
             'success'=>true,
             'message'=>'Inicio de Sesion exitoso.'
@@ -72,6 +83,7 @@ Route::match(['get','post'],'/login',function(Request $request)
     }
     catch (Exception $e)
     {
+        $db->save_log_bitacora($accion,$fecha,$estado,$comentario,$codigo);
         return response()->json([
             'success'=>false,
             'message'=>'Error al Iniciar Sesion.',
@@ -90,7 +102,37 @@ Route::match(['get','post'],'/login',function(Request $request)
 //ENDPOINT LOGOUT
 Route::post('/logout',function()
 {
-    Session::flush();
+    //INICIAR VARIABLE GESTORA DE DB
+    $db=Config::$db;
+    try
+    {
+        //ABRIR CONEXION A LA BASE DE DATOS
+        $db->create_conection();
 
-    return redirect('/login');
+        //CAPTURAR PARAMETROS DE REGISTRO EN BITACORA
+        $accion='CERRAR SESION';
+        $codigo=Session::get('user_code');
+        $estado='SUCCESS';
+        $fecha=date('Y-m-d H:i:s');
+        $comentario='Registro de Cierre de Sesion';
+
+        $db->save_log_bitacora($accion,$fecha,$estado,$comentario,$codigo);
+
+        //QUITAR USUARIO DE LA SESION
+        Session::flush();
+        return redirect('/login');
+    }
+    catch(Exception $e)
+    {
+        //SI FALLA EXPULSAR DE LA SESION Y REDIRIGIR AL LOGIN
+        Session::flush();
+        return redirect('/login');
+    }
+    finally
+    {
+        if (isset($db) && $db !== null) 
+        {
+            $db->close_conection();
+        }
+    }
 });

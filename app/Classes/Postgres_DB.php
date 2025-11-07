@@ -86,4 +86,31 @@ class Postgres_DB
     {
         return $this->conn;
     }
+
+    // GUARDAR REGISTRO EN BITÁCORA
+    public function save_log_bitacora($action, $date, $status, $coment, $user_code)
+    {
+        
+        if (!$this->conn) {
+            throw new PDOException("No hay conexión activa con la base de datos.");
+        }
+
+        try {
+            $sql = "INSERT INTO ex_g32.bitacora (accion, fecha_hora, estado,comentario,codigo_usuario)
+                    VALUES (:accion, :fecha_hora, :estado, :comentario, :codigo_usuario)";
+
+            $stmt = $this->conn->prepare($sql);
+
+            $stmt->bindParam(':accion', $action);
+            $stmt->bindParam(':fecha_hora', $date);
+            $stmt->bindParam(':estado', $status);
+            $stmt->bindParam(':comentario',$coment);
+            $stmt->bindParam(':codigo_usuario',$user_code);
+
+            $stmt->execute();
+            return true;
+        } catch (PDOException $e) {
+            throw new PDOException("Error al guardar en bitácora: " . $e->getMessage());
+        }
+    }
 }

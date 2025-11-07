@@ -15,13 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
   updateClock();
   setInterval(updateClock, 60000);
 
-  // --- BOTÓN IMPORTAR USUARIOS ---
+  //BOTONES MODULOS
   const importBtn = document.getElementById('btn-import-users');
-  if (importBtn) {
-    importBtn.addEventListener('click', () => {
-      window.location.href = '/admin/import-users';
-    });
-  }
+  const mod_adm=document.getElementById('btn-mod-adm');
+  
+  importBtn.addEventListener('click', () => 
+  {
+    window.location.href = '/admin/import-users';
+  });
+  
+  mod_adm.addEventListener('click',()=>
+  {
+    window.location.href='/admin/mod-adm';
+  });
 
   // --- AVATAR & PANEL USUARIO ---
   const avatar = document.getElementById('user-avatar');
