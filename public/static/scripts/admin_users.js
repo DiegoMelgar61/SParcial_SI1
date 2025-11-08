@@ -201,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formData = new FormData(userForm);
             const data = Object.fromEntries(formData.entries());
+            console.log(data);
             const userId = hiddenUserId.value;
             const isEditing = userId !== '';
 
