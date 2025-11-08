@@ -48,3 +48,6 @@ yarn-error.log*
 
 # === ARCHIVOS OPCIONALES DE EJEMPLO ===
 /.env.example.backup
+
+# === CACHE ===
+/storage/sessions
