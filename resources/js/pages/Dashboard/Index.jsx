@@ -4,6 +4,15 @@ import { Head, Link } from '@inertiajs/react';
 export default function Dashboard({ auth, stats }) {
     const statCards = [
         {
+            title: 'Total Semestres',
+            value: stats?.total_semestres || 0,
+            icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+            color: 'from-indigo-500 to-indigo-600',
+            bgColor: 'from-indigo-50 to-indigo-100',
+            textColor: 'text-indigo-600',
+            link: '/gestiones-academicas'
+        },
+        {
             title: 'Total Docentes',
             value: stats?.total_docentes || 0,
             icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
@@ -43,9 +52,16 @@ export default function Dashboard({ auth, stats }) {
 
     const quickActions = [
         {
+            name: 'Gestionar Semestres',
+            href: '/gestiones-academicas',
+            icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+            color: 'text-indigo-600',
+            bgColor: 'bg-indigo-50 hover:bg-indigo-100'
+        },
+        {
             name: 'Ver Horarios',
             href: '/horarios',
-            icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+            icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
             color: 'text-blue-600',
             bgColor: 'bg-blue-50 hover:bg-blue-100'
         },
@@ -63,19 +79,11 @@ export default function Dashboard({ auth, stats }) {
             color: 'text-purple-600',
             bgColor: 'bg-purple-50 hover:bg-purple-100'
         },
-        {
-            name: 'Gestionar Docentes',
-            href: '/docentes',
-            icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
-            color: 'text-indigo-600',
-            bgColor: 'bg-indigo-50 hover:bg-indigo-100'
-        },
     ];
 
     return (
         <AuthenticatedLayout>
             <Head title="Dashboard" />
-
             <div className="p-4 sm:p-6 lg:p-8">
                 <div className="max-w-7xl mx-auto">
                     {/* Welcome Header */}
@@ -83,7 +91,7 @@ export default function Dashboard({ auth, stats }) {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
                                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
-                                    ¡Bienvenido de nuevo! 👋
+                                    ¡Bienvenido de nuevo! {/*Agregamos el nombre*/}
                                 </h1>
                                 <p className="mt-2 text-sm sm:text-base text-gray-600">
                                     {auth.user?.nombre} {auth.user?.apellido}
@@ -195,7 +203,7 @@ export default function Dashboard({ auth, stats }) {
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-blue-100">Total Registros</span>
                                     <span className="text-2xl font-bold">
-                                        {(stats?.total_docentes || 0) + (stats?.total_materias || 0) + (stats?.total_grupos || 0) + (stats?.total_aulas || 0)}
+                                        {(stats?.total_semestres || 0) + (stats?.total_docentes || 0) + (stats?.total_materias || 0) + (stats?.total_grupos || 0) + (stats?.total_aulas || 0)}
                                     </span>
                                 </div>
                                 <div className="h-px bg-white/20" />
@@ -237,30 +245,7 @@ export default function Dashboard({ auth, stats }) {
                             ))}
                         </div>
                     </div>
-
                     {/* Help Section */}
-                    <div className="mt-8 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div className="flex items-start space-x-4">
-                                <div className="flex-shrink-0">
-                                    <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-1">¿Necesitas Ayuda?</h3>
-                                    <p className="text-sm text-gray-600">
-                                        Nuestro equipo está disponible para asistirte en cualquier momento.
-                                    </p>
-                                </div>
-                            </div>
-                            <button className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap">
-                                Contactar Soporte
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </AuthenticatedLayout>

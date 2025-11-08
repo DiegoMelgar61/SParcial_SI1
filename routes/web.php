@@ -7,7 +7,9 @@ use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\AulaController;
 use App\Http\Controllers\DocenteController;
-
+use App\Http\Controllers\GestionAcademicaController;
+use App\Http\Controllers\GrupoController;
+use App\Http\Controllers\HorarioController;
 
 // Public routes
 
@@ -35,4 +37,16 @@ Route::middleware(['auth'])->group(function () {
 
     //Docentes routes
     Route::resource('docentes', DocenteController::class);
+
+    //Gestion Academica
+    Route::resource('gestiones-academicas', GestionAcademicaController::class);
+
+    //Grupos
+    Route::resource('grupos', GrupoController::class);
+
+    //Horarios
+    Route::resource('horarios', HorarioController::class);
+
+
+    
 });
