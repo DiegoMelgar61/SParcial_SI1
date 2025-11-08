@@ -50,4 +50,7 @@ yarn-error.log*
 /.env.example.backup
 
 # === CACHE ===
-/storage/sessions
+# Ignorar archivos y carpetas de sesiones
+/storage/framework/sessions/*
+/storage/framework/cache/*
+/storage/logs/*
