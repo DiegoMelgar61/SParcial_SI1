@@ -172,6 +172,6 @@
     © {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA
   </footer>
 
-  <script src="{{ asset('static/scripts/index.js') }}"></script>
+  <script src="{{ secure_asset('static/scripts/index.js') }}"></script>
 </body>
 </html>

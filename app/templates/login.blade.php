@@ -22,7 +22,7 @@
     <!-- Logo y encabezado -->
     <div class="text-center mb-8">
       <div class="flex justify-center mb-3">
-        <img src="{{ asset('static/images/logo2.png') }}" alt="FICCT Logo"
+        <img src="{{ secure_asset('static/images/logo2.png') }}" alt="FICCT Logo"
              class="w-16 h-16 rounded-full shadow-sm border border-gray-200">
       </div>
       <h1 class="text-xl font-semibold text-gray-800">Sistema de Gestión Facultativa</h1>
@@ -82,6 +82,6 @@
     </div>
   </div>
 
-  <script src="{{ asset('static/scripts/login.js') }}"></script>
+  <script src="{{ secure_asset('static/scripts/login.js') }}"></script>
 </body>
 </html>
