@@ -56,7 +56,7 @@ export default function Create({ grupos, materias, docentes, aulas, diasSemana, 
                         </p>
                     </div>
 
-                    {/* Form */}
+                    {/* Formulario */}
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <form onSubmit={handleSubmit}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
