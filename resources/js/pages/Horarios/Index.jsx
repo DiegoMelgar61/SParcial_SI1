@@ -190,7 +190,7 @@ export default function Index({ horarios, grupos, docentes, aulas, diasSemana, f
                         </div>
                     </div>
 
-                    {/* Table */}
+                    {/* Tabla */}
                     <div className="bg-white rounded-lg shadow overflow-hidden">
                         {horarios.length === 0 ? (
                             <div className="text-center py-12">
