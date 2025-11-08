@@ -20,7 +20,7 @@
       <div class="flex items-center gap-4">
         <div class="hidden sm:block text-right">
           <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp']); ?></p>
-          <p class="text-xs text-gray-500"><?php echo e(ucfirst($user['nombre'])); ?></p>
+          <p class="text-xs text-gray-500"><?php echo e(ucfirst($user['rol'])); ?></p>
         </div>
 
         <!-- Avatar con hover -->
@@ -54,7 +54,7 @@
         <div>
           <p class="font-semibold text-gray-800 leading-tight"><?php echo e($user['nomb_comp']); ?></p>
           <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-            <?php echo e(ucfirst($user['nombre'])); ?>
+            <?php echo e(ucfirst($user['rol'])); ?>
 
           </span>
         </div>
@@ -96,25 +96,27 @@
           <li><span class="font-medium">CI:</span> <?php echo e($user['ci']); ?></li>
           <li><span class="font-medium">Correo:</span> <?php echo e($user['correo'] ?? '—'); ?></li>
           <li><span class="font-medium">Teléfono:</span> <?php echo e($user['tel'] ?? '—'); ?></li>
-          <li><span class="font-medium">Rol:</span> <?php echo e(ucfirst($user['nombre'])); ?></li>
+          <li><span class="font-medium">Rol:</span> <?php echo e(ucfirst($user['rol'])); ?></li>
         </ul>
       </div>
 
-      <?php $rol = strtolower($user['nombre']); ?>
+      <?php $rol = strtolower($user['rol']); ?>
 
       <!-- ADMIN -->
       <?php if($rol === 'admin'): ?>
-        <div class="bg-gradient-to-br from-indigo-50 to-gray-50 p-6 rounded-xl border border-indigo-100 shadow-sm hover:shadow-md transition">
-          <h3 class="text-base font-semibold text-indigo-700 mb-3">Administración general</h3>
-          <ul class="text-sm text-gray-600 space-y-1 leading-relaxed">
-            <li>Gestión de usuarios y roles</li>
-            <li>Asignación de materias y grupos</li>
-            <li>Administración de aulas</li>
-            <li>Reportes globales y consolidación de datos</li>
-          </ul>
+        <div id="import-users-card" 
+             class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition cursor-pointer">
+          <h3 class="text-base font-semibold text-gray-800 mb-2">Modulo de Administracion</h3>
+          <p class="text-sm text-gray-600 mb-4">
+            Accede al modulo administrativo para gestionar usuarios,docentes, materias, etc.
+            <span class="font-medium">.xlsx</span> o <span class="font-medium">.csv</span>.
+          </p>
+          <button id="btn-mod-adm"
+                  class="w-full text-center py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition">
+            Ir al Modulo de Administracion
+          </button>
         </div>
 
-        <!-- NUEVO PANEL: Importar usuarios -->
         <div id="import-users-card" 
              class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition cursor-pointer">
           <h3 class="text-base font-semibold text-gray-800 mb-2">Registro masivo de usuarios</h3>
@@ -124,7 +126,7 @@
           </p>
           <button id="btn-import-users"
                   class="w-full text-center py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition">
-            Ir al módulo de importación
+            Ir al Modulo de Importación
           </button>
         </div>
       <?php elseif($rol === 'autoridad'): ?>
@@ -173,7 +175,7 @@
     © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
   </footer>
 
-  <script src="<?php echo e(secure_asset('static/scripts/index.js')); ?>"></script>
+  <script src="<?php echo e(asset('static/scripts/index.js')); ?>"></script>
 </body>
 </html>
 <?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/index.blade.php ENDPATH**/ ?>
