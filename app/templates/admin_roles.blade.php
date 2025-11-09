@@ -376,7 +376,7 @@
 
     <!-- ====== FIN DE MODALES ====== -->
     <!-- JS: Este archivo ahora debe contener toda la lógica -->
-    <script src="{{ secure_asset('static/scripts/admin_roles.js') }}"></script>
+    <script src="{{ asset('static/scripts/admin_roles.js') }}"></script>
 
 </body>
 

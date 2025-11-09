@@ -22,12 +22,12 @@
     <!-- Logo y encabezado -->
     <div class="text-center mb-8">
       <div class="flex justify-center mb-3">
-        <img src="{{ secure_asset('static/images/logo2.png') }}" alt="FICCT Logo"
+        <img src="{{ asset('static/images/logo2.png') }}" alt="FICCT Logo"
              class="w-16 h-16 rounded-full shadow-sm border border-gray-200">
       </div>
       <h1 class="text-xl font-semibold text-gray-800">Sistema de Gestión Facultativa</h1>
       <p class="text-sm text-gray-500 mt-1 leading-tight">
-        Accede al Portal Web para la Gestion Facultativa - Universitaria.
+        Accede al Portal Web para la Gestión Facultativa - Universitaria.
       </p>
     </div>
 
@@ -48,7 +48,7 @@
 
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-        <input type="password" id="password" name="password" required
+        <input type="password" id="password" name="password" autocomplete="off" required
                placeholder="••••••••"
                class="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 
                       focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition">
@@ -61,11 +61,28 @@
       </button>
     </form>
 
+    <!-- ADMINISTRADOR -->
+    <div class="mt-6 text-center">
+      <div class="inline-block bg-indigo-50 border border-indigo-100 rounded-xl px-5 py-3 shadow-sm">
+        <p class="text-sm text-gray-600 mb-1 font-semibold">Credenciales de Prueba - Administrador</p>
+        <div class="flex items-center justify-center gap-6 text-sm text-gray-700">
+          <div>
+            <span class="block text-gray-500 text-xs">Código</span>
+            <span class="font-medium">37</span>
+          </div>
+          <div>
+            <span class="block text-gray-500 text-xs">Contraseña</span>
+            <span class="font-medium">12345678</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <div class="mt-8 text-center text-xs text-gray-500">
       <p>© {{ date('Y') }} Facultad de Ingeniería — UAGRM</p>
       <p class="mt-1">
-        <a href="#" id="reset-password" class="text-indigo-600 hover:underline">Restablecer contraseña</a>
+        <!--<a href="#" id="reset-password" class="text-indigo-600 hover:underline">Restablecer contraseña</a>-->
       </p>
     </div>
   </div>
@@ -82,6 +99,6 @@
     </div>
   </div>
 
-  <script src="{{ secure_asset('static/scripts/login.js') }}"></script>
+  <script src="{{ asset('static/scripts/login.js') }}"></script>
 </body>
 </html>

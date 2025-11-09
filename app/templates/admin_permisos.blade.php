@@ -300,7 +300,7 @@
     
     <!-- ====== FIN DE MODALES ====== -->
     <!-- JS: Este archivo ahora debe contener toda la lógica -->
-    <script src="{{ secure_asset('static/scripts/admin_permisos.js') }}"></script>
+    <script src="{{ asset('static/scripts/admin_permisos.js') }}"></script>
 
 </body>
 </html>

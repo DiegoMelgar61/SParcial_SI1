@@ -229,6 +229,6 @@
     <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10 md:ml-64">
         © {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA
     </footer>
-    <script src="{{ secure_asset('static/scripts/admin.js') }}"></script>
+    <script src="{{ asset('static/scripts/admin.js') }}"></script>
 </body>
 </html>
