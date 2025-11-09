@@ -10,6 +10,9 @@ use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\GestionAcademicaController;
 use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\HorarioController;
+use App\Http\Controllers\RolController;
+use App\Http\Controllers\PermisoController;
+use App\Http\Controllers\UsuarioController;
 
 // Public routes
 
@@ -47,6 +50,16 @@ Route::middleware(['auth'])->group(function () {
     //Horarios
     Route::resource('horarios', HorarioController::class);
 
+    //Roles
+    Route::resource('roles', RolController::class);
 
-    
+    //Permisos
+    Route::resource('permisos', PermisoController::class);
+
+    //Usuario
+    Route::resource('usuarios', UsuarioController::class);
+    Route::post('usuarios/{usuario}/cambiar-contrasena', [UsuarioController::class, 'cambiarContrasena'])->name('usuarios.cambiar-contrasena');
+    Route::post('usuarios/{usuario}/cambiar-estado', [UsuarioController::class, 'cambiarEstado'])->name('usuarios.cambiar-estado');
+    Route::post('usuarios/{usuario}/desbloquear', [UsuarioController::class, 'desbloquear'])->name('usuarios.desbloquear');
+    Route::post('usuarios/{usuario}/resetear-intentos', [UsuarioController::class, 'resetearIntentos'])->name('usuarios.resetear-intentos');
 });
