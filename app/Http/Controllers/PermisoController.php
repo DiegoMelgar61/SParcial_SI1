@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Permiso;
+use App\Models\Rol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -177,5 +178,57 @@ class PermisoController extends Controller
             ->groupBy('modulo');
 
         return response()->json($permisos);
+    }
+
+    /**
+     * Mostrar la gestión de permisos por rol
+     */
+    public function gestionPorRol()
+    {
+        // Obtener todos los roles con sus permisos
+        $roles = Rol::with('permisos')
+            ->orderBy('nombre')
+            ->get();
+
+        // Obtener todos los permisos agrupados por módulo
+        $permisos = Permiso::orderBy('modulo')
+            ->orderBy('nombre')
+            ->get();
+
+        // Agrupar por módulo manualmente para asegurar formato correcto
+        $permisosAgrupados = [];
+        foreach ($permisos as $permiso) {
+            $modulo = $permiso->modulo ?: 'Sin módulo';
+            if (!isset($permisosAgrupados[$modulo])) {
+                $permisosAgrupados[$modulo] = [];
+            }
+            $permisosAgrupados[$modulo][] = $permiso;
+        }
+
+        return Inertia::render('Permisos/GestionPorRol', [
+            'roles' => $roles,
+            'permisos' => $permisosAgrupados,
+        ]);
+    }
+
+    /**
+     * Asignar permisos a un rol
+     */
+    public function asignarPermisos(Request $request, Rol $rol)
+    {
+        $validated = $request->validate([
+            'permisos' => 'required|array',
+            'permisos.*' => 'exists:permisos,id',
+        ], [
+            'permisos.required' => 'El campo permisos es obligatorio',
+            'permisos.array' => 'Los permisos deben ser un array',
+        ]);
+
+        // Sincronizar permisos (elimina los que no están y agrega los nuevos)
+        $rol->permisos()->sync($validated['permisos']);
+
+        return redirect()
+            ->route('permisos.gestion-por-rol')
+            ->with('success', 'Permisos asignados exitosamente al rol ' . $rol->nombre);
     }
 }

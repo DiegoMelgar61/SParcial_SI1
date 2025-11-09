@@ -59,8 +59,7 @@ class Permiso extends Model
             'rol_permiso',      // Tabla pivot
             'permiso_id',       // Foreign key en tabla pivot para este modelo
             'rol_id'            // Foreign key en tabla pivot para el modelo relacionado
-        )->withPivot('fecha_creacion')
-          ->withTimestamps();
+        )->withPivot('fecha_creacion');
     }
 
     /**

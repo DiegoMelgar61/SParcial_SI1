@@ -54,6 +54,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RolController::class);
 
     //Permisos
+    // Rutas específicas deben ir ANTES del resource para evitar conflictos
+    Route::get('permisos/gestion-por-rol', [PermisoController::class, 'gestionPorRol'])->name('permisos.gestion-por-rol');
+    Route::post('permisos/roles/{rol}/asignar', [PermisoController::class, 'asignarPermisos'])->name('permisos.asignar');
     Route::resource('permisos', PermisoController::class);
 
     //Usuario
