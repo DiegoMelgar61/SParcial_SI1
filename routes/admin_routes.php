@@ -955,7 +955,7 @@ Route::get('/admin/roles', function () {
         $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
 
 
-        return view('admin_roles', ['roles' => $roles, 'user' => $user]);
+        return view('roles_permisos', ['roles' => $roles, 'user' => $user]);
     } catch (Exception $e) {
         return redirect('/admin')->with('error', 'Error al consultar roles: ' . $e->getMessage());
     } finally {
