@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 use App\Config;
 use App\Classes\Postgres_DB;
 
-// ==================== GESTIÓN DE MATERIAS ====================
-//ENDPOINT GESTION DE MATERIAS
+#CU5: GESTIONAR MATERIA
+
+#OBTENER MATERIAS
 Route::get('/admin/materias', function () {
     //VALIDACION: USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -72,7 +73,7 @@ Route::get('/admin/materias', function () {
     }
 });
 
-//ENDPOINT CREAR MATERIA
+//CREAR MATERIA
 Route::post('/admin/materias/create', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -163,7 +164,7 @@ Route::post('/admin/materias/create', function (Request $request) {
     }
 });
 
-//ENDPOINT ACTUALIZAR MATERIA
+//ACTUALIZAR MATERIA
 Route::post('/admin/materias/update', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -255,7 +256,7 @@ Route::post('/admin/materias/update', function (Request $request) {
     }
 });
 
-//ENDPOINT ELIMINAR MATERIA
+//ELIMINAR MATERIA
 Route::post('/admin/materias/delete', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -694,7 +695,7 @@ Route::get('/admin/carga-horaria/detalle/{codigo}', function ($codigo) {
     }
 });
 
-// ENDPOINT: Obtener horario completo del docente
+//HORARIO COMPLETO DEL DOCENTE
 Route::get('/admin/carga-horaria/horario/{codigo}', function ($codigo) {
     // VALIDACIÓN: USUARIO EN SESIÓN
     if (!Session::has('user_code')) {
