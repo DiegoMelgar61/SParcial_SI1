@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestión de Roles y Permisos — Plataforma Universitaria INF342</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
@@ -27,14 +27,15 @@
 
       <div class="flex items-center gap-4">
         <div class="hidden sm:block text-right">
-          <p class="font-medium text-gray-800">{{ $user['nomb_comp'] }}</p>
-          <p class="text-xs text-gray-500">{{ ucfirst($user['rol']) }}</p>
+          <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp']); ?></p>
+          <p class="text-xs text-gray-500"><?php echo e(ucfirst($user['rol'])); ?></p>
         </div>
 
         <!-- Avatar del usuario -->
         <div id="user-avatar"
           class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
-          {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+          <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
         </div>
 
         <!-- Botón de inicio -->
@@ -53,20 +54,22 @@
       <div class="flex items-center gap-3 mb-3">
         <div
           class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm">
-          {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+          <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
         </div>
         <div>
-          <p class="font-semibold text-gray-800 leading-tight">{{ $user['nomb_comp'] }}</p>
+          <p class="font-semibold text-gray-800 leading-tight"><?php echo e($user['nomb_comp']); ?></p>
           <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-            {{ ucfirst($user['rol']) }}
+            <?php echo e(ucfirst($user['rol'])); ?>
+
           </span>
         </div>
       </div>
       <hr class="my-3 border-gray-200">
       <ul class="space-y-2 text-sm">
-        <li><span class="font-medium text-gray-600">CI:</span> {{ $user['ci'] }}</li>
-        <li><span class="font-medium text-gray-600">Correo:</span> {{ $user['correo'] ?? '—' }}</li>
-        <li><span class="font-medium text-gray-600">Teléfono:</span> {{ $user['tel'] ?? '—' }}</li>
+        <li><span class="font-medium text-gray-600">CI:</span> <?php echo e($user['ci']); ?></li>
+        <li><span class="font-medium text-gray-600">Correo:</span> <?php echo e($user['correo'] ?? '—'); ?></li>
+        <li><span class="font-medium text-gray-600">Teléfono:</span> <?php echo e($user['tel'] ?? '—'); ?></li>
       </ul>
       <div class="mt-4 pt-3 border-t border-gray-100">
         <a href="/perfil"
@@ -180,26 +183,26 @@
               </tr>
             </thead>
             <tbody id="tabla-roles" class="bg-white divide-y divide-gray-200 text-sm">
-              @forelse($roles as $index => $rol)
+              <?php $__empty_1 = true; $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $rol): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
               <tr class="hover:bg-gray-50 transition rol-row">
-                <td class="px-6 py-4 text-gray-700">{{ $index + 1 }}</td>
-                <td class="px-6 py-4 font-medium text-gray-800 nombre-cell">{{ $rol['nombre'] }}</td>
-                <td class="px-6 py-4 text-gray-600 descripcion-cell">{{ $rol['descripcion'] ?? '—' }}</td>
+                <td class="px-6 py-4 text-gray-700"><?php echo e($index + 1); ?></td>
+                <td class="px-6 py-4 font-medium text-gray-800 nombre-cell"><?php echo e($rol['nombre']); ?></td>
+                <td class="px-6 py-4 text-gray-600 descripcion-cell"><?php echo e($rol['descripcion'] ?? '—'); ?></td>
                 <td class="px-6 py-4">
-                  @if(!empty($rol['permisos']))
-                    @foreach($rol['permisos'] as $perm)
-                      <span class="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-md mr-1 mb-1">{{ $perm['nombre'] }}</span>
-                    @endforeach
-                  @else
+                  <?php if(!empty($rol['permisos'])): ?>
+                    <?php $__currentLoopData = $rol['permisos']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $perm): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                      <span class="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-md mr-1 mb-1"><?php echo e($perm['nombre']); ?></span>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                  <?php else: ?>
                     <span class="text-gray-400 italic">Sin permisos asignados</span>
-                  @endif
+                  <?php endif; ?>
                 </td>
                 <td class="px-6 py-4 text-center">
                   <div class="flex justify-center gap-3">
                     <!-- Botón Editar Rol -->
-                    <button data-id="{{ $rol['id'] }}" 
-                            data-nombre="{{ $rol['nombre'] }}" 
-                            data-descripcion="{{ $rol['descripcion'] ?? '' }}"
+                    <button data-id="<?php echo e($rol['id']); ?>" 
+                            data-nombre="<?php echo e($rol['nombre']); ?>" 
+                            data-descripcion="<?php echo e($rol['descripcion'] ?? ''); ?>"
                             class="btn-edit-rol text-indigo-600 hover:text-indigo-800 p-1 rounded-md hover:bg-indigo-50 transition" 
                             title="Editar Rol">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,8 +210,8 @@
                       </svg>
                     </button>
                     <!-- Botón Eliminar Rol -->
-                    <button data-id="{{ $rol['id'] }}" 
-                            data-nombre="{{ $rol['nombre'] }}"
+                    <button data-id="<?php echo e($rol['id']); ?>" 
+                            data-nombre="<?php echo e($rol['nombre']); ?>"
                             class="btn-delete-rol text-red-600 hover:text-red-800 p-1 rounded-md hover:bg-red-50 transition" 
                             title="Eliminar Rol">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,13 +221,13 @@
                   </div>
                 </td>
               </tr>
-              @empty
+              <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
               <tr id="no-roles-record">
                 <td colspan="5" class="px-6 py-8 text-center text-gray-500 italic">
                   No hay roles registrados en el sistema.
                 </td>
               </tr>
-              @endforelse
+              <?php endif; ?>
             </tbody>
           </table>
         </div>
@@ -281,7 +284,7 @@
 
   <!-- Footer -->
   <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10 md:ml-64">
-    © {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA
+    © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
   </footer>
 
   <!-- ======================== MODALES ======================== -->
@@ -495,6 +498,7 @@
   </div>
 
   <!-- Script principal -->
-  <script src="{{ asset('static/scripts/roles_permisos.js') }}"></script>
+  <script src="<?php echo e(asset('static/scripts/roles_permisos.js')); ?>"></script>
 </body>
 </html>
+<?php /**PATH D:\whatever that twas, scarcely worth my notice\Brillo\app\templates/roles_permisos.blade.php ENDPATH**/ ?>
