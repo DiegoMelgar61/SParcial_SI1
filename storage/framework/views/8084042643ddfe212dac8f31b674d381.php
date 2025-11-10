@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Roles — Plataforma Universitaria INF342</title>
+    <title>Gestión de Grupos — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
@@ -30,14 +30,15 @@
 
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
-                    <p class="font-medium text-gray-800">{{ $user['nomb_comp'] }}</p>
-                    <p class="text-xs text-gray-500">{{ ucfirst($user['rol']) }}</p>
+                    <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp']); ?></p>
+                    <p class="text-xs text-gray-500"><?php echo e(ucfirst($user['rol'])); ?></p>
                 </div>
 
                 <!-- Avatar -->
                 <div id="user-avatar"
                     class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
 
                 <!-- Botón de inicio -->
@@ -55,20 +56,22 @@
             <div class="flex items-center gap-3 mb-3">
                 <div
                     class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
                 <div>
-                    <p class="font-semibold text-gray-800 leading-tight">{{ $user['nomb_comp'] }}</p>
+                    <p class="font-semibold text-gray-800 leading-tight"><?php echo e($user['nomb_comp']); ?></p>
                     <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-                        {{ ucfirst($user['rol']) }}
+                        <?php echo e(ucfirst($user['rol'])); ?>
+
                     </span>
                 </div>
             </div>
             <hr class="my-3 border-gray-200">
             <ul class="space-y-2 text-sm">
-                <li><span class="font-medium text-gray-600">CI:</span> {{ $user['ci'] }}</li>
-                <li><span class="font-medium text-gray-600">Correo:</span> {{ $user['correo'] ?? '—' }}</li>
-                <li><span class="font-medium text-gray-600">Teléfono:</span> {{ $user['tel'] ?? '—' }}</li>
+                <li><span class="font-medium text-gray-600">CI:</span> <?php echo e($user['ci']); ?></li>
+                <li><span class="font-medium text-gray-600">Correo:</span> <?php echo e($user['correo'] ?? '—'); ?></li>
+                <li><span class="font-medium text-gray-600">Teléfono:</span> <?php echo e($user['tel'] ?? '—'); ?></li>
             </ul>
             <div class="mt-4 pt-3 border-t border-gray-100">
                 <a href="/perfil"
@@ -115,7 +118,7 @@
                     </li>
                     <li>
                         <a href="/admin/roles"
-                            class="flex items-center gap-3 px-4 py-3 text-indigo-700 bg-indigo-50 rounded-lg transition group font-semibold">
+                            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition group">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -134,13 +137,13 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/admin/permisos"
-                            class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition group">
+                        <a href="/admin/grupos"
+                            class="flex items-center gap-3 px-4 py-3 text-indigo-700 bg-indigo-50 rounded-lg transition group font-semibold">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
-                            <span class="font-medium">Gestión de Permisos</span>
+                            <span class="font-medium">Gestión de Grupos</span>
                         </a>
                     </li>
                     <li>
@@ -155,7 +158,7 @@
                     </li>
                     <li>
                         <a href="/admin/grupos" 
-                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition group">
+                           class="flex items-center gap-3 px-4 py-3 bg-indigo-50 text-indigo-700 rounded-lg transition group">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                             </svg>
@@ -203,21 +206,19 @@
         <!-- Encabezado -->
         <div class="flex flex-col md:flex-row justify-between md:items-center mb-8">
             <div>
-                <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-1">Roles del Sistema</h2>
-                <p class="text-gray-500 text-sm">Cree, edite o elimine roles.</p>
+                <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-1">Grupos del Sistema</h2>
+                <p class="text-gray-500 text-sm">Cree, edite o elimine grupos según sea necesario.</p>
             </div>
-             <div id="clock" class="text-sm text-gray-600 font-medium"></div>
-
             <button id="btn-add"
                 class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Agregar Rol
+                Agregar Grupo
             </button>
         </div>
-        <!-- Tabla de roles -->
+        <!-- Tabla de grupos -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -229,46 +230,19 @@
                                     #</th>
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nombre del Rol</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Permisos</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Descripción</th>
+                                    Sigla del Grupo</th>
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Acciones</th>
                             </tr>
                         </thead>
-                    <tbody id="usuarios-table-body" class="bg-white divide-y divide-gray-200 text-sm">
-                        @forelse ($roles as $index => $rol)
-                            <tr class="user-row hover:bg-gray-50" data-perm-id="{{ $rol['id'] }}">
-                                <td class="px-6 py-4 text-gray-700">{{ $index + 1 }}</td>
-                                <td class="px-6 py-4 text-gray-800 font-medium">{{ $rol['nombre'] }}</td>
-                                <td class="px-6 py-4 text-gray-800 font-medium">
-                                    @if (!empty($rol['permisos']) && count($rol['permisos']) > 0)
-                                         @foreach ($rol['permisos'] as $permiso)
-                                            <span class="badge inline-block mr-1 mb-1">{{ $permiso['nombre'] }}</span>
-                                        @endforeach
-                                    @else
-                                    <span class="text-gray-400 italic">Sin permisos</span>
-                                       
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-gray-600">{{ $rol['descripcion'] }}</td>
+                    <tbody id="grupos-table-body" class="bg-white divide-y divide-gray-200 text-sm">
+                        <?php $__empty_1 = true; $__currentLoopData = $grupos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $grupo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <tr class="grupo-row hover:bg-gray-50" data-grupo-id="<?php echo e($grupo['sigla']); ?>">
+                                <td class="px-6 py-4 text-gray-700"><?php echo e($index + 1); ?></td>
+                                <td class="px-6 py-4 text-gray-800 font-medium"><?php echo e($grupo['sigla']); ?></td>
                                 <td class="px-6 py-4 text-right">
-                                    <button data-id="{{ $rol['id'] }}" data-nombre="{{ $rol['nombre'] }}"
-                                        data-descripcion="{{ $rol['descripcion'] }}"
-                                        data-permisos="{{ implode(',', array_column($rol['permisos'], 'id')) }}"
-                                        class="btn-edit text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-100 transition"
-                                        title="Editar">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
-                                    <button data-id="{{ $rol['id'] }}" data-nombre="{{ $rol['nombre'] }}"
+                                    <button data-id="<?php echo e($grupo['sigla']); ?>" data-sigla="<?php echo e($grupo['sigla']); ?>"
                                         class="btn-delete text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100 transition"
                                         title="Eliminar">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,16 +252,16 @@
                                     </button>
                                 </td>
                             </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">No hay roles registrados.</td>
+                                <td colspan="3" class="px-6 py-8 text-center text-gray-500">No hay grupos registrados.</td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
 
-            <div class="mt-4 text-sm text-gray-500">Mostrando {{ count($roles) }} roles.</div>
+            <div class="mt-4 text-sm text-gray-500">Mostrando <?php echo e(count($grupos)); ?> grupos.</div>
     </main>
 
     <!-- Pie de página -->
@@ -295,17 +269,16 @@
         © 2025 Plataforma Universitaria — Todos los derechos reservados
     </footer>
 
-    <!-- Modal de Formulario (Agregar/Editar Usuario) -->
-    <div id="user-form-modal"
+    <!-- Modal de Formulario (Agregar/Editar Grupo) -->
+    <div id="grupo-form-modal"
         class="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 hidden">
 
-        <!-- *** INICIO DE LA CORRECCIÓN RESPONSIVE *** -->
         <!-- Contenedor del modal con altura máxima y flex-col -->
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh]">
 
             <!-- Encabezado del Modal (fijo) -->
             <div class="flex-shrink-0 flex items-center justify-between p-5 border-b border-gray-200">
-                <h3 id="form-modal-title" class="text-lg font-semibold text-gray-900">Agregar Nuevo rol</h3>
+                <h3 id="form-modal-title" class="text-lg font-semibold text-gray-900">Agregar Nuevo Grupo</h3>
                 <button id="btn-cancel-form-x" class="text-gray-400 hover:text-gray-600 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
@@ -315,35 +288,20 @@
             </div>
 
             <!-- Formulario (con contenedor flex para scroll) -->
-            <form id="user-form" class="flex-1 flex flex-col min-h-0">
-                <!-- <input type="hidden" name="_token" value="{{ csrf_token() }}"> -->
-                <input type="hidden" id="form-user-id" name="id" value="">
+            <form id="grupo-form" class="flex-1 flex flex-col min-h-0">
+                <input type="hidden" id="form-grupo-id" name="id" value="">
 
                 <!-- Área de campos con scroll -->
-                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto">
+                <div class="p-6 overflow-y-auto">
 
-                    <!-- Nombre -->
+                    <!-- Sigla -->
                     <div>
-                        <label for="form-nombre" class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
-                        <input type="text" id="form-nombre" name="nombre"
+                        <label for="form-sigla" class="block text-sm font-medium text-gray-700 mb-2">Sigla del
+                            Grupo</label>
+                        <input type="text" id="form-sigla" name="sigla"
                             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            required>
-                    </div>
-                    <!-- Permisos -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Permisos</label>
-                        <div id="form-permisos-lista"
-                            class="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto border border-gray-300 rounded-md p-3">
-                            <!-- Aquí se insertan dinámicamente los checkboxes de permisos -->
-                        </div>
-                    </div>
-
-                    <!-- Descripcion -->
-                    <div>
-                        <label for="form-descripcion"
-                            class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-                        <input type="text" id="form-descripcion" name="descripcion"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            required maxlength="2">
+                        <p class="text-xs text-gray-500 mt-1">Máximo 2 caracteres</p>
                     </div>
 
                 </div>
@@ -362,7 +320,6 @@
                 </div>
             </form>
         </div>
-        <!-- *** FIN DE LA CORRECCIÓN RESPONSIVE *** -->
 
     </div>
 
@@ -380,9 +337,9 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Eliminar Rol</h3>
+                        <h3 class="text-lg font-semibold text-gray-900">Eliminar Grupo</h3>
                         <p class="text-sm text-gray-600 mt-1">
-                            ¿Estás seguro de que deseas eliminar el rol <strong id="delete-user-name"
+                            ¿Estás seguro de que deseas eliminar el grupo <strong id="delete-grupo-sigla"
                                 class="font-bold">...</strong>? Esta acción no se puede deshacer.
                         </p>
                     </div>
@@ -403,8 +360,9 @@
 
     <!-- ====== FIN DE MODALES ====== -->
     <!-- JS: Este archivo ahora debe contener toda la lógica -->
-    <script src="{{ asset('static/scripts/admin_roles.js') }}"></script>
+    <script src="<?php echo e(asset('static/scripts/admin_grupos.js')); ?>">
+    </script>
 
 </body>
 
-</html>
+</html><?php /**PATH D:\whatever that twas, scarcely worth my notice\Brillo\app\templates/admin_grupos.blade.php ENDPATH**/ ?>

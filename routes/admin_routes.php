@@ -411,7 +411,6 @@ Route::post('/admin/users/update', function (Request $request) {
             'id_rol' => $rol_id,
             'ci' => $ci
         ];
-error_log(print_r($request->json()->all(), true));
 
         $db->execute_query($sql, params: $params);
         error_log(print_r($request->json()->all(), true));
@@ -1142,3 +1141,980 @@ Route::post('/admin/roles/delete', function (Request $request) {
     }
 });
 
+//ENDPOINT GRUPO
+
+//GET GRUPOS
+Route::get('/admin/grupos', function () {
+    //VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
+
+    //VALIDACION: USUARIO ADMIN
+    if (Session::get('user_role') != 'admin') {
+        return redirect('/');
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        //REGISTRO DE BITACORA
+        $accion = 'GESTION DE GRUPOS';
+        $fecha = date('Y-m-d H:i:s');
+        $estado = 'ERROR';
+        $comentario = 'Consultar Grupos registrados.';
+        $codigo = Session::get('user_code');
+
+        //OBTENER BITACORA
+        $sql = " SELECT *
+                FROM ex_g32.grupo";
+        $stmt = $db->execute_query($sql);
+        $grupos = $db->fetch_all($stmt);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        //RECUPERAR DATOS DEL USUARIO
+        $user = [
+            'nomb_comp' => Session::get('name'),  // Asegúrate de tener este dato en la sesión
+            'rol' => Session::get('user_role'),
+            'ci' => Session::get('ci'),
+            'correo' => Session::get('mail'),
+            'tel' => Session::get('tel'),
+        ];
+
+        return view('admin_grupos', ['grupos' => $grupos, 'user' => $user]);
+    } catch (Exception $e) {
+        return redirect('/admin')->with('error', 'Error al consultar usuarios: ' . $e->getMessage());
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+// CREAR GRUPO
+Route::post('/admin/grupos/create', function (Request $request) {
+
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $sigla = $data['sigla'];
+
+
+    //OBTENER DATOS BITACORA
+    $accion = 'CREAR GRUPO';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Creacion de grupo de materia.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = " INSERT INTO ex_g32.grupo
+                VALUES (:sigla)";
+        $params = [':sigla' => strtoupper($sigla)];
+        $stmt = $db->execute_query($sql, $params);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Grupo creado exitosamente'
+        ]);
+    } catch (Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT ELIMINAR GRUPO
+
+Route::post('/admin/grupos/delete', function (Request $request) {
+      error_log('Request data: ' . print_r($request->all(), true));
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $sigla = $data['id'];
+
+    //OBTENER DATOS BITACORA
+    $accion = 'ELIMINAR GRUPO';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Eliminar un grupo indicado.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "  SELECT *
+                FROM ex_g32.grupo
+                WHERE sigla= :sigla";
+        $params = [':sigla' => $sigla];
+
+        $stmt = $db->execute_query($sql, $params);
+        $id = $db->fetch_one($stmt);
+
+        if ($id == null) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'El grupo no esta Registrado en el Sistema.'
+            ]);
+        }
+        $sql = "  DELETE FROM ex_g32.grupo
+                WHERE sigla= :sigla";
+        $params = [':sigla' => $sigla];
+
+        $stmt = $db->execute_query($sql, $params);
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Grupo eliminado Exitosamente'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+// ENDPOINT PARA AULAS
+
+//GET AULAS
+Route::get('/admin/aulas', function () {
+    //VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
+
+    //VALIDACION: USUARIO ADMIN
+    if (Session::get('user_role') != 'admin') {
+        return redirect('/');
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        //REGISTRO DE BITACORA
+        $accion = 'GESTION DE AULAS';
+        $fecha = date('Y-m-d H:i:s');
+        $estado = 'ERROR';
+        $comentario = 'Consultar aulas registrados.';
+        $codigo = Session::get('user_code');
+
+        //OBTENER BITACORA
+        $sql = "  SELECT nro,capacidad,modulo,tipo
+                FROM ex_g32.aula";
+        $stmt = $db->execute_query($sql);
+        $aulas = $db->fetch_all($stmt);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        //RECUPERAR DATOS DEL USUARIO
+        $user = [
+            'nomb_comp' => Session::get('name'),  // Asegúrate de tener este dato en la sesión
+            'rol' => Session::get('user_role'),
+            'ci' => Session::get('ci'),
+            'correo' => Session::get('mail'),
+            'tel' => Session::get('tel'),
+        ];
+
+        return view('admin_aulas', ['aulas' => $aulas, 'user' => $user]);
+    } catch (Exception $e) {
+        return redirect('/admin')->with('error', 'Error al consultar usuarios: ' . $e->getMessage());
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+// CREAR AULAS
+Route::post('/admin/aulas/create', function (Request $request) {
+
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $nro = $data['nro'];
+    $capacidad = $data['capacidad'];
+    $modulo = $data['modulo'];
+    $tipo = $data['tipo'];
+
+
+    //OBTENER DATOS BITACORA
+    $accion = 'REGISTRAR AULAS';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Registo de aulas.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+
+        $sql = " INSERT INTO ex_g32.aula (nro, capacidad,modulo,tipo)
+                VALUES (:nro, :capacidad, :modulo, :tipo)";
+        $params = [':nro' => $nro, ':capacidad' => $capacidad, ':modulo' => $modulo, ':tipo' => $tipo];
+        $stmt = $db->execute_query($sql, $params);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Aula registrada exitosamente'
+        ]);
+    } catch (Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT ELIMINAR AULA
+
+Route::post('/admin/aulas/delete', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+   $nro_eliminar = $data['nro'];
+
+
+    //OBTENER DATOS BITACORA
+    $accion = 'ELIMINAR AULA';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Eliminar un aula indicado.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "  SELECT nro
+                FROM ex_g32.aula
+                WHERE nro= :nro";
+        $params = [':nro' => $nro_eliminar];
+
+        $stmt = $db->execute_query($sql, $params);
+        $nro = $db->fetch_one($stmt);
+
+        if ($nro == null) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'El aula no esta Registrado en el Sistema.'
+            ]);
+        }
+        $sql = "  DELETE FROM ex_g32.aula
+                WHERE nro= :nro";
+        $params = [':nro' => $nro_eliminar];
+
+        $stmt = $db->execute_query($sql, $params);
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Aula eliminado Exitosamente'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT ACTUALIZAR AULA
+
+Route::post('/admin/aulas/update', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $nro = $data['nro'];
+    $capacidad = $data['capacidad'];
+    $modulo = $data['modulo'];
+    $tipo = $data['tipo'];
+    //OBTENER DATOS BITACORA
+    $accion = 'MOFICIAR PERMISO';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Modifica un permiso indicado.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "  SELECT nro
+                FROM ex_g32.aula
+                WHERE nro= :nro";
+        $params = [':nro' => $nro];
+
+        $stmt = $db->execute_query($sql, $params);
+        $id = $db->fetch_one($stmt);
+
+        if ($id == null) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'El aula no esta Registrado en el Sistema.'
+            ]);
+        }
+        $sql = "  UPDATE ex_g32.aula
+                SET capacidad= :capacidad, modulo= :modulo, tipo= :tipo
+                WHERE nro= :nro";
+        $params = [':nro' => $nro, ':capacidad' => $capacidad, ':modulo' => $modulo, ':tipo' => $tipo];
+
+        $stmt = $db->execute_query($sql, $params);
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => true,
+            'message' => 'Aula actualizada Exitosamente'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrio un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+// ==================== GESTIÓN DE MATERIAS ====================
+
+//ENDPOINT GESTION DE MATERIAS
+Route::get('/admin/materias', function () {
+    //VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
+
+    //VALIDACION: USUARIO ADMIN
+    if (Session::get('user_role') != 'admin') {
+        return redirect('/');
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        //REGISTRO DE BITACORA
+        $accion = 'VISUALIZAR MATERIAS';
+        $fecha = date('Y-m-d H:i:s');
+        $estado = 'SUCCESS';
+        $comentario = 'Acceso al módulo de gestión de materias.';
+        $codigo = Session::get('user_code');
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        //OBTENER MATERIAS
+        $sql = "SELECT sigla, nombre, semestre, carga_horaria
+                FROM ex_g32.materia
+                ORDER BY semestre, sigla";
+        $stmt = $db->execute_query($sql);
+        $materias = $db->fetch_all($stmt);
+
+        // Obtener grupos asignados a cada materia
+        foreach ($materias as &$materia) {
+            $sql = "SELECT sigla_grupo FROM ex_g32.materia_grupo WHERE sigla_materia = :sigla ORDER BY sigla_grupo";
+            $params = [':sigla' => $materia['sigla']];
+            $stmt = $db->execute_query($sql, $params);
+            $grupos = $db->fetch_all($stmt);
+            $materia['grupos'] = array_map(function($g) {
+                return $g['sigla_grupo'];
+            }, $grupos);
+        }
+
+        //DATOS USUARIO
+         $user = [
+            'nomb_comp' => Session::get('name'),  // Asegúrate de tener este dato en la sesión
+            'rol' => Session::get('user_role'),
+            'ci' => Session::get('ci'),
+            'correo' => Session::get('mail'),
+            'tel' => Session::get('tel'),
+        ];
+
+        return view('admin_materias', [
+            'materias' => $materias,
+            'user' => $user
+        ]);
+    } catch (Exception $e) {
+        return redirect('/')->with('error', 'Error al cargar materias.');
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT CREAR MATERIA
+Route::post('/admin/materias/create', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $sigla = $data['sigla'] ?? null;
+    $nombre = $data['nombre'] ?? null;
+    $semestre = $data['semestre'] ?? null;
+    $carga_horaria = $data['carga_horaria'] ?? null;
+
+    //VALIDACIONES
+    if (!$sigla || !$nombre || !$semestre || !$carga_horaria) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Todos los campos son obligatorios.'
+        ], 400);
+    }
+
+    //OBTENER DATOS BITACORA
+    $accion = 'CREAR MATERIA';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Crear una nueva materia.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        //VERIFICAR QUE LA MATERIA NO EXISTA
+        $sql = "SELECT sigla FROM ex_g32.materia WHERE sigla = :sigla";
+        $params = [':sigla' => $sigla];
+        $stmt = $db->execute_query($sql, $params);
+        $existe = $db->fetch_one($stmt);
+
+        if ($existe) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'La materia ya existe en el sistema.'
+            ], 409);
+        }
+
+        //INSERTAR MATERIA
+        $sql = "INSERT INTO ex_g32.materia (sigla, nombre, semestre, carga_horaria) 
+                VALUES (:sigla, :nombre, :semestre, :carga_horaria)";
+        $params = [
+            ':sigla' => $sigla,
+            ':nombre' => $nombre,
+            ':semestre' => $semestre,
+            ':carga_horaria' => $carga_horaria
+        ];
+        $stmt = $db->execute_query($sql, $params);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Materia creada exitosamente.'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT ACTUALIZAR MATERIA
+Route::post('/admin/materias/update', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $sigla = $data['sigla'] ?? null;
+    $nombre = $data['nombre'] ?? null;
+    $semestre = $data['semestre'] ?? null;
+    $carga_horaria = $data['carga_horaria'] ?? null;
+
+    //VALIDACIONES
+    if (!$sigla || !$nombre || !$semestre || !$carga_horaria) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Todos los campos son obligatorios.'
+        ], 400);
+    }
+
+    //OBTENER DATOS BITACORA
+    $accion = 'MODIFICAR MATERIA';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Modificar una materia existente.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        //VERIFICAR QUE LA MATERIA EXISTE
+        $sql = "SELECT sigla FROM ex_g32.materia WHERE sigla = :sigla";
+        $params = [':sigla' => $sigla];
+        $stmt = $db->execute_query($sql, $params);
+        $materia_existe = $db->fetch_one($stmt);
+
+        if (!$materia_existe) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'La materia no existe en el sistema.'
+            ], 404);
+        }
+
+        //ACTUALIZAR MATERIA
+        $sql = "UPDATE ex_g32.materia 
+                SET nombre = :nombre, semestre = :semestre, carga_horaria = :carga_horaria 
+                WHERE sigla = :sigla";
+        $params = [
+            ':sigla' => $sigla,
+            ':nombre' => $nombre,
+            ':semestre' => $semestre,
+            ':carga_horaria' => $carga_horaria
+        ];
+        $stmt = $db->execute_query($sql, $params);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Materia actualizada exitosamente.'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT ELIMINAR MATERIA
+Route::post('/admin/materias/delete', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $sigla_eliminar = $data['sigla'] ?? null;
+
+    if (!$sigla_eliminar) {
+        return response()->json([
+            'success' => false,
+            'message' => 'La sigla de la materia es obligatoria.'
+        ], 400);
+    }
+
+    //OBTENER DATOS BITACORA
+    $accion = 'ELIMINAR MATERIA';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Eliminar una materia indicada.';
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        //VERIFICAR QUE LA MATERIA EXISTE
+        $sql = "SELECT sigla FROM ex_g32.materia WHERE sigla = :sigla";
+        $params = [':sigla' => $sigla_eliminar];
+        $stmt = $db->execute_query($sql, $params);
+        $materia = $db->fetch_one($stmt);
+
+        if (!$materia) {
+            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'La materia no está registrada en el sistema.'
+            ], 404);
+        }
+
+        //ELIMINAR MATERIA
+        $sql = "DELETE FROM ex_g32.materia WHERE sigla = :sigla";
+        $params = [':sigla' => $sigla_eliminar];
+        $stmt = $db->execute_query($sql, $params);
+
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Materia eliminada exitosamente.'
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error en el proceso.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT OBTENER TODOS LOS GRUPOS
+Route::get('/admin/materias/get-grupos', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "SELECT sigla FROM ex_g32.grupo ORDER BY sigla";
+        $stmt = $db->execute_query($sql);
+        $grupos = $db->fetch_all($stmt);
+
+        return response()->json($grupos);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener grupos.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT OBTENER GRUPOS ASIGNADOS A UNA MATERIA
+Route::get('/admin/materias/get-grupos-asignados', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    $siglaMateria = $request->query('sigla_materia');
+    if (!$siglaMateria) {
+        return response()->json([
+            'success' => false,
+            'message' => 'La sigla de la materia es obligatoria.'
+        ], 400);
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "SELECT sigla_grupo FROM ex_g32.materia_grupo WHERE sigla_materia = :sigla ORDER BY sigla_grupo";
+        $params = [':sigla' => $siglaMateria];
+        $stmt = $db->execute_query($sql, $params);
+        $grupos = $db->fetch_all($stmt);
+
+        // Extraer solo las siglas en un array simple
+        $siglas = array_map(function($g) {
+            return $g['sigla_grupo'];
+        }, $grupos);
+
+        return response()->json($siglas);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener grupos asignados.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+//ENDPOINT ASIGNAR GRUPOS A MATERIA
+Route::post('/admin/materias/asignar-grupos', function (Request $request) {
+    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+    //VALIDACION:USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no Autenticado.'
+        ]);
+    }
+
+    //VALIDACION:USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json([
+            'success' => false,
+            'message' => 'El Usuario no es Administrador.'
+        ]);
+    }
+
+    //OBTENER DATOS
+    $data = $request->json()->all();
+    $siglaMateria = $data['sigla_materia'] ?? null;
+    $grupos = $data['grupos'] ?? [];
+
+    if (!$siglaMateria) {
+        return response()->json([
+            'success' => false,
+            'message' => 'La sigla de la materia es obligatoria.'
+        ], 400);
+    }
+
+    //OBTENER DATOS BITACORA
+    $accion = 'ASIGNAR GRUPOS A MATERIA';
+    $fecha = date('Y-m-d H:i:s');
+    $estado = 'ERROR';
+    $comentario = 'Asignar grupos a la materia ' . $siglaMateria;
+    $codigo = Session::get('user_code');
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+        $pdo = $db->get_connection();
+        $pdo->beginTransaction();
+
+        //ELIMINAR ASIGNACIONES PREVIAS
+        $sql = "DELETE FROM ex_g32.materia_grupo WHERE sigla_materia = :sigla";
+        $params = [':sigla' => $siglaMateria];
+        $db->execute_query($sql, $params);
+
+        //INSERTAR NUEVAS ASIGNACIONES
+        if (!empty($grupos)) {
+            foreach ($grupos as $siglaGrupo) {
+                $sql = "INSERT INTO ex_g32.materia_grupo (sigla_materia, sigla_grupo) VALUES (:mat, :gru)";
+                $params = [':mat' => $siglaMateria, ':gru' => $siglaGrupo];
+                $db->execute_query($sql, $params);
+            }
+        }
+
+        $pdo->commit();
+        $estado = 'SUCCESS';
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Grupos asignados exitosamente.'
+        ]);
+    } catch (Exception $e) {
+        if (isset($pdo) && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al asignar grupos.',
+            'error' => $e->getMessage()
+        ], 500);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
+// ============================================
+// INCLUIR RUTAS DE CARGA HORARIA
+// ============================================
+require __DIR__ . '/admin_carga_horaria_routes.php';
