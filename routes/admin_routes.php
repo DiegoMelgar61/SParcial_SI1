@@ -1,5 +1,6 @@
 <?php
 
+#IMPORTAR CLASES Y LIBRERIAS
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
@@ -612,9 +613,6 @@ Route::match(['get', 'post'], '/admin/import-users', function (Request $request)
 
 
 
-
-//ENDPOINT ADMINISTRAR ROLES Y PERMISOS
-
 //GET PERMISOS
 Route::get('/admin/permisos', function () {
     //VALIDACION: USUARIO EN SESION
@@ -669,8 +667,6 @@ Route::get('/admin/permisos', function () {
 
 // CREAR PERMISOS
 Route::post('/admin/permisos/create', function (Request $request) {
-
-
     //VALIDACION:USUARIO EN SESION
     if (!Session::has('user_code')) {
         return response()->json([
@@ -1176,8 +1172,7 @@ Route::post('/admin/roles/delete', function (Request $request) {
     }
 });
 
-//ENDPOINT GRUPO
-
+//ENDPOINT GRUPOS
 //GET GRUPOS
 Route::get('/admin/grupos', function () {
     //VALIDACION: USUARIO EN SESION
@@ -1228,6 +1223,7 @@ Route::get('/admin/grupos', function () {
         }
     }
 });
+
 // CREAR GRUPO
 Route::post('/admin/grupos/create', function (Request $request) {
 
@@ -1290,7 +1286,6 @@ Route::post('/admin/grupos/create', function (Request $request) {
 });
 
 //ENDPOINT ELIMINAR GRUPO
-
 Route::post('/admin/grupos/delete', function (Request $request) {
       error_log('Request data: ' . print_r($request->all(), true));
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
@@ -1365,8 +1360,8 @@ Route::post('/admin/grupos/delete', function (Request $request) {
     }
 });
 
-// ENDPOINT PARA AULAS
 
+// ENDPOINT PARA AULAS
 //GET AULAS
 Route::get('/admin/aulas', function () {
     //VALIDACION: USUARIO EN SESION
@@ -1483,8 +1478,8 @@ Route::post('/admin/aulas/create', function (Request $request) {
     }
 });
 
-//ENDPOINT ELIMINAR AULA
 
+//ENDPOINT ELIMINAR AULA
 Route::post('/admin/aulas/delete', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -1560,7 +1555,6 @@ Route::post('/admin/aulas/delete', function (Request $request) {
 });
 
 //ENDPOINT ACTUALIZAR AULA
-
 Route::post('/admin/aulas/update', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -1637,519 +1631,3 @@ Route::post('/admin/aulas/update', function (Request $request) {
     }
 });
 
-// ==================== GESTIÓN DE MATERIAS ====================
-
-//ENDPOINT GESTION DE MATERIAS
-Route::get('/admin/materias', function () {
-    //VALIDACION: USUARIO EN SESION
-    if (!Session::has('user_code')) {
-        return redirect('/login');
-    }
-
-    //VALIDACION: USUARIO ADMIN
-    if (Session::get('user_role') != 'admin') {
-        return redirect('/');
-    }
-
-    $db = Config::$db;
-    try {
-        $db->create_conection();
-
-        //REGISTRO DE BITACORA
-        $accion = 'VISUALIZAR MATERIAS';
-        $fecha = date('Y-m-d H:i:s');
-        $estado = 'SUCCESS';
-        $comentario = 'Acceso al módulo de gestión de materias.';
-        $codigo = Session::get('user_code');
-        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-
-        //OBTENER MATERIAS
-        $sql = "SELECT sigla, nombre, semestre, carga_horaria
-                FROM ex_g32.materia
-                ORDER BY semestre, sigla";
-        $stmt = $db->execute_query($sql);
-        $materias = $db->fetch_all($stmt);
-
-        // Obtener grupos asignados a cada materia
-        foreach ($materias as &$materia) {
-            $sql = "SELECT sigla_grupo FROM ex_g32.materia_grupo WHERE sigla_materia = :sigla ORDER BY sigla_grupo";
-            $params = [':sigla' => $materia['sigla']];
-            $stmt = $db->execute_query($sql, $params);
-            $grupos = $db->fetch_all($stmt);
-            $materia['grupos'] = array_map(function($g) {
-                return $g['sigla_grupo'];
-            }, $grupos);
-        }
-
-        //DATOS USUARIO
-         $user = [
-            'nomb_comp' => Session::get('name'),  // Asegúrate de tener este dato en la sesión
-            'rol' => Session::get('user_role'),
-            'ci' => Session::get('ci'),
-            'correo' => Session::get('mail'),
-            'tel' => Session::get('tel'),
-        ];
-
-        return view('admin_materias', [
-            'materias' => $materias,
-            'user' => $user
-        ]);
-    } catch (Exception $e) {
-        return redirect('/')->with('error', 'Error al cargar materias.');
-    } finally {
-        if (isset($db) && $db !== null) {
-            $db->close_conection();
-        }
-    }
-});
-
-//ENDPOINT CREAR MATERIA
-Route::post('/admin/materias/create', function (Request $request) {
-    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-
-    //VALIDACION:USUARIO EN SESION
-    if (!Session::has('user_code')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Usuario no Autenticado.'
-        ]);
-    }
-
-    //VALIDACION:USUARIO ADMIN
-    if (Session::get('user_role') !== 'admin') {
-        return response()->json([
-            'success' => false,
-            'message' => 'El Usuario no es Administrador.'
-        ]);
-    }
-
-    //OBTENER DATOS
-    $data = $request->json()->all();
-    $sigla = $data['sigla'] ?? null;
-    $nombre = $data['nombre'] ?? null;
-    $semestre = $data['semestre'] ?? null;
-    $carga_horaria = $data['carga_horaria'] ?? null;
-
-    //VALIDACIONES
-    if (!$sigla || !$nombre || !$semestre || !$carga_horaria) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Todos los campos son obligatorios.'
-        ], 400);
-    }
-
-    //OBTENER DATOS BITACORA
-    $accion = 'CREAR MATERIA';
-    $fecha = date('Y-m-d H:i:s');
-    $estado = 'ERROR';
-    $comentario = 'Crear una nueva materia.';
-    $codigo = Session::get('user_code');
-
-    $db = Config::$db;
-    try {
-        $db->create_conection();
-
-        //VERIFICAR QUE LA MATERIA NO EXISTA
-        $sql = "SELECT sigla FROM ex_g32.materia WHERE sigla = :sigla";
-        $params = [':sigla' => $sigla];
-        $stmt = $db->execute_query($sql, $params);
-        $existe = $db->fetch_one($stmt);
-
-        if ($existe) {
-            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-            return response()->json([
-                'success' => false,
-                'message' => 'La materia ya existe en el sistema.'
-            ], 409);
-        }
-
-        //INSERTAR MATERIA
-        $sql = "INSERT INTO ex_g32.materia (sigla, nombre, semestre, carga_horaria) 
-                VALUES (:sigla, :nombre, :semestre, :carga_horaria)";
-        $params = [
-            ':sigla' => $sigla,
-            ':nombre' => $nombre,
-            ':semestre' => $semestre,
-            ':carga_horaria' => $carga_horaria
-        ];
-        $stmt = $db->execute_query($sql, $params);
-
-        $estado = 'SUCCESS';
-        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Materia creada exitosamente.'
-        ]);
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Ocurrió un error en el proceso.',
-            'error' => $e->getMessage()
-        ], 500);
-    } finally {
-        if (isset($db) && $db !== null) {
-            $db->close_conection();
-        }
-    }
-});
-
-//ENDPOINT ACTUALIZAR MATERIA
-Route::post('/admin/materias/update', function (Request $request) {
-    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-
-    //VALIDACION:USUARIO EN SESION
-    if (!Session::has('user_code')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Usuario no Autenticado.'
-        ]);
-    }
-
-    //VALIDACION:USUARIO ADMIN
-    if (Session::get('user_role') !== 'admin') {
-        return response()->json([
-            'success' => false,
-            'message' => 'El Usuario no es Administrador.'
-        ]);
-    }
-
-    //OBTENER DATOS
-    $data = $request->json()->all();
-    $sigla = $data['sigla'] ?? null;
-    $nombre = $data['nombre'] ?? null;
-    $semestre = $data['semestre'] ?? null;
-    $carga_horaria = $data['carga_horaria'] ?? null;
-
-    //VALIDACIONES
-    if (!$sigla || !$nombre || !$semestre || !$carga_horaria) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Todos los campos son obligatorios.'
-        ], 400);
-    }
-
-    //OBTENER DATOS BITACORA
-    $accion = 'MODIFICAR MATERIA';
-    $fecha = date('Y-m-d H:i:s');
-    $estado = 'ERROR';
-    $comentario = 'Modificar una materia existente.';
-    $codigo = Session::get('user_code');
-
-    $db = Config::$db;
-    try {
-        $db->create_conection();
-
-        //VERIFICAR QUE LA MATERIA EXISTE
-        $sql = "SELECT sigla FROM ex_g32.materia WHERE sigla = :sigla";
-        $params = [':sigla' => $sigla];
-        $stmt = $db->execute_query($sql, $params);
-        $materia_existe = $db->fetch_one($stmt);
-
-        if (!$materia_existe) {
-            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-            return response()->json([
-                'success' => false,
-                'message' => 'La materia no existe en el sistema.'
-            ], 404);
-        }
-
-        //ACTUALIZAR MATERIA
-        $sql = "UPDATE ex_g32.materia 
-                SET nombre = :nombre, semestre = :semestre, carga_horaria = :carga_horaria 
-                WHERE sigla = :sigla";
-        $params = [
-            ':sigla' => $sigla,
-            ':nombre' => $nombre,
-            ':semestre' => $semestre,
-            ':carga_horaria' => $carga_horaria
-        ];
-        $stmt = $db->execute_query($sql, $params);
-
-        $estado = 'SUCCESS';
-        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Materia actualizada exitosamente.'
-        ]);
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Ocurrió un error en el proceso.',
-            'error' => $e->getMessage()
-        ], 500);
-    } finally {
-        if (isset($db) && $db !== null) {
-            $db->close_conection();
-        }
-    }
-});
-
-//ENDPOINT ELIMINAR MATERIA
-Route::post('/admin/materias/delete', function (Request $request) {
-    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-
-    //VALIDACION:USUARIO EN SESION
-    if (!Session::has('user_code')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Usuario no Autenticado.'
-        ]);
-    }
-
-    //VALIDACION:USUARIO ADMIN
-    if (Session::get('user_role') !== 'admin') {
-        return response()->json([
-            'success' => false,
-            'message' => 'El Usuario no es Administrador.'
-        ]);
-    }
-
-    //OBTENER DATOS
-    $data = $request->json()->all();
-    $sigla_eliminar = $data['sigla'] ?? null;
-
-    if (!$sigla_eliminar) {
-        return response()->json([
-            'success' => false,
-            'message' => 'La sigla de la materia es obligatoria.'
-        ], 400);
-    }
-
-    //OBTENER DATOS BITACORA
-    $accion = 'ELIMINAR MATERIA';
-    $fecha = date('Y-m-d H:i:s');
-    $estado = 'ERROR';
-    $comentario = 'Eliminar una materia indicada.';
-    $codigo = Session::get('user_code');
-
-    $db = Config::$db;
-    try {
-        $db->create_conection();
-
-        //VERIFICAR QUE LA MATERIA EXISTE
-        $sql = "SELECT sigla FROM ex_g32.materia WHERE sigla = :sigla";
-        $params = [':sigla' => $sigla_eliminar];
-        $stmt = $db->execute_query($sql, $params);
-        $materia = $db->fetch_one($stmt);
-
-        if (!$materia) {
-            $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-            return response()->json([
-                'success' => false,
-                'message' => 'La materia no está registrada en el sistema.'
-            ], 404);
-        }
-
-        //ELIMINAR MATERIA
-        $sql = "DELETE FROM ex_g32.materia WHERE sigla = :sigla";
-        $params = [':sigla' => $sigla_eliminar];
-        $stmt = $db->execute_query($sql, $params);
-
-        $estado = 'SUCCESS';
-        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Materia eliminada exitosamente.'
-        ]);
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Ocurrió un error en el proceso.',
-            'error' => $e->getMessage()
-        ], 500);
-    } finally {
-        if (isset($db) && $db !== null) {
-            $db->close_conection();
-        }
-    }
-});
-
-//ENDPOINT OBTENER TODOS LOS GRUPOS
-Route::get('/admin/materias/get-grupos', function (Request $request) {
-    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-
-    //VALIDACION:USUARIO EN SESION
-    if (!Session::has('user_code')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Usuario no Autenticado.'
-        ]);
-    }
-
-    //VALIDACION:USUARIO ADMIN
-    if (Session::get('user_role') !== 'admin') {
-        return response()->json([
-            'success' => false,
-            'message' => 'El Usuario no es Administrador.'
-        ]);
-    }
-
-    $db = Config::$db;
-    try {
-        $db->create_conection();
-
-        $sql = "SELECT sigla FROM ex_g32.grupo ORDER BY sigla";
-        $stmt = $db->execute_query($sql);
-        $grupos = $db->fetch_all($stmt);
-
-        return response()->json($grupos);
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al obtener grupos.',
-            'error' => $e->getMessage()
-        ], 500);
-    } finally {
-        if (isset($db) && $db !== null) {
-            $db->close_conection();
-        }
-    }
-});
-
-//ENDPOINT OBTENER GRUPOS ASIGNADOS A UNA MATERIA
-Route::get('/admin/materias/get-grupos-asignados', function (Request $request) {
-    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-
-    //VALIDACION:USUARIO EN SESION
-    if (!Session::has('user_code')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Usuario no Autenticado.'
-        ]);
-    }
-
-    //VALIDACION:USUARIO ADMIN
-    if (Session::get('user_role') !== 'admin') {
-        return response()->json([
-            'success' => false,
-            'message' => 'El Usuario no es Administrador.'
-        ]);
-    }
-
-    $siglaMateria = $request->query('sigla_materia');
-    if (!$siglaMateria) {
-        return response()->json([
-            'success' => false,
-            'message' => 'La sigla de la materia es obligatoria.'
-        ], 400);
-    }
-
-    $db = Config::$db;
-    try {
-        $db->create_conection();
-
-        $sql = "SELECT sigla_grupo FROM ex_g32.materia_grupo WHERE sigla_materia = :sigla ORDER BY sigla_grupo";
-        $params = [':sigla' => $siglaMateria];
-        $stmt = $db->execute_query($sql, $params);
-        $grupos = $db->fetch_all($stmt);
-
-        // Extraer solo las siglas en un array simple
-        $siglas = array_map(function($g) {
-            return $g['sigla_grupo'];
-        }, $grupos);
-
-        return response()->json($siglas);
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al obtener grupos asignados.',
-            'error' => $e->getMessage()
-        ], 500);
-    } finally {
-        if (isset($db) && $db !== null) {
-            $db->close_conection();
-        }
-    }
-});
-
-//ENDPOINT ASIGNAR GRUPOS A MATERIA
-Route::post('/admin/materias/asignar-grupos', function (Request $request) {
-    $request->headers->set('X-Requested-With', 'XMLHttpRequest');
-
-    //VALIDACION:USUARIO EN SESION
-    if (!Session::has('user_code')) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Usuario no Autenticado.'
-        ]);
-    }
-
-    //VALIDACION:USUARIO ADMIN
-    if (Session::get('user_role') !== 'admin') {
-        return response()->json([
-            'success' => false,
-            'message' => 'El Usuario no es Administrador.'
-        ]);
-    }
-
-    //OBTENER DATOS
-    $data = $request->json()->all();
-    $siglaMateria = $data['sigla_materia'] ?? null;
-    $grupos = $data['grupos'] ?? [];
-
-    if (!$siglaMateria) {
-        return response()->json([
-            'success' => false,
-            'message' => 'La sigla de la materia es obligatoria.'
-        ], 400);
-    }
-
-    //OBTENER DATOS BITACORA
-    $accion = 'ASIGNAR GRUPOS A MATERIA';
-    $fecha = date('Y-m-d H:i:s');
-    $estado = 'ERROR';
-    $comentario = 'Asignar grupos a la materia ' . $siglaMateria;
-    $codigo = Session::get('user_code');
-
-    $db = Config::$db;
-    try {
-        $db->create_conection();
-        $pdo = $db->get_connection();
-        $pdo->beginTransaction();
-
-        //ELIMINAR ASIGNACIONES PREVIAS
-        $sql = "DELETE FROM ex_g32.materia_grupo WHERE sigla_materia = :sigla";
-        $params = [':sigla' => $siglaMateria];
-        $db->execute_query($sql, $params);
-
-        //INSERTAR NUEVAS ASIGNACIONES
-        if (!empty($grupos)) {
-            foreach ($grupos as $siglaGrupo) {
-                $sql = "INSERT INTO ex_g32.materia_grupo (sigla_materia, sigla_grupo) VALUES (:mat, :gru)";
-                $params = [':mat' => $siglaMateria, ':gru' => $siglaGrupo];
-                $db->execute_query($sql, $params);
-            }
-        }
-
-        $pdo->commit();
-        $estado = 'SUCCESS';
-        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Grupos asignados exitosamente.'
-        ]);
-    } catch (Exception $e) {
-        if (isset($pdo) && $pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-        return response()->json([
-            'success' => false,
-            'message' => 'Ocurrió un error al asignar grupos.',
-            'error' => $e->getMessage()
-        ], 500);
-    } finally {
-        if (isset($db) && $db !== null) {
-            $db->close_conection();
-        }
-    }
-});
-
-// ============================================
-// INCLUIR RUTAS DE CARGA HORARIA
-// ============================================
-require __DIR__ . '/admin_carga_horaria_routes.php';
