@@ -9,7 +9,9 @@ use App\Classes\Postgres_DB;
 
 require_once app_path('/services/help_functs.php');
 
-//ENDPOINT GESTOR DE USUARIOS: ELIMINAR
+#CU15: GESTIONAR USUARIO
+
+#ELIMINAR UN USUARIO
 Route::post('/admin/users/delete', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -82,7 +84,8 @@ Route::post('/admin/users/delete', function (Request $request) {
         }
     }
 });
-//ENDPOINT GESTION DE USUARIO
+
+//OBTENER LISTA DE USUARIO Y RENDERIZAR HTML
 Route::get('/admin/users', function () {
     //VALIDACION: USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -188,7 +191,7 @@ Route::get('/admin/bitacora', function () {
     }
 });
 
-//ENDPOINT GESTOR DE USUARIOS: CREAR
+//CREAR USUARIO
 Route::post('/admin/users/store', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -310,7 +313,8 @@ Route::post('/admin/users/store', function (Request $request) {
         }
     }
 });
-//ENDPOINT GESTOR DE USUARIOS: Actualizar
+
+//ACTUALIZAR USUARIO
 Route::post('/admin/users/update', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -469,7 +473,7 @@ Route::post('/admin/users/update', function (Request $request) {
 });
 
 
-//RUTA GESTORA DEL MODULO DE ADMINISTRADORES
+//MODULO ADMINISTRACION
 Route::get('/admin/mod-adm', function () {
     // VALIDACION: USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -539,7 +543,7 @@ Route::get('/admin/mod-adm', function () {
 });
 
 
-//RUTA GESTORA DEL MODULO DE IMPORTACION DE USUARIOS
+//CU12: IMPORTACION MASIVA DE USUARIOS
 Route::match(['get', 'post'], '/admin/import-users', function (Request $request) {
     //EVITAR ERRORES CORS
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
@@ -613,7 +617,9 @@ Route::match(['get', 'post'], '/admin/import-users', function (Request $request)
 
 
 
-//GET PERMISOS
+//CU18:GESTIONAR PERMISOS
+
+#OBTENER PERMISOS
 Route::get('/admin/permisos', function () {
     //VALIDACION: USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -665,7 +671,7 @@ Route::get('/admin/permisos', function () {
     }
 });
 
-// CREAR PERMISOS
+#CREAR UN PERMISO
 Route::post('/admin/permisos/create', function (Request $request) {
     //VALIDACION:USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -742,8 +748,8 @@ Route::post('/admin/permisos/create', function (Request $request) {
     }
 });
 
-//ENDPOINT ELIMINAR PERMISO
 
+#ELIMINAR UN PERMISO
 Route::post('/admin/permisos/delete', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -817,8 +823,7 @@ Route::post('/admin/permisos/delete', function (Request $request) {
     }
 });
 
-//ENDPOINT ACTUALIZAR PERMISO
-
+//ACTUALIZAR PERMISOS
 Route::post('/admin/permisos/update', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
@@ -895,9 +900,32 @@ Route::post('/admin/permisos/update', function (Request $request) {
     }
 });
 
-//ENDPOINT ROLES GET
+#LISTAR PERMISOS
+Route::get('/admin/permisos/listar', function () {
+    if (!Session::has('user_code')) {
+        return response()->json([], 401);
+    }
+    $db = Config::$db;
+    try {
 
-//GET roles
+
+        $db->create_conection();
+        $sql = "SELECT id, nombre, descripcion FROM ex_g32.permisos ORDER BY nombre";
+        $stmt = $db->execute_query($sql);
+        $permisos = $db->fetch_all($stmt);
+
+        return response()->json($permisos);
+    } catch (Exception $e) {
+        return response()->json([], 500);
+    } finally {
+        if (isset($db) && $db !== null)
+            $db->close_conection();
+    }
+});
+
+#CU17:GESTIONAR ROLES
+
+#OBTENER LISTA DE ROLES
 Route::get('/admin/roles', function () {
     //VALIDACION: USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -921,9 +949,9 @@ Route::get('/admin/roles', function () {
         $codigo = Session::get('user_code');
 
         //OBTENER ROLES
-        $sql = "  SELECT id, nombre, descripcion
-                FROM ex_g32.rol
-                ORDER BY nombre";
+        $sql = "    SELECT id, nombre, descripcion
+                    FROM ex_g32.rol
+                    ORDER BY nombre";
         $stmt = $db->execute_query($sql);
         $roles = $db->fetch_all($stmt);
 
@@ -961,31 +989,8 @@ Route::get('/admin/roles', function () {
     }
 });
 
-// Compatibility endpoints used by the frontend scripts
-// Listar todos los permisos (JSON)
-Route::get('/admin/permisos/listar', function () {
-    if (!Session::has('user_code')) {
-        return response()->json([], 401);
-    }
-    $db = Config::$db;
-    try {
 
-
-        $db->create_conection();
-        $sql = "SELECT id, nombre, descripcion FROM ex_g32.permisos ORDER BY nombre";
-        $stmt = $db->execute_query($sql);
-        $permisos = $db->fetch_all($stmt);
-
-        return response()->json($permisos);
-    } catch (Exception $e) {
-        return response()->json([], 500);
-    } finally {
-        if (isset($db) && $db !== null)
-            $db->close_conection();
-    }
-});
-
-// Obtener permisos asignados a un rol (compatibilidad con /admin/roles/get-permisos?role_id=)
+#OBTENER PERMISOS ASOCIADOS A UN ROL
 Route::get('/admin/roles/get-permisos', function (Request $request) {
     if (!Session::has('user_code')) {
         return response()->json([], 401);
@@ -1015,7 +1020,7 @@ Route::get('/admin/roles/get-permisos', function (Request $request) {
     }
 });
 
-// Crear rol (compatibilidad POST)
+#CREAR UN ROL
 Route::post('/admin/roles/create', function (Request $request) {
     if (!Session::has('user_code')) {
         return response()->json(['success' => false, 'message' => 'Usuario no autenticado'], 401);
@@ -1070,7 +1075,7 @@ Route::post('/admin/roles/create', function (Request $request) {
     }
 });
 
-// Actualizar rol (compatibilidad POST)
+//ACTUALIZAR ROL
 Route::post('/admin/roles/update', function (Request $request) {
     if (!Session::has('user_code')) {
         return response()->json(['success' => false, 'message' => 'Usuario no autenticado'], 401);
@@ -1127,7 +1132,7 @@ Route::post('/admin/roles/update', function (Request $request) {
     }
 });
 
-// Eliminar rol (compatibilidad POST)
+#ELIMINAR ROL
 Route::post('/admin/roles/delete', function (Request $request) {
     if (!Session::has('user_code')) {
         return response()->json(['success' => false, 'message' => 'Usuario no autenticado'], 401);
@@ -1172,8 +1177,9 @@ Route::post('/admin/roles/delete', function (Request $request) {
     }
 });
 
-//ENDPOINT GRUPOS
-//GET GRUPOS
+#CU6: GESTIONAR GRUPO
+
+#OBTENER GRUPOS
 Route::get('/admin/grupos', function () {
     //VALIDACION: USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -1224,7 +1230,7 @@ Route::get('/admin/grupos', function () {
     }
 });
 
-// CREAR GRUPO
+#CREAR UN GRUPO
 Route::post('/admin/grupos/create', function (Request $request) {
 
 
@@ -1285,7 +1291,7 @@ Route::post('/admin/grupos/create', function (Request $request) {
     }
 });
 
-//ENDPOINT ELIMINAR GRUPO
+#ELIMINAR GRUPO
 Route::post('/admin/grupos/delete', function (Request $request) {
       error_log('Request data: ' . print_r($request->all(), true));
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
@@ -1361,8 +1367,9 @@ Route::post('/admin/grupos/delete', function (Request $request) {
 });
 
 
-// ENDPOINT PARA AULAS
-//GET AULAS
+#CU20: GESTIONAR AULAS
+
+#OBTENER AULAS
 Route::get('/admin/aulas', function () {
     //VALIDACION: USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -1413,10 +1420,8 @@ Route::get('/admin/aulas', function () {
     }
 });
 
-// CREAR AULAS
+//CREAR AULA
 Route::post('/admin/aulas/create', function (Request $request) {
-
-
     //VALIDACION:USUARIO EN SESION
     if (!Session::has('user_code')) {
         return response()->json([
@@ -1554,7 +1559,7 @@ Route::post('/admin/aulas/delete', function (Request $request) {
     }
 });
 
-//ENDPOINT ACTUALIZAR AULA
+//ACTUALIZAR AULA
 Route::post('/admin/aulas/update', function (Request $request) {
     $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
