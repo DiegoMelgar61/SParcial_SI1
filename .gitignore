@@ -48,3 +48,9 @@ yarn-error.log*
 
 # === ARCHIVOS OPCIONALES DE EJEMPLO ===
 /.env.example.backup
+
+# === CACHE ===
+# Ignorar archivos y carpetas de sesiones
+/storage/framework/sessions/*
+/storage/framework/cache/*
+/storage/logs/*

@@ -193,7 +193,8 @@ Route::post('/admin/users/store', function (Request $request) {
 
 
     //VALIDACION:USUARIO EN SESION
-    if (!Session::has('user_code')) {
+    if (!Session::has('user_code')) 
+    {
         return response()->json([
             'success' => false,
             'message' => 'Usuario no Autenticado.'
@@ -201,7 +202,8 @@ Route::post('/admin/users/store', function (Request $request) {
     }
 
     //VALIDACION:USUARIO ADMIN
-    if (Session::get('user_role') !== 'admin') {
+    if (Session::get('user_role') !== 'admin') 
+    {
         return response()->json([
             'success' => false,
             'message' => 'El Usuario no es Administrador.'
@@ -215,6 +217,7 @@ Route::post('/admin/users/store', function (Request $request) {
     $fecha_n = $data['fecha_nac'];
     $correo = $data['correo'];
     $tel = $data['tel'];
+    $profesion=$data['profesion'];
     $rol = $data['rol'];
     $password = $data['password'];
 
@@ -255,7 +258,7 @@ Route::post('/admin/users/store', function (Request $request) {
             ':fecha_n' => $fecha_n,
             ':correo' => $correo,
             ':tel' => $tel,
-            ':profesion' => $rol,
+            ':profesion' => $profesion,
             ':tipo' => strtolower($rol)
         ];
         $db->execute_query($sql, $params);
@@ -334,6 +337,7 @@ Route::post('/admin/users/update', function (Request $request) {
     $fecha_n = $data['fecha_nac'];
     $correo = $data['correo'];
     $tel = $data['tel'];
+    $profesion=$data['profesion'];
     $rol = $data['rol'];
     $password = $data['password'];
 
@@ -363,18 +367,41 @@ Route::post('/admin/users/update', function (Request $request) {
         }
 
 
+        
         // INSERTAR EN TABLA PERSONA
-        $sql = "
-                    UPDATE ex_g32.persona SET nomb_comp=:nomb_comp, correo=:correo, tel=:tel, tipo=:tipo
+        if ($profesion!='')
+        {
+            $sql = "
+                    UPDATE ex_g32.persona 
+                    SET nomb_comp=:nomb_comp, correo=:correo, tel=:tel, tipo=:tipo, profesion=:profesion
                      WHERE ci=:ci
                 ";
-        $params = [
-            ':ci' => $ci,
-            ':nomb_comp' => $nomb_comp,
-            ':correo' => $correo,
-            ':tel' => $tel,
-            ':tipo' => strtolower($rol)
-        ];
+
+            $params = [
+                ':ci' => $ci,
+                ':nomb_comp' => $nomb_comp,
+                ':correo' => $correo,
+                ':tel' => $tel,
+                ':tipo' => strtolower($rol),
+                ':profesion'=>$profesion
+            ];
+        }
+        else
+        {
+            $sql = "
+                    UPDATE ex_g32.persona 
+                    SET nomb_comp=:nomb_comp, correo=:correo, tel=:tel, tipo=:tipo
+                     WHERE ci=:ci
+                ";
+
+            $params = [
+                ':ci' => $ci,
+                ':nomb_comp' => $nomb_comp,
+                ':correo' => $correo,
+                ':tel' => $tel,
+                ':tipo' => strtolower($rol)
+            ];
+        }
         $db->execute_query($sql, $params);
 
         // DETERMINAR ROL SEGÚN EL TIPO
@@ -411,6 +438,7 @@ Route::post('/admin/users/update', function (Request $request) {
             'id_rol' => $rol_id,
             'ci' => $ci
         ];
+        error_log(print_r($request->json()->all(), true));
 
         $db->execute_query($sql, params: $params);
         error_log(print_r($request->json()->all(), true));
@@ -421,18 +449,25 @@ Route::post('/admin/users/update', function (Request $request) {
             'success' => true,
             'message' => 'Usuario actualizado Exitosamente'
         ]);
-    } catch (Exception $e) {
+    } 
+    catch (Exception $e) 
+    {
         return response()->json([
             'success' => false,
             'message' => 'Ocurrio un error en el proceso.',
             'error' => $e->getMessage()
         ], 500);
-    } finally {
-        if (isset($db) && $db !== null) {
+    } 
+    finally 
+    {
+        if (isset($db) && $db !== null) 
+        {
             $db->close_conection();
         }
     }
 });
+
+
 //RUTA GESTORA DEL MODULO DE ADMINISTRADORES
 Route::get('/admin/mod-adm', function () {
     // VALIDACION: USUARIO EN SESION
@@ -920,7 +955,7 @@ Route::get('/admin/roles', function () {
         $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
 
 
-        return view('admin_roles', ['roles' => $roles, 'user' => $user]);
+        return view('roles_permisos', ['roles' => $roles, 'user' => $user]);
     } catch (Exception $e) {
         return redirect('/admin')->with('error', 'Error al consultar roles: ' . $e->getMessage());
     } finally {

@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Helper para obtener el token CSRF de Laravel
+    
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // --- MÓDULO 1: LÓGICA DEL SIDEBAR (Menú lateral) ---
+    
     const sidebar = document.getElementById('admin-sidebar');
     const toggleButton = document.getElementById('menu-toggle');
     const overlay = document.getElementById('sidebar-overlay');
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- MÓDULO 2: LÓGICA DEL PANEL DE USUARIO (Avatar) ---
+    
     const userAvatar = document.getElementById('user-avatar');
     const userAside = document.getElementById('user-aside');
 
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Ocultar panel de usuario si se hace clic fuera
+    
     document.addEventListener('click', (e) => {
         if (userAside && !userAside.contains(e.target) && !userAvatar.contains(e.target) && !userAside.classList.contains('opacity-0')) {
             userAside.classList.add('opacity-0', 'scale-95');
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // --- MÓDULO 3: RELOJ EN TIEMPO REAL ---
+    
     const clockElement = document.getElementById('clock');
     if (clockElement) {
         const updateClock = () => {
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateClock(); // Carga inicial
     }
 
-    // --- MÓDULO 4: FILTRADO DE TABLA DE USUARIOS ---
+    
     const filterNombre = document.getElementById('filter-nombre');
     const filterCiCodigo = document.getElementById('filter-ci-codigo');
     const filterRol = document.getElementById('filter-rol');
@@ -132,9 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filterRol) filterRol.addEventListener('change', applyUserFilters);
 
 
-    // --- MÓDULO 5: LÓGICA DE MODALES CRUD (AGREGAR, EDITAR, ELIMINAR) ---
+    
 
-    // --- A. Lógica de Agregar/Editar ---
+    
     const userFormModal = document.getElementById('user-form-modal');
     const userForm = document.getElementById('user-form');
     const btnCancelForm = document.getElementById('btn-cancel-form');
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Botones "Cancelar" del formulario (ambos)
+    
     function closeFormModal() {
         userFormModal.classList.add('hidden');
     }
@@ -201,14 +201,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formData = new FormData(userForm);
             const data = Object.fromEntries(formData.entries());
+            console.log(data);
             const userId = hiddenUserId.value;
             const isEditing = userId !== '';
 
-            // Define el endpoint al que se enviarán los datos
+            
             const url = isEditing ? `/admin/users/update` : `/admin/users/store`;
             
             if (isEditing) {
-                data.id = userId; // Asegúrate de que el ID vaya en el body para la actualización
+                data.id = userId; 
             }
 
             try {
