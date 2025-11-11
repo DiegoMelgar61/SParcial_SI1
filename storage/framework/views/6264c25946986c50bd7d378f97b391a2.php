@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitácora — Plataforma Universitaria INF342</title>
+    <title>Gestión de Grupos — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 </head>
@@ -15,9 +16,11 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
             <div class="flex items-center gap-4">
                 <!-- Botón de menú lateral para móviles -->
-                <button id="menu-toggle" class="block md:hidden p-2 text-gray-600 hover:text-indigo-600 rounded-md transition">
+                <button id="menu-toggle"
+                    class="block md:hidden p-2 text-gray-600 hover:text-indigo-600 rounded-md transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
                 <h1 class="text-lg md:text-xl font-semibold text-gray-700 tracking-wide">
@@ -33,27 +36,27 @@
 
                 <!-- Avatar -->
                 <div id="user-avatar"
-                     class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
+                    class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
                     <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
 
                 </div>
 
                 <!-- Botón de inicio -->
                 <a href="/"
-                   class="text-sm bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 px-4 py-2 rounded-md font-medium transition">
+                    class="text-sm bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 px-4 py-2 rounded-md font-medium transition">
                     Inicio
                 </a>
             </div>
         </div>
     </header>
-
     <!-- Panel lateral de usuario (copiado del index, necesario para el avatar) -->
     <aside id="user-aside"
-           class="hidden fixed top-16 right-4 w-64 bg-white shadow-2xl rounded-xl border border-gray-200 z-50 transition-all duration-300 opacity-0 scale-95 origin-top-right">
+        class="hidden fixed top-16 right-4 w-64 bg-white shadow-2xl rounded-xl border border-gray-200 z-50 transition-all duration-300 opacity-0 scale-95 origin-top-right">
         <div class="p-5 text-sm text-gray-700">
             <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm">
-                    <?php echo e(strtoupper(substr($user['nomb_comp'],0,1))); ?>
+                <div
+                    class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm">
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
 
                 </div>
                 <div>
@@ -72,13 +75,14 @@
             </ul>
             <div class="mt-4 pt-3 border-t border-gray-100">
                 <a href="/perfil"
-                   class="text-indigo-600 text-sm font-medium hover:underline hover:text-indigo-700 transition">
+                    class="text-indigo-600 text-sm font-medium hover:underline hover:text-indigo-700 transition">
                     Ver perfil completo →
                 </a>
             </div>
         </div>
     </aside>
 
+    
     <!-- Panel lateral de usuario -->
     <aside id="admin-sidebar"
         class="fixed top-0 left-0 w-64 bg-white shadow-lg h-full z-30 border-r border-gray-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
@@ -131,7 +135,7 @@
 
                     <li>
                         <a href="/admin/grupos"
-                        class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
+                        class="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 rounded-lg font-semibold hover:bg-indigo-100 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M16 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -163,7 +167,7 @@
                     </li>
 
                     <li>
-                        <a href="/admin/carga-horaria"
+                        <a href="/admin/carga-docente"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -174,7 +178,7 @@
                     </li>
 
                     <li>
-                        <a href="/auto/generar-horario"
+                        <a href="/admin/horarios"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -186,7 +190,7 @@
 
                     <li>
                         <a href="/admin/bitacora"
-                        class="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 rounded-lg font-semibold hover:bg-indigo-100 transition">
+                        class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
@@ -205,136 +209,175 @@
         </div>
     </aside>
 
+
     <!-- Overlay para móviles -->
-    <div id="sidebar-overlay" 
-         class="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden hidden"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden hidden"></div>
 
     <!-- Contenido principal -->
     <main class="flex-1 md:ml-64 p-6 transition-all duration-300">
         <!-- Encabezado -->
+
+
+        <!-- Encabezado -->
         <div class="flex flex-col md:flex-row justify-between md:items-center mb-8">
             <div>
-                <h2 class="text-2xl font-semibold text-gray-800 mb-1">Historial de Acciones (Bitácora)</h2>
-                <p class="text-gray-500 text-sm">Registro de actividades del sistema.</p>
+                <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-1">Grupos del Sistema</h2>
+                <p class="text-gray-500 text-sm">Cree, edite o elimine grupos según sea necesario.</p>
             </div>
-            <div class="flex items-center gap-4 mt-3 md:mt-0">
-                <div id="clock" class="text-sm text-gray-600 font-medium"></div>
-                <button id="refresh-btn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 border border-gray-300">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                    Actualizar
-                </button>
-            </div>
+            <button id="btn-add"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Agregar Grupo
+            </button>
         </div>
-
-        <!-- Filtros -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
-            <h3 class="text-base font-semibold text-gray-800 mb-4">Filtros</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label for="filter-status" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                    <select id="filter-status" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Todos los estados</option>
-                        <option value="SUCCESS">Éxito</option>
-                        <option value="ERROR">Error</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="filter-action" class="block text-sm font-medium text-gray-700 mb-2">Acción</label>
-                    <input type="text" id="filter-action" placeholder="Buscar por acción..." class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div>
-                    <label for="filter-user" class="block text-sm font-medium text-gray-700 mb-2">Usuario (Código)</label>
-                    <input type="text" id="filter-user" placeholder="Buscar por código de usuario..." class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabla de bitácora -->
+        <!-- Tabla de grupos -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha y Hora</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario (Código)</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comentario</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bitacora-table-body" class="bg-white divide-y divide-gray-200 text-sm">
-                        
-                        <!-- Bucle de Blade para renderizar los datos -->
-                        <?php $__empty_1 = true; $__currentLoopData = $bitacora; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                            <tr class="log-row hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-600">
-                                    <?php echo e(\Carbon\Carbon::parse($log['fecha_hora'])->format('d/m/Y H:i:s')); ?>
-
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium user-cell">
-                                    <?php echo e($log['codigo_usuario']); ?>
-
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-800 action-cell">
-                                    <?php echo e($log['accion']); ?>
-
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap status-cell">
-                                    <?php if(strtoupper($log['estado']) == 'SUCCESS'): ?>
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Éxito
-                                        </span>
-                                    <?php elseif(strtoupper($log['estado']) == 'ERROR'): ?>
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                            Error
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                            <?php echo e($log['estado']); ?>
-
-                                        </span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="px-6 py-4 text-gray-600">
-                                    <?php echo e($log['comentario']); ?>
-
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    #</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Sigla del Grupo</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Acciones</th>
+                            </tr>
+                        </thead>
+                    <tbody id="grupos-table-body" class="bg-white divide-y divide-gray-200 text-sm">
+                        <?php $__empty_1 = true; $__currentLoopData = $grupos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $grupo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <tr class="grupo-row hover:bg-gray-50" data-grupo-id="<?php echo e($grupo['sigla']); ?>">
+                                <td class="px-6 py-4 text-gray-700"><?php echo e($index + 1); ?></td>
+                                <td class="px-6 py-4 text-gray-800 font-medium"><?php echo e($grupo['sigla']); ?></td>
+                                <td class="px-6 py-4 text-right">
+                                    <button data-id="<?php echo e($grupo['sigla']); ?>" data-sigla="<?php echo e($grupo['sigla']); ?>"
+                                        class="btn-delete text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100 transition"
+                                        title="Eliminar">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                            <!-- Estado vacío -->
-                            <tr id="no-records">
-                                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
-                                    No se encontraron registros en la bitácora.
-                                </td>
+                            <tr>
+                                <td colspan="3" class="px-6 py-8 text-center text-gray-500">No hay grupos registrados.</td>
                             </tr>
                         <?php endif; ?>
-
                     </tbody>
                 </table>
             </div>
-        </div>
 
-        <!-- Información de paginación -->
-        <div class="mt-4 flex items-center justify-between text-sm text-gray-600" id="table-footer-info">
-            <div id="total-records">
-                Mostrando <?php echo e(count($bitacora)); ?> de los últimos 30 registros.
-            </div>
-            <div id="last-update" class="text-xs text-gray-500">
-                Última carga: <?php echo e(\Carbon\Carbon::now()->format('d/m/Y H:i:s')); ?>
-
-            </div>
-        </div>
+            <div class="mt-4 text-sm text-gray-500">Mostrando <?php echo e(count($grupos)); ?> grupos.</div>
     </main>
 
-    <!-- Footer -->
-    <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10 md:ml-64">
-        © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
+    <!-- Pie de página -->
+    <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 mt-auto">
+        © 2025 Plataforma Universitaria — Todos los derechos reservados
     </footer>
 
+    <!-- Modal de Formulario (Agregar/Editar Grupo) -->
+    <div id="grupo-form-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 hidden">
+
+        <!-- Contenedor del modal con altura máxima y flex-col -->
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh]">
+
+            <!-- Encabezado del Modal (fijo) -->
+            <div class="flex-shrink-0 flex items-center justify-between p-5 border-b border-gray-200">
+                <h3 id="form-modal-title" class="text-lg font-semibold text-gray-900">Agregar Nuevo Grupo</h3>
+                <button id="btn-cancel-form-x" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Formulario (con contenedor flex para scroll) -->
+            <form id="grupo-form" class="flex-1 flex flex-col min-h-0">
+                <input type="hidden" id="form-grupo-id" name="id" value="">
+
+                <!-- Área de campos con scroll -->
+                <div class="p-6 overflow-y-auto">
+
+                    <!-- Sigla -->
+                    <div>
+                        <label for="form-sigla" class="block text-sm font-medium text-gray-700 mb-2">Sigla del
+                            Grupo</label>
+                        <input type="text" id="form-sigla" name="sigla"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            required maxlength="2">
+                        <p class="text-xs text-gray-500 mt-1">Máximo 2 caracteres</p>
+                    </div>
+
+                </div>
+
+                <!-- Footer del Formulario (Acciones) (fijo) -->
+                <div
+                    class="flex-shrink-0 bg-gray-50 px-6 py-4 flex justify-end gap-3 rounded-b-xl border-t border-gray-200">
+                    <button type="button" id="btn-cancel-form"
+                        class="text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btn-save-form"
+                        class="text-sm font-medium text-white bg-indigo-600 rounded-lg px-4 py-2 hover:bg-indigo-700 transition">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div id="delete-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-red-100">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Eliminar Grupo</h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            ¿Estás seguro de que deseas eliminar el grupo <strong id="delete-grupo-sigla"
+                                class="font-bold">...</strong>? Esta acción no se puede deshacer.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 rounded-b-xl">
+                <button id="btn-cancel-delete"
+                    class="text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition">
+                    Cancelar
+                </button>
+                <button id="btn-confirm-delete"
+                    class="text-sm font-medium text-white bg-red-600 rounded-lg px-4 py-2 hover:bg-red-700 transition">
+                    Sí, eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== FIN DE MODALES ====== -->
     <!-- JS: Este archivo ahora debe contener toda la lógica -->
-    <script src="<?php echo e(asset('static/scripts/bitacora.js')); ?>"></script>
+    <script src="<?php echo e(asset('static/scripts/admin_grupos.js')); ?>">
+    </script>
+
 </body>
-</html>
-<?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/admin_bitacora.blade.php ENDPATH**/ ?>
+
+</html><?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/admin_grupos.blade.php ENDPATH**/ ?>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Aulas — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
@@ -27,14 +27,15 @@
 
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
-                    <p class="font-medium text-gray-800">{{ $user['nomb_comp'] }}</p>
-                    <p class="text-xs text-gray-500">{{ ucfirst($user['rol']) }}</p>
+                    <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp']); ?></p>
+                    <p class="text-xs text-gray-500"><?php echo e(ucfirst($user['rol'])); ?></p>
                 </div>
 
                 <!-- Avatar -->
                 <div id="user-avatar"
                      class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
 
                 <!-- Botón de inicio -->
@@ -51,20 +52,22 @@
         <div class="p-5 text-sm text-gray-700">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm">
-                    {{ strtoupper(substr($user['nomb_comp'],0,1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'],0,1))); ?>
+
                 </div>
                 <div>
-                    <p class="font-semibold text-gray-800 leading-tight">{{ $user['nomb_comp'] }}</p>
+                    <p class="font-semibold text-gray-800 leading-tight"><?php echo e($user['nomb_comp']); ?></p>
                     <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-                        {{ ucfirst($user['rol']) }}
+                        <?php echo e(ucfirst($user['rol'])); ?>
+
                     </span>
                 </div>
             </div>
             <hr class="my-3 border-gray-200">
             <ul class="space-y-2 text-sm">
-                <li><span class="font-medium text-gray-600">CI:</span> {{ $user['ci'] }}</li>
-                <li><span class="font-medium text-gray-600">Correo:</span> {{ $user['correo'] ?? '—' }}</li>
-                <li><span class="font-medium text-gray-600">Teléfono:</span> {{ $user['tel'] ?? '—' }}</li>
+                <li><span class="font-medium text-gray-600">CI:</span> <?php echo e($user['ci']); ?></li>
+                <li><span class="font-medium text-gray-600">Correo:</span> <?php echo e($user['correo'] ?? '—'); ?></li>
+                <li><span class="font-medium text-gray-600">Teléfono:</span> <?php echo e($user['tel'] ?? '—'); ?></li>
             </ul>
             <div class="mt-4 pt-3 border-t border-gray-100">
                 <a href="/perfil"
@@ -247,31 +250,32 @@
                     </tr>
                 </thead>
                        <tbody id="aulas-table-body" class="bg-white divide-y divide-gray-200 text-sm">
-                    @forelse ($aulas as $index => $aula)
-                        <tr class="aula-row hover:bg-gray-50" data-aula-nro="{{ $aula['nro'] }}">
-                            <td class="px-6 py-4 text-gray-700">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4 text-gray-800 font-medium">{{ $aula['nro'] }}</td>
-                            <td class="px-6 py-4 text-gray-600">{{ $aula['capacidad'] }}</td>
-                            <td class="px-6 py-4 text-gray-600">{{ $aula['modulo'] }}</td>
+                    <?php $__empty_1 = true; $__currentLoopData = $aulas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $aula): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <tr class="aula-row hover:bg-gray-50" data-aula-nro="<?php echo e($aula['nro']); ?>">
+                            <td class="px-6 py-4 text-gray-700"><?php echo e($index + 1); ?></td>
+                            <td class="px-6 py-4 text-gray-800 font-medium"><?php echo e($aula['nro']); ?></td>
+                            <td class="px-6 py-4 text-gray-600"><?php echo e($aula['capacidad']); ?></td>
+                            <td class="px-6 py-4 text-gray-600"><?php echo e($aula['modulo']); ?></td>
                             <td class="px-6 py-4 text-gray-600">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ $aula['tipo'] }}
+                                    <?php echo e($aula['tipo']); ?>
+
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <button data-nro="{{ $aula['nro'] }}" data-capacidad="{{ $aula['capacidad'] }}" data-modulo="{{ $aula['modulo'] }}" data-tipo="{{ $aula['tipo'] }}"
+                                <button data-nro="<?php echo e($aula['nro']); ?>" data-capacidad="<?php echo e($aula['capacidad']); ?>" data-modulo="<?php echo e($aula['modulo']); ?>" data-tipo="<?php echo e($aula['tipo']); ?>"
                                     class="btn-edit text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-100 transition" title="Editar">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
                                 </button>
-                                <button  data-nro="{{ $aula['nro'] }}"
+                                <button  data-nro="<?php echo e($aula['nro']); ?>"
                                     class="btn-ver-horario text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-100 transition" title="Ver Horario">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </button>
-                                <button data-nro="{{ $aula['nro'] }}" data-capacidad="{{ $aula['capacidad'] }}"
+                                <button data-nro="<?php echo e($aula['nro']); ?>" data-capacidad="<?php echo e($aula['capacidad']); ?>"
                                     class="btn-delete text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100 transition" title="Eliminar">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -279,14 +283,14 @@
                                 </button>
                             </td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No hay aulas registradas.</td></tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        <div class="mt-4 text-sm text-gray-500">Mostrando {{ count($aulas) }} aulas.</div>
+        <div class="mt-4 text-sm text-gray-500">Mostrando <?php echo e(count($aulas)); ?> aulas.</div>
     </main>
 
     <!-- Pie de página -->
@@ -413,8 +417,8 @@
             <!-- Lista de Aulas -->
             <div class="p-6 overflow-y-auto">
                 <div id="aulas-lista-horarios" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    @foreach ($aulas as $aula)
-                        <button data-aula-nro="{{ $aula['nro'] }}" data-aula-capacidad="{{ $aula['capacidad'] }}" data-aula-modulo="{{ $aula['modulo'] }}" data-aula-tipo="{{ $aula['tipo'] }}"
+                    <?php $__currentLoopData = $aulas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $aula): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <button data-aula-nro="<?php echo e($aula['nro']); ?>" data-aula-capacidad="<?php echo e($aula['capacidad']); ?>" data-aula-modulo="<?php echo e($aula['modulo']); ?>" data-aula-tipo="<?php echo e($aula['tipo']); ?>"
                             class="aula-card-selectable group bg-gray-50 hover:bg-indigo-50 border-2 border-gray-200 hover:border-indigo-500 rounded-lg p-4 transition-all duration-200 text-left">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="w-10 h-10 rounded-full bg-indigo-100 group-hover:bg-indigo-200 flex items-center justify-center">
@@ -422,13 +426,13 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                     </svg>
                                 </div>
-                                <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">{{ $aula['tipo'] }}</span>
+                                <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700"><?php echo e($aula['tipo']); ?></span>
                             </div>
-                            <h4 class="text-lg font-bold text-gray-900 mb-1">Aula {{ $aula['nro'] }}</h4>
-                            <p class="text-sm text-gray-600">Capacidad: {{ $aula['capacidad'] }} personas</p>
-                            <p class="text-sm text-gray-600">Módulo: {{ $aula['modulo'] }}</p>
+                            <h4 class="text-lg font-bold text-gray-900 mb-1">Aula <?php echo e($aula['nro']); ?></h4>
+                            <p class="text-sm text-gray-600">Capacidad: <?php echo e($aula['capacidad']); ?> personas</p>
+                            <p class="text-sm text-gray-600">Módulo: <?php echo e($aula['modulo']); ?></p>
                         </button>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
 
@@ -522,4 +526,4 @@
     <script src="/static/scripts/admin_aulas.js"></script>
 
 </body>
-</html>
+</html><?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/admin_aulas.blade.php ENDPATH**/ ?>

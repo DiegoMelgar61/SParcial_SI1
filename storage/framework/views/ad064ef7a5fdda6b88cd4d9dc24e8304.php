@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generar Horario — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
@@ -35,13 +35,14 @@
 
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
-                    <p class="font-medium text-gray-800">{{ $user['nomb_comp'] ?? 'Usuario' }}</p>
-                    <p class="text-xs text-indigo-600 font-medium">{{ isset($user['rol']) ? ucfirst($user['rol']) : 'Sin rol' }}</p>
+                    <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp'] ?? 'Usuario'); ?></p>
+                    <p class="text-xs text-indigo-600 font-medium"><?php echo e(isset($user['rol']) ? ucfirst($user['rol']) : 'Sin rol'); ?></p>
                 </div>
 
                 <div id="user-avatar"
                      class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
-                    {{ isset($user['nomb_comp']) ? strtoupper(substr($user['nomb_comp'], 0, 1)) : '?' }}
+                    <?php echo e(isset($user['nomb_comp']) ? strtoupper(substr($user['nomb_comp'], 0, 1)) : '?'); ?>
+
                 </div>
 
                 <a href="/"
@@ -201,9 +202,9 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Gestión Académica</label>
                     <select id="select-gestion" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                         <option value="">-- Seleccione una gestión --</option>
-                        @foreach($gestiones as $gestion)
-                        <option value="{{ $gestion['id'] }}">{{ $gestion['nombre'] }} ({{ date('Y', strtotime($gestion['fecha_i'])) }})</option>
-                        @endforeach
+                        <?php $__currentLoopData = $gestiones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gestion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($gestion['id']); ?>"><?php echo e($gestion['nombre']); ?> (<?php echo e(date('Y', strtotime($gestion['fecha_i']))); ?>)</option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                 </div>
                 <div class="flex items-end">
@@ -529,3 +530,4 @@
 
 </body>
 </html>
+<?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/auto_generar_horario.blade.php ENDPATH**/ ?>

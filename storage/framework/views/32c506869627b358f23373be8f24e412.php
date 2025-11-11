@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carga Horaria Docente — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
@@ -26,13 +26,14 @@
 
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
-                    <p class="font-medium text-gray-800">{{ $user['nomb_comp'] ?? 'Usuario' }}</p>
+                    <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp'] ?? 'Usuario'); ?></p>
                     <p class="text-xs text-indigo-600 font-medium">Admin</p>
                 </div>
 
                 <div id="user-avatar"
                      class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
-                    {{ isset($user['nomb_comp']) ? strtoupper(substr($user['nomb_comp'], 0, 1)) : '?' }}
+                    <?php echo e(isset($user['nomb_comp']) ? strtoupper(substr($user['nomb_comp'], 0, 1)) : '?'); ?>
+
                 </div>
 
                 <a href="/"
@@ -297,7 +298,7 @@
                         </svg>
                     </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-900">{{ count($docentes) }}</p>
+                <p class="text-3xl font-bold text-gray-900"><?php echo e(count($docentes)); ?></p>
                 <p class="text-sm text-gray-600 mt-1">Docentes registrados en el sistema</p>
             </div>
 
@@ -312,13 +313,13 @@
                     </div>
                 </div>
                 <p class="text-3xl font-bold text-gray-900">
-                    @php
+                    <?php
                         $activos = 0;
                         foreach($docentes as $d) {
                             if($d['total_clases'] > 0) $activos++;
                         }
                         echo $activos;
-                    @endphp
+                    ?>
                 </p>
                 <p class="text-sm text-gray-600 mt-1">Con asignación de clases</p>
             </div>
@@ -334,13 +335,13 @@
                     </div>
                 </div>
                 <p class="text-3xl font-bold text-gray-900">
-                    @php
+                    <?php
                         $total = 0;
                         foreach($docentes as $d) {
                             $total += $d['carga_horaria_total'];
                         }
                         echo $total;
-                    @endphp
+                    ?>
                     <span class="text-lg text-gray-600 font-normal">hrs</span>
                 </p>
                 <p class="text-sm text-gray-600 mt-1">Horas acumuladas en el sistema</p>
@@ -367,42 +368,44 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        @forelse($docentes as $docente)
+                        <?php $__empty_1 = true; $__currentLoopData = $docentes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $docente): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold text-xs">
-                                        {{ strtoupper(substr($docente['nomb_comp'], 0, 1)) }}
+                                        <?php echo e(strtoupper(substr($docente['nomb_comp'], 0, 1))); ?>
+
                                     </div>
-                                    <span class="font-medium text-gray-900">{{ $docente['nomb_comp'] }}</span>
+                                    <span class="font-medium text-gray-900"><?php echo e($docente['nomb_comp']); ?></span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-gray-700">{{ $docente['ci'] }}</td>
-                            <td class="px-6 py-4 text-gray-700">{{ $docente['correo'] ?? '—' }}</td>
+                            <td class="px-6 py-4 text-gray-700"><?php echo e($docente['ci']); ?></td>
+                            <td class="px-6 py-4 text-gray-700"><?php echo e($docente['correo'] ?? '—'); ?></td>
                             <td class="px-6 py-4 text-center">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                    {{ $docente['total_clases'] > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                    {{ $docente['total_clases'] }}
+                                    <?php echo e($docente['total_clases'] > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'); ?>">
+                                    <?php echo e($docente['total_clases']); ?>
+
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="font-semibold text-purple-600">{{ $docente['carga_horaria_total'] }} hrs</span>
+                                <span class="font-semibold text-purple-600"><?php echo e($docente['carga_horaria_total']); ?> hrs</span>
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <button class="btn-ver-detalle bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition shadow-sm"
-                                        data-codigo="{{ $docente['codigo'] }}"
-                                        data-nombre="{{ $docente['nomb_comp'] }}">
+                                        data-codigo="<?php echo e($docente['codigo']); ?>"
+                                        data-nombre="<?php echo e($docente['nomb_comp']); ?>">
                                     Ver Detalle
                                 </button>
                             </td>
                         </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="6" class="px-6 py-8 text-center text-gray-500">
                                 No hay docentes registrados
                             </td>
                         </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -521,3 +524,4 @@
 
 </body>
 </html>
+<?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/admin_carga_horaria.blade.php ENDPATH**/ ?>

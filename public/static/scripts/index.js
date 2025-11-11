@@ -18,16 +18,23 @@ document.addEventListener('DOMContentLoaded', () => {
   //BOTONES MODULOS
   const importBtn = document.getElementById('btn-import-users');
   const mod_adm=document.getElementById('btn-mod-adm');
-  
-  importBtn.addEventListener('click', () => 
+  if (importBtn)
+  {
+    importBtn.addEventListener('click', () => 
   {
     window.location.href = '/admin/import-users';
   });
   
-  mod_adm.addEventListener('click',()=>
+  }
+  
+  if (mod_adm)
+  {
+    mod_adm.addEventListener('click',()=>
   {
     window.location.href='/admin/mod-adm';
   });
+  }
+  
 
   // --- AVATAR & PANEL USUARIO ---
   const avatar = document.getElementById('user-avatar');
