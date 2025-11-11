@@ -1,5 +1,5 @@
 import { Head, Link, usePage, router, useForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { useState } from 'react';
 
 export default function GestionPorRol({ roles, permisos }) {

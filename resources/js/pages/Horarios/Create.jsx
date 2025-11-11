@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { useState } from 'react';
 
 export default function Create({ grupos, materias, docentes, aulas, diasSemana, bloquesHorarios }) {
