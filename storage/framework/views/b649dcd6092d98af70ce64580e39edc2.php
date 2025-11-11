@@ -102,7 +102,7 @@
 
       <?php $rol = strtolower($user['rol']); ?>
 
-      <!-- ADMIN -->
+      <!-- ADMIN -->   
       <?php if($rol === 'admin'): ?>
         <div id="import-users-card" 
              class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition cursor-pointer">
@@ -156,6 +156,20 @@
             <li>Gestión de aulas y materiales</li>
           </ul>
         </div>
+      <?php endif; ?>
+
+      <?php if($rol == 'admin' or $rol=='docente'): ?>
+        <div id="import-users-card" 
+             class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition cursor-pointer">
+          <h3 class="text-base font-semibold text-gray-800 mb-2">Modulo de Docencia</h3>
+          <p class="text-sm text-gray-600 mb-4">
+            Accede al modulo docencia para gestionar asistencias, licencias, consulta de horarios, etc.
+          </p>
+          <button id="btn-mod-docen"
+                  class="w-full text-center py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition">
+            Ir al Modulo de Docencia
+          </button>
+        </div> 
       <?php endif; ?>
 
       <!-- Avisos -->
