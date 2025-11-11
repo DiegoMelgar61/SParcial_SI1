@@ -13,32 +13,42 @@ trait Auditable
     {
         // Registrar cuando se crea un registro
         static::created(function ($modelo) {
+            // Guardar los datos del modelo para usar después (evitar problemas de referencia)
+            $modeloData = [
+                'id' => $modelo->id,
+                'table' => $modelo->getTable(),
+                'attributes' => $modelo->getAuditableAttributes(),
+            ];
+            
             // Si hay una transacción activa, ejecutar después del commit
-            // Si no hay transacción, ejecutar inmediatamente
             if (\Illuminate\Support\Facades\DB::transactionLevel() > 0) {
-                \Illuminate\Support\Facades\DB::afterCommit(function () use ($modelo) {
+                \Illuminate\Support\Facades\DB::afterCommit(function () use ($modeloData) {
                     try {
-                        $datosNuevos = $modelo->getAuditableAttributes();
-                        AuditoriaService::logCreate(
-                            $modelo,
-                            $modelo->getTable(),
-                            $datosNuevos
-                        );
+                        AuditoriaService::log([
+                            'accion' => 'create',
+                            'tabla' => $modeloData['table'],
+                            'registro_id' => $modeloData['id'],
+                            'datos_nuevos' => $modeloData['attributes'],
+                        ]);
                     } catch (\Exception $e) {
-                        \Log::error('Error en auditoría created: ' . $e->getMessage());
+                        \Log::error('Error en auditoría created (afterCommit): ' . $e->getMessage());
                     }
                 });
             } else {
-                // No hay transacción activa, ejecutar inmediatamente
+                // No hay transacción, ejecutar inmediatamente con manejo de errores robusto
+                // El try-catch asegura que cualquier error no interrumpa la respuesta
                 try {
-                    $datosNuevos = $modelo->getAuditableAttributes();
-                    AuditoriaService::logCreate(
-                        $modelo,
-                        $modelo->getTable(),
-                        $datosNuevos
-                    );
+                    AuditoriaService::log([
+                        'accion' => 'create',
+                        'tabla' => $modeloData['table'],
+                        'registro_id' => $modeloData['id'],
+                        'datos_nuevos' => $modeloData['attributes'],
+                    ]);
                 } catch (\Exception $e) {
-                    \Log::error('Error en auditoría created: ' . $e->getMessage());
+                    // Solo loguear el error, no lanzarlo
+                    \Log::error('Error en auditoría created: ' . $e->getMessage(), [
+                        'trace' => $e->getTraceAsString(),
+                    ]);
                 }
             }
         });
