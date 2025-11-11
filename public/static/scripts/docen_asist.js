@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-  console.log('docen_asist.js cargado correctamente.');
+  console.log('docen_asist.js cargado correctamente con validación precisa.');
 
   // -------------------------------
   // RELOJ EN TIEMPO REAL
@@ -20,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -------------------------------
-  // CONTROL DEL PANEL LATERAL
+  // PANEL LATERAL RESPONSIVE
   // -------------------------------
   const toggleBtn = document.getElementById('menu-toggle');
   const sidebar = document.getElementById('docencia-sidebar');
@@ -28,11 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (toggleBtn && sidebar && overlay) {
     toggleBtn.addEventListener('click', () => {
-      const isHidden = sidebar.classList.contains('-translate-x-full');
-      sidebar.classList.toggle('-translate-x-full', !isHidden);
-      overlay.classList.toggle('hidden', !isHidden);
+      const hidden = sidebar.classList.contains('-translate-x-full');
+      sidebar.classList.toggle('-translate-x-full', !hidden);
+      overlay.classList.toggle('hidden', !hidden);
     });
-
     overlay.addEventListener('click', () => {
       sidebar.classList.add('-translate-x-full');
       overlay.classList.add('hidden');
@@ -40,25 +38,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -------------------------------
-  // TARJETAS DE MATERIAS Y MODAL
+  // TARJETAS Y MODALES
   // -------------------------------
   const cards = document.querySelectorAll('.materia-card');
   const modal = document.getElementById('modal-clases');
   const modalTitulo = document.getElementById('modal-titulo');
   const modalContenido = document.getElementById('modal-contenido');
   const cerrarModal = document.getElementById('cerrar-modal');
+  const modalOpciones = document.getElementById('modal-opciones');
+  const cerrarOpciones = document.getElementById('cerrar-opciones');
+  const btnFormulario = document.getElementById('btn-formulario');
+  const btnQr = document.getElementById('btn-qr');
   const formAsistencia = document.getElementById('form-asistencia');
 
-  if (cards.length > 0 && modal) {
+  let claseSeleccionada = null;
 
+  // Mostrar listado de clases
+  if (cards.length > 0 && modal) {
     cards.forEach(card => {
       card.addEventListener('click', () => {
         const materia = card.dataset.materia;
         const clases = JSON.parse(card.dataset.clases);
-
         modalTitulo.textContent = materia;
         modalContenido.innerHTML = '';
-        formAsistencia.classList.add('hidden');
+        formAsistencia?.classList.add('hidden');
 
         clases.forEach(c => {
           const fila = document.createElement('div');
@@ -82,11 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    // Cerrar modal
     cerrarModal.addEventListener('click', () => {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     });
-
     modal.addEventListener('click', e => {
       if (e.target === modal) {
         modal.classList.add('hidden');
@@ -94,50 +97,113 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Mostrar formulario al marcar
+    // -------------------------------
+    // ABRIR SUBMODAL DE OPCIONES
+    // -------------------------------
     document.addEventListener('click', e => {
       if (e.target.classList.contains('btn-marcar')) {
-        const idClase = e.target.dataset.id;
-        console.log('Marcar asistencia para clase:', idClase);
-
-        modalContenido.innerHTML = `<p class="text-sm text-gray-700 mb-3">Registrando asistencia para clase ID: <strong>${idClase}</strong></p>`;
-        formAsistencia.classList.remove('hidden');
-        formAsistencia.dataset.id = idClase;
+        claseSeleccionada = e.target.dataset.id;
+        if (!claseSeleccionada) {
+          alert('Esta clase no tiene un identificador válido.');
+          return;
+        }
+        modal.classList.add('hidden');
+        modalOpciones.classList.remove('hidden');
+        modalOpciones.classList.add('flex');
       }
     });
 
-    // Envío del formulario de asistencia
-    formAsistencia.addEventListener('submit', async (e) => {
+    cerrarOpciones?.addEventListener('click', () => {
+      modalOpciones.classList.add('hidden');
+      modalOpciones.classList.remove('flex');
+    });
+    modalOpciones?.addEventListener('click', e => {
+      if (e.target === modalOpciones) {
+        modalOpciones.classList.add('hidden');
+        modalOpciones.classList.remove('flex');
+      }
+    });
+
+    // -------------------------------
+    // OPCIÓN: FORMULARIO
+    // -------------------------------
+    btnFormulario?.addEventListener('click', () => {
+      modalOpciones.classList.add('hidden');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      modalTitulo.textContent = 'Registro de asistencia';
+      modalContenido.innerHTML = `
+        <p class="text-sm text-gray-700 mb-3">Registrando asistencia para clase ID: <strong>${claseSeleccionada}</strong></p>
+      `;
+      formAsistencia.classList.remove('hidden');
+      formAsistencia.dataset.id = claseSeleccionada;
+
+      const claseData = Array.from(document.querySelectorAll('.materia-card'))
+        .flatMap(card => JSON.parse(card.dataset.clases))
+        .find(c => String(c.id_clase) === String(claseSeleccionada));
+
+      if (!claseData) return;
+
+      const ahora = new Date();
+      const [h, m, s] = claseData.hora_inicio.split(':').map(Number);
+      const horaInicio = new Date();
+      horaInicio.setHours(h, m, s || 0, 0);
+      const diffMin = Math.round((ahora - horaInicio) / 60000);
+
+      let estado;
+      if (diffMin >= -10 && diffMin <= 10) estado = 'Presente';
+      else if (diffMin > 10 && diffMin <= 15) estado = 'Retraso';
+      else estado = 'Ausente';
+
+      const estadoSelect = formAsistencia.querySelector('select[name="estado"]');
+      if (estadoSelect) {
+        estadoSelect.value = estado;
+        estadoSelect.disabled = true;
+        estadoSelect.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-700');
+      }
+
+      console.log(`Estado calculado: ${estado} (diferencia ${diffMin} min)`);
+    });
+
+    // -------------------------------
+    // ENVÍO DEL FORMULARIO
+    // -------------------------------
+    formAsistencia?.addEventListener('submit', async e => {
       e.preventDefault();
 
       const idClase = formAsistencia.dataset.id;
       const formData = new FormData(formAsistencia);
       formData.append('id_clase', idClase);
 
+      const submitBtn = formAsistencia.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Registrando...';
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
       try {
         const response = await fetch('/docen/asistencia/marcar', {
           method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          },
+          headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
           body: formData
         });
 
         const result = await response.json();
-        console.log(result);
-
-        if (result.CODE === 200) {
+        if (result.success) {
           alert('Asistencia registrada correctamente.');
           modal.classList.add('hidden');
         } else {
-          alert('Error al registrar asistencia: ' + result.MESSAGE);
+          alert(result.message);
         }
-
       } catch (error) {
         console.error('Error al enviar asistencia:', error);
-        alert('Ocurrió un error al registrar asistencia.');
+        alert('Error al registrar asistencia.');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
       }
     });
   }
-
 });

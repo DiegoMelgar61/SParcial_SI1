@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Config;
 use App\Classes\Postgres_DB;
 
-//MODULO DOCENNCIA
+//MODULO DOCENCIA
 Route::get('/docen/mod-doc', function () {
     // VALIDACION: USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -55,7 +55,132 @@ Route::get('/docen/mod-doc', function () {
     }
 });
 
+// CU23: REGISTRAR ASISTENCIA POR QR O FORMULARIO
+Route::post('/docen/asistencia/marcar', function (Request $request) {
+    
+    #VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
 
+    #VALIDACION: USUARIO DOCENTE O ADMIN
+    $rol = Session::get('user_role');
+    if ($rol !== 'docente' && $rol !== 'admin') {
+        return redirect('/');
+    }
+
+    #RECUPERAR DATOS DEL USUARIO
+    $user = [
+        'codigo' => Session::get('user_code'),
+        'nombre' => Session::get('name'),
+        'rol'    => $rol,
+    ];
+
+    //REGISTRO DE BITACORA
+    $accion = 'ACCESO A MÓDULO ADMIN';
+    $fecha_bit = date('Y-m-d H:i:s');
+    $estado_bit = 'SUCCESS';
+    $comentario = 'Acceso al módulo de docencia.';
+    $codigo = Session::get('user_code');
+    
+
+    #CONEXION A LA BD
+    $db = Config::$db;
+    try 
+    {
+        $db->create_conection();
+    } 
+    catch (Exception $e) 
+    {
+        $db->save_log_bitacora($accion, $fecha_bit, $estado_bit, $comentario, $codigo);
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al conectar con la base de datos: ' . $e->getMessage()
+        ]);
+    }
+
+    #OBTENER DATOS DESDE EL FORMULARIO O QR
+    $id_clase = $request->input('id_clase');
+    $fecha = $request->input('fecha', date('Y-m-d'));
+    $estado = $request->input('estado', 'Presente');
+    $metodo_r = $request->input('metodo_r', 'Formulario');
+    $observacion = $request->input('observacion', null);
+
+    if (!$id_clase) 
+    {
+        $db->save_log_bitacora($accion, $fecha_bit, $estado_bit, $comentario, $codigo);
+        return response()->json([
+            'success' => false,
+            'message' => 'Falta el identificador de clase.'
+        ]);
+    }
+
+    try 
+    {
+        
+        // VALIDAR SI YA EXISTE ASISTENCIA PARA ESA CLASE Y FECHA
+        $sql_check = "
+            SELECT COUNT(*) AS total
+            FROM ex_g32.asistencia 
+            WHERE id_clase = :id_clase 
+              AND fecha = :fecha
+        ";
+        $params_check = [
+            ':id_clase' => $id_clase,
+            ':fecha' => $fecha
+        ];
+        $stmt = $db->execute_query($sql_check, $params_check);
+        $exists = $db->fetch_one($stmt)['total'];
+
+        if ($exists > 0) {
+            $db->save_log_bitacora($accion, $fecha_bit, $estado_bit, $comentario, $codigo);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ya se registró asistencia para esta clase hoy.'
+            ]);
+        }
+
+        
+        // INSERTAR NUEVO REGISTRO
+        $sql_insert = "
+            INSERT INTO ex_g32.asistencia (fecha, estado, metodo_r, observacion, id_clase)
+            VALUES (:fecha, :estado, :metodo_r, :observacion, :id_clase)
+        ";
+
+        $params_insert = [
+            ':fecha' => $fecha,
+            ':estado' => $estado,
+            ':metodo_r' => $metodo_r,
+            ':observacion' => $observacion,
+            ':id_clase' => $id_clase
+        ];
+
+        $db->execute_query($sql_insert, $params_insert);
+
+        
+
+        
+        // RESPUESTA EXITOSA
+        return response()->json([
+            'success' => true,
+            'message' => 'Asistencia registrada correctamente.',
+            'data' => [
+                'id_clase' => $id_clase,
+                'estado' => $estado,
+                'fecha' => $fecha,
+                'metodo' => $metodo_r
+            ]
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => 500,
+            'message' => 'Error al registrar asistencia: ' . $e->getMessage()
+        ]);
+    }
+});
+
+
+//SECCION DE ASISTENCIA
 Route::get('/docen/asistencia', function () {
     // VALIDACION: USUARIO EN SESION
     if (!Session::has('user_code')) {
@@ -68,6 +193,8 @@ Route::get('/docen/asistencia', function () {
         return redirect('/');
     }
 
+    
+
     try {
         $db = Config::$db;
         $db->create_conection(); // Crea la conexión
@@ -76,7 +203,7 @@ Route::get('/docen/asistencia', function () {
 
         //MATERIAS PROXIMAS A MARCAR ASISTENCIA
         $sql="
-            SELECT m.sigla sigla_materia,m.nombre as nombre_materia,mg.sigla_grupo as grupo,h.dia,h.hora_i as hora_inicio,h.hora_f as hora_final
+            SELECT c.id as id_clase,m.sigla sigla_materia,m.nombre as nombre_materia,mg.sigla_grupo as grupo,h.dia,h.hora_i as hora_inicio,h.hora_f as hora_final
             FROM ex_g32.usuario u
             INNER JOIN ex_g32.clase c ON c.usuario_codigo = u.codigo 
             INNER JOIN ex_g32.materia_grupo mg ON mg.id =c.id_materia_grupo 
@@ -94,7 +221,7 @@ Route::get('/docen/asistencia', function () {
 
 
         $sql="
-            SELECT m.sigla sigla_materia,m.nombre as nombre_materia,mg.sigla_grupo as grupo,h.dia,h.hora_i as hora_inicio,h.hora_f as hora_final
+            SELECT c.id as id_clase,m.sigla sigla_materia,m.nombre as nombre_materia,mg.sigla_grupo as grupo,h.dia,h.hora_i as hora_inicio,h.hora_f as hora_final,a.estado,a.fecha
             FROM ex_g32.usuario u
             INNER JOIN ex_g32.clase c ON c.usuario_codigo = u.codigo 
             INNER JOIN ex_g32.materia_grupo mg ON mg.id =c.id_materia_grupo 

@@ -127,61 +127,134 @@
         <p class="text-sm text-gray-600">No tienes clases próximas programadas.</p>
       @endif
     </section>
+
+    <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-8">
+      <h3 class="text-base font-semibold text-gray-800 mb-4">Historial de asistencias</h3>
+
+      @if (count($asistencias) > 0)
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm text-left border border-gray-200 rounded-lg">
+            <thead class="bg-gray-100 text-gray-700 font-semibold">
+              <tr>
+                <th class="px-4 py-2 border-b">Fecha</th>
+                <th class="px-4 py-2 border-b">Materia</th>
+                <th class="px-4 py-2 border-b">Grupo</th>
+                <th class="px-4 py-2 border-b">Día</th>
+                <th class="px-4 py-2 border-b">Horario</th>
+                <th class="px-4 py-2 border-b">Estado</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-700">
+              @foreach ($asistencias as $a)
+                <tr class="hover:bg-gray-50 transition">
+                  <td class="px-4 py-2 border-b">{{ $a['fecha'] ?? '—' }}</td>
+                  <td class="px-4 py-2 border-b">{{ $a['nombre_materia'] }}</td>
+                  <td class="px-4 py-2 border-b">{{ $a['grupo'] }}</td>
+                  <td class="px-4 py-2 border-b">{{ ucfirst($a['dia']) }}</td>
+                  <td class="px-4 py-2 border-b">
+                    {{ $a['hora_inicio'] }} - {{ $a['hora_final'] }}
+                  </td>
+                  <td class="px-4 py-2 border-b font-medium
+                            @if($a['estado'] === 'Presente') text-green-600
+                            @elseif($a['estado'] === 'Retraso') text-amber-600
+                            @else text-red-600 @endif">
+                    {{ $a['estado'] }}
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      @else
+        <p class="text-sm text-gray-600">Aún no registraste asistencias.</p>
+      @endif
+    </section>
+
+
   </main>
 
-  <!-- Modal con formulario de asistencia -->
-    <div id="modal-clases" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
-        <button id="cerrar-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-lg">✕</button>
-        <h4 id="modal-titulo" class="text-lg font-semibold text-sky-700 mb-4"></h4>
-        <div id="modal-contenido" class="space-y-3"></div>
+  <!-- MODAL PRINCIPAL -->
+  <div id="modal-clases" class="fixed inset-0 hidden items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg relative border border-gray-200">
+      
+      <!-- Encabezado -->
+      <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200">
+        <h4 id="modal-titulo" class="text-lg font-semibold text-gray-800 tracking-wide"></h4>
+        <button id="cerrar-modal"
+                class="text-gray-500 hover:text-gray-700 focus:outline-none text-xl leading-none">
+          ×
+        </button>
+      </div>
 
-        <!-- Formulario de registro -->
-        <form id="form-asistencia" class="hidden mt-6 border-t pt-5 space-y-5">
-        <!-- Fecha -->
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha actual</label>
-            <input type="date" name="fecha" 
-                value="{{ date('Y-m-d') }}" 
-                readonly
-                class="w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 cursor-not-allowed text-sm">
-        </div>
+      <!-- Contenido dinámico -->
+      <div id="modal-contenido" class="p-6 space-y-3 text-gray-700 text-sm"></div>
 
-        <!-- Estado -->
-        <div>
+      <!-- Formulario -->
+      <form id="form-asistencia" class="hidden border-t border-gray-100 p-6 space-y-5 bg-gray-50 rounded-b-xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+            <input type="date" name="fecha" value="{{ date('Y-m-d') }}" readonly
+                  class="w-full border border-gray-300 rounded-md bg-gray-100 text-gray-700 cursor-not-allowed px-2 py-1.5 text-sm">
+          </div>
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-            <select name="estado" 
-                    class="w-full border-gray-300 rounded-md shadow-sm focus:border-sky-500 focus:ring-sky-500 text-sm">
-            <option value="Presente">Presente</option>
-            <option value="Ausente">Ausente</option>
-            <option value="Retraso">Retraso</option>
+            <select name="estado"
+                    class="w-full border border-gray-300 rounded-md focus:ring-1 focus:ring-sky-500 px-2 py-1.5 text-sm">
+              <option value="Presente">Presente</option>
+              <option value="Ausente">Ausente</option>
+              <option value="Retraso">Retraso</option>
             </select>
+          </div>
         </div>
 
-        <!-- Método -->
         <input type="hidden" name="metodo_r" value="Formulario">
 
-        <!-- Observación -->
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Observación</label>
-            <textarea name="observacion" rows="3"
-                    placeholder="Ej. Llegó 10 min tarde o registró asistencia normal"
-                    class="w-full border-gray-300 rounded-md shadow-sm focus:border-sky-500 focus:ring-sky-500 text-sm"></textarea>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Observación</label>
+          <textarea name="observacion" rows="3"
+                    placeholder="Comentario adicional (opcional)"
+                    class="w-full border border-gray-300 rounded-md focus:ring-1 focus:ring-sky-500 px-2 py-1.5 text-sm"></textarea>
         </div>
 
-        <!-- Botón principal -->
-        <div class="flex justify-center mt-6">
-            <button type="submit"
-                    id="btn-generar-qr"
-                    class="w-full sm:w-auto px-8 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg shadow-sm transition">
-            Generar QR
-            </button>
+        <div class="flex justify-end pt-3 border-t border-gray-200">
+          <button type="submit"
+                  class="px-6 py-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-medium rounded-md shadow-sm transition">
+            Registrar asistencia
+          </button>
         </div>
-        </form>
+      </form>
     </div>
-    
+  </div>
 
-</div>
+
+  <!-- MODAL OPCIONES -->
+  <div id="modal-opciones" class="fixed inset-0 hidden items-center justify-center bg-black/40 backdrop-blur-sm z-60">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm relative border border-gray-200">
+      
+      <!-- Encabezado -->
+      <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200">
+        <h4 class="text-base font-semibold text-gray-800 tracking-wide">Seleccionar método de registro</h4>
+        <button id="cerrar-opciones" class="text-gray-500 hover:text-gray-700 focus:outline-none text-xl leading-none">
+          ×
+        </button>
+      </div>
+
+      <!-- Botones -->
+      <div class="p-6 space-y-4">
+        <button id="btn-formulario"
+                class="w-full py-2.5 bg-sky-700 hover:bg-sky-800 text-white font-medium text-sm rounded-md shadow-sm transition">
+          Registrar mediante formulario
+        </button>
+        <button id="btn-qr"
+                class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium text-sm rounded-md shadow-sm transition">
+          Generar código QR
+        </button>
+      </div>
+    </div>
+  </div>
+
+
 
   <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10 md:ml-64">
     © {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA
