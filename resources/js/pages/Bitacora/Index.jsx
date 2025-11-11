@@ -34,16 +34,38 @@ export default function Index({ bitacora, filters, acciones, tablas }) {
 
     const getAccionColor = (accion) => {
         const colores = {
-            'crear': 'bg-green-100 text-green-800',
-            'editar': 'bg-blue-100 text-blue-800',
-            'eliminar': 'bg-red-100 text-red-800',
+            'create': 'bg-green-100 text-green-800',
+            'update': 'bg-blue-100 text-blue-800',
+            'delete': 'bg-red-100 text-red-800',
+            'restore': 'bg-yellow-100 text-yellow-800',
             'login': 'bg-purple-100 text-purple-800',
             'logout': 'bg-gray-100 text-gray-800',
+            'login_fallido': 'bg-orange-100 text-orange-800',
             'cambiar_contrasena': 'bg-yellow-100 text-yellow-800',
             'cambiar_estado': 'bg-indigo-100 text-indigo-800',
-            'asignar_permisos': 'bg-pink-100 text-pink-800',
+            'asignar_permiso': 'bg-pink-100 text-pink-800',
+            'exportar': 'bg-cyan-100 text-cyan-800',
+            'importar': 'bg-teal-100 text-teal-800',
         };
         return colores[accion] || 'bg-gray-100 text-gray-800';
+    };
+
+    const getAccionLabel = (accion) => {
+        const labels = {
+            'create': 'Crear',
+            'update': 'Actualizar',
+            'delete': 'Eliminar',
+            'restore': 'Restaurar',
+            'login': 'Login',
+            'logout': 'Logout',
+            'login_fallido': 'Login Fallido',
+            'cambiar_contrasena': 'Cambiar Contraseña',
+            'cambiar_estado': 'Cambiar Estado',
+            'asignar_permiso': 'Asignar Permiso',
+            'exportar': 'Exportar',
+            'importar': 'Importar',
+        };
+        return labels[accion] || accion;
     };
 
     const formatearFecha = (fecha) => {
@@ -231,19 +253,45 @@ export default function Index({ bitacora, filters, acciones, tablas }) {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getAccionColor(registro.accion)}`}>
-                                                        {registro.accion}
+                                                        {getAccionLabel(registro.accion)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     {registro.tabla || '-'}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-900">
-                                                    {registro.descripcion}
-                                                    {registro.registro_id && (
-                                                        <span className="text-gray-400 ml-2">
-                                                            (ID: {registro.registro_id})
-                                                        </span>
-                                                    )}
+                                                    <div className="space-y-1">
+                                                        {registro.registro_id && (
+                                                            <div className="text-xs text-gray-500">
+                                                                ID Registro: {registro.registro_id}
+                                                            </div>
+                                                        )}
+                                                        {(registro.datos_anteriores || registro.datos_nuevos) && (
+                                                            <details className="text-xs">
+                                                                <summary className="cursor-pointer text-blue-600 hover:text-blue-800">
+                                                                    Ver detalles
+                                                                </summary>
+                                                                <div className="mt-2 pl-4 space-y-1 border-l-2 border-gray-200">
+                                                                    {registro.datos_anteriores && Object.keys(registro.datos_anteriores).length > 0 && (
+                                                                        <div>
+                                                                            <span className="font-semibold text-red-600">Anterior:</span>
+                                                                            <pre className="text-xs bg-red-50 p-2 rounded mt-1 overflow-x-auto">
+                                                                                {JSON.stringify(registro.datos_anteriores, null, 2)}
+                                                                            </pre>
+                                                                        </div>
+                                                                    )}
+                                                                    {registro.datos_nuevos && Object.keys(registro.datos_nuevos).length > 0 && (
+                                                                        <div>
+                                                                            <span className="font-semibold text-green-600">Nuevo:</span>
+                                                                            <pre className="text-xs bg-green-50 p-2 rounded mt-1 overflow-x-auto">
+                                                                                {JSON.stringify(registro.datos_nuevos, null, 2)}
+                                                                            </pre>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </details>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {registro.ip_address || '-'}

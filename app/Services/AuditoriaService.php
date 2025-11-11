@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\LogAuditoria;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\DB;
 
 class AuditoriaService
 {
@@ -21,23 +22,41 @@ class AuditoriaService
             $ipAddress = Request::ip();
             $userAgent = Request::header('User-Agent');
 
-            // Crear el log
-            LogAuditoria::create([
-                'usuario_id' => $usuarioId ?? $data['usuario_id'] ?? null,
-                'accion' => $data['accion'],
+            // Preparar datos para insertar
+            $insertData = [
+                'usuario_id' => $usuarioId ?? ($data['usuario_id'] ?? null),
+                'accion' => $data['accion'] ?? 'unknown',
                 'tabla' => $data['tabla'] ?? null,
                 'registro_id' => $data['registro_id'] ?? null,
-                'datos_anteriores' => $data['datos_anteriores'] ?? null,
-                'datos_nuevos' => $data['datos_nuevos'] ?? null,
                 'ip_address' => $ipAddress,
                 'user_agent' => $userAgent,
                 'fecha_creacion' => now(),
-            ]);
+            ];
+
+            // Agregar datos_anteriores si existen
+            if (isset($data['datos_anteriores']) && !empty($data['datos_anteriores'])) {
+                $insertData['datos_anteriores'] = json_encode($data['datos_anteriores']);
+            } else {
+                $insertData['datos_anteriores'] = null;
+            }
+
+            // Agregar datos_nuevos si existen
+            if (isset($data['datos_nuevos']) && !empty($data['datos_nuevos'])) {
+                $insertData['datos_nuevos'] = json_encode($data['datos_nuevos']);
+            } else {
+                $insertData['datos_nuevos'] = null;
+            }
+
+            // Crear el log usando DB::table para evitar eventos del modelo y bucles infinitos
+            DB::table('logs_auditoria')->insert($insertData);
 
             return true;
         } catch (\Exception $e) {
             // Log del error pero no interrumpir la ejecución
-            \Log::error('Error al registrar auditoría: ' . $e->getMessage());
+            \Log::error('Error al registrar auditoría: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'data' => $data,
+            ]);
             return false;
         }
     }

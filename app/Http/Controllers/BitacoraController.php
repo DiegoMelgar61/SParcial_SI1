@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Bitacora;
+use App\Models\LogAuditoria;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,7 +13,7 @@ class BitacoraController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Bitacora::with('usuario.rol')
+        $query = LogAuditoria::with('usuario.rol')
             ->orderBy('fecha_creacion', 'desc');
 
         // Búsqueda
@@ -48,10 +48,10 @@ class BitacoraController extends Controller
         $bitacora = $query->paginate(20)->withQueryString();
 
         // Obtener acciones únicas para el filtro
-        $acciones = Bitacora::distinct()->pluck('accion')->sort()->values();
+        $acciones = LogAuditoria::distinct()->pluck('accion')->sort()->values();
 
         // Obtener tablas únicas para el filtro
-        $tablas = Bitacora::distinct()->whereNotNull('tabla')->pluck('tabla')->sort()->values();
+        $tablas = LogAuditoria::distinct()->whereNotNull('tabla')->pluck('tabla')->sort()->values();
 
         return Inertia::render('Bitacora/Index', [
             'bitacora' => $bitacora,

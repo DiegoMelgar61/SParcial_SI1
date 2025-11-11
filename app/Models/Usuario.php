@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\Auditable;
 
 class Usuario extends Authenticatable
 {
-    use SoftDeletes;
+    use SoftDeletes, Auditable;
 
     protected $table = 'usuarios';
     protected $primaryKey = 'id';

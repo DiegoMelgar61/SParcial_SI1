@@ -130,7 +130,8 @@ export default function AuthenticatedLayout({ children }) {
                                         </div>
                                         <div className="border-t">
                                             <button
-                                                onClick={() => {
+                                                onClick={(e) => {
+                                                    e.preventDefault();
                                                     router.post('/logout');
                                                 }}
                                                 className="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"

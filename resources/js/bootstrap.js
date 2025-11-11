@@ -3,11 +3,22 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-// Configurar CSRF token para Inertia.js
-let token = document.head.querySelector('meta[name="csrf-token"]');
+// Función para actualizar el token CSRF
+function updateCsrfToken() {
+    const token = document.head.querySelector('meta[name="csrf-token"]');
+    if (token) {
+        window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+    }
+}
 
-if (token) {
-    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-} else {
-    console.error('CSRF token not found');
+// Configurar CSRF token inicialmente
+updateCsrfToken();
+
+// Observar cambios en el meta tag CSRF
+const metaTag = document.head.querySelector('meta[name="csrf-token"]');
+if (metaTag) {
+    const observer = new MutationObserver(() => {
+        updateCsrfToken();
+    });
+    observer.observe(metaTag, { attributes: true, attributeFilter: ['content'] });
 }

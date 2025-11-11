@@ -4,17 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @deprecated Esta clase ha sido movida a LogAuditoria.php
- * Usar App\Models\LogAuditoria en su lugar
- */
-class Bitacora extends Model
+class LogAuditoria extends Model
 {
     protected $table = 'logs_auditoria';
-    
-    /**
-     * @deprecated Usar LogAuditoria en su lugar
-     */
     protected $primaryKey = 'id';
     public $timestamps = false; // Solo tiene fecha_creacion
 
@@ -201,3 +193,4 @@ class Bitacora extends Model
         ];
     }
 }
+
