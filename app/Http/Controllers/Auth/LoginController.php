@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Usuario;
+use App\Helpers\BitacoraHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +31,7 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
-        $usuario = Usuario::where('email', $request->email)->first();
+        $usuario = Usuario::with('rol')->where('email', $request->email)->first();
 
         if (!$usuario) {
             Log::warning('Usuario no encontrado', ['email' => $request->email]);
@@ -62,12 +63,40 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
+        // Registrar en bitácora - pasar el usuario_id directamente
+        $rolNombre = $usuario->rol ? $usuario->rol->nombre : 'Usuario';
+        BitacoraHelper::registrar(
+            'login', 
+            null, 
+            null, 
+            "Usuario: {$rolNombre} - Acción: Login - Descripción: successful",
+            null,
+            null,
+            $usuario->id
+        );
+
         // Intenta redirigir al dashboard
         return redirect()->intended('/dashboard');
     }
 
     public function destroy(Request $request)
     {
+        $usuario = Auth::user();
+        
+        // Registrar en bitácora antes de cerrar sesión
+        if ($usuario) {
+            $rolNombre = $usuario->rol ? $usuario->rol->nombre : 'Usuario';
+            BitacoraHelper::registrar(
+                'logout', 
+                null, 
+                null, 
+                "Usuario: {$rolNombre} - Acción: Logout - Descripción: successful",
+                null,
+                null,
+                $usuario->id
+            );
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

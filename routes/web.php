@@ -13,6 +13,7 @@ use App\Http\Controllers\HorarioController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\BitacoraController;
 
 // Public routes
 
@@ -65,4 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('usuarios/{usuario}/cambiar-estado', [UsuarioController::class, 'cambiarEstado'])->name('usuarios.cambiar-estado');
     Route::post('usuarios/{usuario}/desbloquear', [UsuarioController::class, 'desbloquear'])->name('usuarios.desbloquear');
     Route::post('usuarios/{usuario}/resetear-intentos', [UsuarioController::class, 'resetearIntentos'])->name('usuarios.resetear-intentos');
+
+    //Bitácora
+    Route::get('bitacora', [BitacoraController::class, 'index'])->name('bitacora.index');
 });
