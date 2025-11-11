@@ -524,6 +524,6 @@
   </div>
 
   <!-- Script principal -->
-  <script src="{{ asset('static/scripts/roles_permisos.js') }}"></script>
+  <script src="{{ secure_asset('static/scripts/roles_permisos.js') }}"></script>
 </body>
 </html>

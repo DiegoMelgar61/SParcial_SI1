@@ -325,6 +325,6 @@
     </footer>
 
     <!-- JS: Este archivo ahora debe contener toda la lógica -->
-    <script src="{{ asset('static/scripts/bitacora.js') }}"></script>
+    <script src="{{ secure_asset('static/scripts/bitacora.js') }}"></script>
 </body>
 </html>

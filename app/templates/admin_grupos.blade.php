@@ -372,7 +372,7 @@
 
     <!-- ====== FIN DE MODALES ====== -->
     <!-- JS: Este archivo ahora debe contener toda la lógica -->
-    <script src="{{ asset('static/scripts/admin_grupos.js') }}">
+    <script src="{{ secure_asset('static/scripts/admin_grupos.js') }}">
     </script>
 
 </body>
