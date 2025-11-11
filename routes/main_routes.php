@@ -67,7 +67,7 @@ Route::get('/perfil', function () {
             return redirect('/')->with('error', 'Usuario no encontrado.');
         }
 
-        return view('perfil_nuevo', ['user' => $user]);
+        return view('profile', ['user' => $user]);
 
     } catch (Exception $e) {
         if (isset($db) && $db !== null) {

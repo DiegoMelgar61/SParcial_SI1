@@ -18,21 +18,30 @@ document.addEventListener('DOMContentLoaded', () => {
   //BOTONES MODULOS
   const importBtn = document.getElementById('btn-import-users');
   const mod_adm=document.getElementById('btn-mod-adm');
+  const mod_doc=document.getElementById('btn-mod-docen');
+
   if (importBtn)
   {
     importBtn.addEventListener('click', () => 
-  {
-    window.location.href = '/admin/import-users';
-  });
-  
+    {
+      window.location.href = '/admin/import-users';
+    });
   }
   
   if (mod_adm)
   {
     mod_adm.addEventListener('click',()=>
+    {
+      window.location.href='/admin/mod-adm';
+    });
+  }
+
+  if (mod_doc)
   {
-    window.location.href='/admin/mod-adm';
-  });
+    mod_doc.addEventListener('click',()=>
+    {
+      window.location.href='/docen/mod-doc';
+    })
   }
   
 
