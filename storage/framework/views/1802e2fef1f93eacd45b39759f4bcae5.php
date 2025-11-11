@@ -46,50 +46,61 @@
         </div>
     </header>
 
-    <!-- Sidebar Docencia -->
+   <!-- Sidebar -->
     <aside id="docencia-sidebar"
-        class="fixed top-0 left-0 w-64 bg-white shadow-lg h-full z-30 border-r border-gray-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-
+    class="fixed top-0 left-0 w-64 bg-white shadow-lg h-full z-30 border-r border-gray-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
         <div class="flex flex-col h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             
             <!-- Encabezado -->
             <div class="p-4 border-b border-gray-100">
-                <h3 class="text-sm font-semibold text-gray-800">Panel de Docencia</h3>
-                <p class="text-xs text-sky-600 mt-1 font-medium">Gestión docente</p>
+            <h3 class="text-sm font-semibold text-gray-800">Panel de Docencia</h3>
+            <p class="text-xs text-sky-600 mt-1 font-medium">Gestión docente</p>
             </div>
 
             <!-- Navegación -->
             <nav class="flex-1 p-3">
-                <ul class="space-y-1 text-sm">
+            <ul class="space-y-1 text-sm">
+                
+                <!-- Panel principal -->
+                <li>
+                <a href="/docen/mod-doc"
+                    class="flex items-center gap-2 px-3 py-2 text-sky-700 bg-sky-50 rounded-lg font-semibold hover:bg-sky-100 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
+                    </svg>
+                    <span>Panel Docencia</span>
+                </a>
+                </li>
 
-                    <li>
-                        <a href="/docencia/asistencia"
-                           class="flex items-center gap-2 px-3 py-2 text-sky-700 bg-sky-50 rounded-lg font-semibold hover:bg-sky-100 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span>Asistencia</span>
-                        </a>
-                    </li>
+                <!-- Asistencia -->
+                <li>
+                <a href="/docen/asistencia"
+                    class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-sky-50 hover:text-sky-700 rounded-lg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>Asistencia</span>
+                </a>
+                </li>
 
-                    <li>
-                        <a href="/docencia/licencia"
-                           class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-sky-50 hover:text-sky-700 rounded-lg transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span>Licencia</span>
-                        </a>
-                    </li>
-
-                </ul>
+                <!-- Licencia -->
+                <li>
+                <a href="/docencia/licencia"
+                    class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-sky-50 hover:text-sky-700 rounded-lg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Licencia</span>
+                </a>
+                </li>
+            </ul>
             </nav>
 
             <!-- Footer -->
             <div class="p-3 border-t border-gray-100 text-center text-[11px] text-gray-500">
-                Módulo Docencia v1.0
+            Módulo Docencia v1.0
             </div>
         </div>
     </aside>
