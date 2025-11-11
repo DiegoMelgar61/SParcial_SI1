@@ -35,36 +35,37 @@ Cada vez que se realiza un *push* a la rama principal (`main`), Render reconstru
 ---
 ## 🧩 Estructura del proyecto
 
+
 INF342_2EXA/
 │
 ├── app/
-│   ├── Classes/                # Clases PHP reutilizables (modelos, helpers, etc.)
-│   ├── Http/                   # Controladores HTTP y lógica de rutas
-│   ├── Providers/              # Servicios, inicializadores, middlewares
-│   ├── services/               # Funciones o módulos independientes (bitácora, auth, etc.)
-│   ├── static/                 # Recursos estáticos: scripts JS, CSS, imágenes
-│   ├── templates/              # Plantillas HTML o Blade
-│   ├── __init__.php            # Archivo de inicialización modular
-│   └── Config.php              # Configuración principal (conexión BD, constantes)
+│ ├── Classes/ # Clases PHP reutilizables (modelos, helpers, etc.)
+│ ├── Http/ # Controladores HTTP y lógica de rutas
+│ ├── Providers/ # Servicios, inicializadores, middlewares
+│ ├── services/ # Funciones o módulos independientes (bitácora, auth, etc.)
+│ ├── static/ # Recursos estáticos: scripts JS, CSS, imágenes
+│ ├── templates/ # Plantillas HTML o Blade
+│ ├── init.php # Archivo de inicialización modular
+│ └── Config.php # Configuración principal (conexión BD, constantes)
 │
-├── bootstrap/                  # Archivos de arranque y carga del sistema
-├── config/                     # Archivos de configuración global del proyecto
-├── docs/                       # Documentación, diagramas o imágenes
-├── public/                     # Carpeta accesible públicamente (punto de entrada web)
-├── resources/                  # Archivos fuente del frontend (Tailwind, vistas)
-├── routes/                     # Definición de rutas por módulo
-├── storage/                    # Archivos temporales, logs o caché
-├── vendor/                     # Dependencias instaladas por Composer
+├── bootstrap/ # Archivos de arranque y carga del sistema
+├── config/ # Archivos de configuración global del proyecto
+├── docs/ # Documentación, diagramas o imágenes
+├── public/ # Carpeta accesible públicamente (punto de entrada web)
+├── resources/ # Archivos fuente del frontend (Tailwind, vistas)
+├── routes/ # Definición de rutas por módulo
+├── storage/ # Archivos temporales, logs o caché
+├── vendor/ # Dependencias instaladas por Composer
 │
-├── .env                        # Variables de entorno (configuración local)
-├── .gitignore                  # Archivos y carpetas que Git debe ignorar
-├── artisan                     # CLI interna de Laravel (si se usa para comandos)
-├── composer.json               # Definición de dependencias PHP
-├── composer.lock               # Bloqueo de versiones de dependencias
-├── dockerfile                  # Configuración para entorno Docker
-├── hash_pass.php               # Script auxiliar para generar hashes de contraseñas
-├── run.php                     # Punto de entrada principal de la aplicación
-└── README.md                   # Documentación general del proyecto
+├── .env # Variables de entorno (configuración local)
+├── .gitignore # Archivos y carpetas que Git debe ignorar
+├── artisan # CLI interna de Laravel (si se usa para comandos)
+├── composer.json # Definición de dependencias PHP
+├── composer.lock # Bloqueo de versiones de dependencias
+├── dockerfile # Configuración para entorno Docker
+├── hash_pass.php # Script auxiliar para generar hashes de contraseñas
+├── run.php # Punto de entrada principal de la aplicación
+└── README.md # Documentación general del proyecto
 
 ---
 
