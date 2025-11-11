@@ -57,6 +57,24 @@ let diasDisponiblesGlobal = 0;
  * Inicializa el sistema cuando el DOM está completamente cargado
  * Configura event listeners y carga datos iniciales
  */
+// Toggle del menú lateral en móviles
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('admin-sidebar');
+        
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+        }
+
+        // Cerrar sidebar al hacer clic fuera en móviles
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth < 768) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            }
+        });
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Iniciando Sistema de Gestión de Licencias');
     
@@ -328,21 +346,6 @@ async function cargarLicencias() {
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-gray-50 transition';
                     
-                    // Determinar estado de la licencia
-                    const fechaInicio = new Date(licencia.fecha_i);
-                    const fechaFin = new Date(licencia.fecha_f);
-                    const hoy = new Date();
-                    hoy.setHours(0, 0, 0, 0);
-                    
-                    let estadoBadge = '';
-                    if (hoy < fechaInicio) {
-                        estadoBadge = '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"><i class="fas fa-clock mr-1"></i>Pendiente</span>';
-                    } else if (hoy >= fechaInicio && hoy <= fechaFin) {
-                        estadoBadge = '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>En curso</span>';
-                    } else {
-                        estadoBadge = '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800"><i class="fas fa-history mr-1"></i>Finalizada</span>';
-                    }
-                    
                     // Botones de acción (solo si puede modificar)
                     let botonesAccion = '';
                     if (licencia.puede_modificar) {
@@ -381,9 +384,6 @@ async function cargarLicencias() {
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            ${estadoBadge}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
                             ${botonesAccion}
                         </td>
                     `;
@@ -396,10 +396,7 @@ async function cargarLicencias() {
                     
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xl font-bold text-indigo-600">#${licencia.nro}</span>
-                            </div>
-                            ${estadoBadge}
+                            <span class="text-xl font-bold text-indigo-600">#${licencia.nro}</span>
                         </div>
                         
                         <div class="space-y-3 mb-4">

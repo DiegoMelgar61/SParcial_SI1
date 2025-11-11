@@ -203,7 +203,6 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Inicio</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Fin</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Días</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
@@ -400,28 +399,6 @@
             </div>
         </div>
     </div>
-
-    <!-- SCRIPT PARA MENÚ MÓVIL -->
-    <script>
-        // Toggle del menú lateral en móviles
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('admin-sidebar');
-        
-        if (menuToggle) {
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-            });
-        }
-
-        // Cerrar sidebar al hacer clic fuera en móviles
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth < 768) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    sidebar.classList.add('-translate-x-full');
-                }
-            }
-        });
-    </script>
 
     <!-- Incluir el archivo JavaScript -->
     <script src="/static/scripts/docente_licencia.js"></script>

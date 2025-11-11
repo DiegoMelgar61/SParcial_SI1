@@ -323,6 +323,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const aulaModulo = aulaCard.dataset.aulaModulo;
         const aulaTipo = aulaCard.dataset.aulaTipo;
 
+        // Guardar aula actual
+        aulaNroActual = aulaNro;
+
         // Cerrar modal de selección y abrir modal de horario
         cerrarSeleccionModal();
         if (horarioAulaModal) horarioAulaModal.classList.remove("hidden");
@@ -337,8 +340,14 @@ document.addEventListener("DOMContentLoaded", () => {
             horarioAulaInfo.textContent = `Capacidad: ${aulaCapacidad} | Módulo: ${aulaModulo} | Tipo: ${aulaTipo}`;
         }
 
-        // Cargar horario del aula
-        await cargarHorarioAula(aulaNro);
+        // Limpiar selector de gestión y mostrar mensaje inicial
+        const selectGestion = document.getElementById("select-gestion-horario");
+        if (selectGestion) selectGestion.value = "";
+        
+        const horarioSinGestion = document.getElementById("horario-sin-gestion");
+        const horarioContentWrapper = document.getElementById("horario-content-wrapper");
+        if (horarioSinGestion) horarioSinGestion.classList.remove("hidden");
+        if (horarioContentWrapper) horarioContentWrapper.classList.add("hidden");
     });
 
     // Manejar click en botón "Ver Horario" de la tabla
@@ -347,6 +356,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!btnVerHorario) return;
 
         const aulaNro = btnVerHorario.dataset.nro;
+
+        // Guardar aula actual
+        aulaNroActual = aulaNro;
 
         // Buscar información completa del aula
         const aulaRow = btnVerHorario.closest("tr");
@@ -367,24 +379,75 @@ document.addEventListener("DOMContentLoaded", () => {
             horarioAulaInfo.textContent = `Capacidad: ${aulaCapacidad} | Módulo: ${aulaModulo} | Tipo: ${aulaTipo}`;
         }
 
-        // Cargar horario del aula
-        await cargarHorarioAula(aulaNro);
+        // Limpiar selector de gestión y mostrar mensaje inicial
+        const selectGestion = document.getElementById("select-gestion-horario");
+        if (selectGestion) selectGestion.value = "";
+        
+        const horarioSinGestion = document.getElementById("horario-sin-gestion");
+        const horarioContentWrapper = document.getElementById("horario-content-wrapper");
+        if (horarioSinGestion) horarioSinGestion.classList.remove("hidden");
+        if (horarioContentWrapper) horarioContentWrapper.classList.add("hidden");
     });
 
     // Cerrar modal de horario
     function cerrarHorarioModal() {
         if (horarioAulaModal) horarioAulaModal.classList.add("hidden");
         document.documentElement.classList.remove("overflow-hidden");
+        
+        // Limpiar selector de gestión
+        const selectGestion = document.getElementById("select-gestion-horario");
+        if (selectGestion) selectGestion.value = "";
+        
+        // Mostrar mensaje inicial
+        const horarioSinGestion = document.getElementById("horario-sin-gestion");
+        const horarioContentWrapper = document.getElementById("horario-content-wrapper");
+        if (horarioSinGestion) horarioSinGestion.classList.remove("hidden");
+        if (horarioContentWrapper) horarioContentWrapper.classList.add("hidden");
     }
 
     if (btnCloseHorario) btnCloseHorario.addEventListener("click", cerrarHorarioModal);
     if (btnCerrarHorario) btnCerrarHorario.addEventListener("click", cerrarHorarioModal);
 
+    // Manejador del selector de gestión
+    const selectGestionHorario = document.getElementById("select-gestion-horario");
+    let aulaNroActual = null;
+    
+    if (selectGestionHorario) {
+        selectGestionHorario.addEventListener("change", async function() {
+            const gestionId = this.value;
+            
+            if (!gestionId || !aulaNroActual) {
+                // Ocultar horario si no hay gestión seleccionada
+                const horarioSinGestion = document.getElementById("horario-sin-gestion");
+                const horarioContentWrapper = document.getElementById("horario-content-wrapper");
+                if (horarioSinGestion) horarioSinGestion.classList.remove("hidden");
+                if (horarioContentWrapper) horarioContentWrapper.classList.add("hidden");
+                return;
+            }
+            
+            // Cargar horario con la gestión seleccionada
+            await cargarHorarioAula(aulaNroActual, gestionId);
+        });
+    }
+
     // Función para cargar el horario de un aula
-    async function cargarHorarioAula(aulaNro) {
+    async function cargarHorarioAula(aulaNro, gestionId) {
+        const horarioSinGestion = document.getElementById("horario-sin-gestion");
+        const horarioContentWrapper = document.getElementById("horario-content-wrapper");
         const horarioLoading = document.getElementById("horario-loading");
         const horarioVacio = document.getElementById("horario-vacio");
         const horarioTablaContainer = document.getElementById("horario-tabla-container");
+
+        // Si no hay gestión seleccionada, mostrar mensaje
+        if (!gestionId) {
+            if (horarioSinGestion) horarioSinGestion.classList.remove("hidden");
+            if (horarioContentWrapper) horarioContentWrapper.classList.add("hidden");
+            return;
+        }
+
+        // Ocultar mensaje y mostrar contenedor
+        if (horarioSinGestion) horarioSinGestion.classList.add("hidden");
+        if (horarioContentWrapper) horarioContentWrapper.classList.remove("hidden");
 
         // Mostrar loading
         if (horarioLoading) horarioLoading.classList.remove("hidden");
@@ -392,8 +455,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (horarioTablaContainer) horarioTablaContainer.classList.add("hidden");
 
         try {
-            console.log("Cargando horario para aula:", aulaNro);
-            const response = await fetch(`/auto/aulas/horario?aula_nro=${aulaNro}`, {
+            console.log("Cargando horario para aula:", aulaNro, "Gestión:", gestionId);
+            const response = await fetch(`/auto/aulas/horario?aula_nro=${aulaNro}&gestion_id=${gestionId}`, {
                 headers: {
                     "X-CSRF-TOKEN": csrfToken,
                     "X-Requested-With": "XMLHttpRequest"

@@ -267,4 +267,4 @@
 
   <script src="<?php echo e(asset('static/scripts/docen_asist.js')); ?>"></script>
 </body>
-</html><?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/docen_asist.blade.php ENDPATH**/ ?>
+</html><?php /**PATH D:\whatever that twas, scarcely worth my notice\Brillo\app\templates/docen_asist.blade.php ENDPATH**/ ?>

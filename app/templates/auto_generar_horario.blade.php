@@ -4,9 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generar Horario — Plataforma Universitaria INF342</title>
+    
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- CSRF Token para peticiones AJAX -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Estilos personalizados -->
     <style>
+        /* Animación para elementos que aparecen */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -14,14 +21,37 @@
         .animate-fade-in {
             animation: fadeIn 0.3s ease-out;
         }
+
+        /* Personalización del scrollbar */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
 
-    <!-- Barra superior -->
+    <!-- ============================================
+         BARRA SUPERIOR (HEADER)
+         ============================================
+         - Logo y título del sistema
+         - Información del usuario logueado
+         - Botón de menú para móviles
+    ============================================ -->
     <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
+            
+            <!-- Logo y botón de menú móvil -->
             <div class="flex items-center gap-4">
                 <button id="menu-toggle" class="block md:hidden p-2 text-gray-600 hover:text-indigo-600 rounded-md transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,17 +63,21 @@
                 </h1>
             </div>
 
+            <!-- Información del usuario y botones -->
             <div class="flex items-center gap-4">
+                <!-- Nombre del usuario -->
                 <div class="hidden sm:block text-right">
                     <p class="font-medium text-gray-800">{{ $user['nomb_comp'] ?? 'Usuario' }}</p>
                     <p class="text-xs text-indigo-600 font-medium">{{ isset($user['rol']) ? ucfirst($user['rol']) : 'Sin rol' }}</p>
                 </div>
 
+                <!-- Avatar del usuario -->
                 <div id="user-avatar"
                      class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
                     {{ isset($user['nomb_comp']) ? strtoupper(substr($user['nomb_comp'], 0, 1)) : '?' }}
                 </div>
 
+                <!-- Botón de inicio -->
                 <a href="/"
                    class="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition shadow-sm">
                     Inicio
@@ -52,23 +86,29 @@
         </div>
     </header>
 
-    <!-- Panel lateral de usuario -->
+    <!-- ============================================
+         SIDEBAR DE NAVEGACIÓN
+         ============================================
+         - Menú lateral con links a todas las secciones
+         - Responsive: oculto en móviles, visible en desktop
+         - Con scroll interno para muchos elementos
+    ============================================ -->
     <aside id="admin-sidebar"
         class="fixed top-0 left-0 w-64 bg-white shadow-lg h-full z-30 border-r border-gray-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
 
-        <!-- Contenedor con scroll -->
-        <div class="flex flex-col h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div class="flex flex-col h-full overflow-y-auto scrollbar-thin">
 
-            <!-- Encabezado -->
+            <!-- Encabezado del sidebar -->
             <div class="p-4 border-b border-gray-100">
                 <h3 class="text-sm font-semibold text-gray-800">Panel de Administración</h3>
                 <p class="text-xs text-indigo-600 mt-1 font-medium">Gestión completa del sistema</p>
             </div>
 
-            <!-- Navegación -->
+            <!-- Enlaces de navegación -->
             <nav class="flex-1 p-3">
                 <ul class="space-y-1 text-sm">
 
+                    <!-- Panel Administrador -->
                     <li>
                         <a href="/admin/mod-adm"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
@@ -80,6 +120,7 @@
                         </a>
                     </li>
 
+                    <!-- Gestión de Usuarios -->
                     <li>
                         <a href="/admin/users"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
@@ -91,6 +132,7 @@
                         </a>
                     </li>
 
+                    <!-- Gestión de Roles -->
                     <li>
                         <a href="/admin/roles"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
@@ -102,6 +144,7 @@
                         </a>
                     </li>
 
+                    <!-- Gestión de Grupos -->
                     <li>
                         <a href="/admin/grupos"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
@@ -113,6 +156,7 @@
                         </a>
                     </li>
 
+                    <!-- Gestión de Aulas -->
                     <li>
                         <a href="/admin/aulas"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
@@ -124,6 +168,7 @@
                         </a>
                     </li>
 
+                    <!-- Gestión de Materias -->
                     <li>
                         <a href="/admin/materias"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
@@ -136,6 +181,17 @@
                     </li>
 
                     <li>
+                        <a href="/admin/gestiones"
+                        class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <span>Gestión de Gestiones</span>
+                        </a>
+                    </li>
+                    <!-- Carga Horaria del Docente -->
+                    <li>
                         <a href="/admin/carga-horaria"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,6 +202,7 @@
                         </a>
                     </li>
 
+                    <!-- Generar Horario (ACTIVO) -->
                     <li>
                         <a href="/auto/generar-horario"
                         class="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 rounded-lg font-semibold hover:bg-indigo-100 transition">
@@ -157,6 +214,7 @@
                         </a>
                     </li>
 
+                    <!-- Bitácora del Sistema -->
                     <li>
                         <a href="/admin/bitacora"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
@@ -171,29 +229,41 @@
                 </ul>
             </nav>
 
-            <!-- Footer -->
+            <!-- Footer del sidebar -->
             <div class="p-3 border-t border-gray-100 text-center text-[11px] text-gray-500">
                 Módulo Admin v1.1
             </div>
         </div>
     </aside>
 
-    <!-- Overlay para móviles -->
+    <!-- Overlay oscuro para cerrar sidebar en móviles -->
     <div id="sidebar-overlay" 
          class="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden hidden"></div>
 
-    <!-- Contenido principal -->
+    <!-- ============================================
+         CONTENIDO PRINCIPAL
+         ============================================
+         Contiene todo el formulario y paneles de la
+         funcionalidad de generación de horarios
+    ============================================ -->
     <main class="flex-1 md:ml-64 p-6 transition-all duration-300">
-        <!-- Encabezado -->
+        
+        <!-- Encabezado de la página -->
         <div class="flex flex-col md:flex-row justify-between md:items-center mb-8">
             <div>
                 <h2 class="text-2xl font-semibold text-gray-800 mb-1">Generación Automática de Horarios</h2>
                 <p class="text-gray-600 text-sm">Sistema inteligente de asignación de aulas, horarios y docentes</p>
             </div>
+            <!-- Reloj en tiempo real (actualizado por JavaScript) -->
             <div id="clock" class="text-sm text-gray-600 font-medium mt-3 md:mt-0"></div>
         </div>
 
-        <!-- Selector de Gestión -->
+        <!-- ============================================
+             PASO 1: SELECTOR DE GESTIÓN ACADÉMICA
+             ============================================
+             Permite seleccionar el período académico
+             para el cual se generará el horario
+        ============================================ -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Seleccionar Gestión</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -207,7 +277,9 @@
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <button id="btn-cargar-datos" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <button id="btn-cargar-datos" 
+                            class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                            disabled>
                         Cargar Datos
                     </button>
                 </div>
@@ -487,45 +559,6 @@
 
     <!-- JavaScript Externo -->
     <script src="/static/scripts/auto_generar_horario.js"></script>
-    <script>
-        // Verificar que el contenedor existe al cargar
-        document.addEventListener('DOMContentLoaded', () => {
-            const contenedor = document.getElementById('contenedor-horario-generado');
-            console.log('✅ Contenedor horario encontrado al cargar:', contenedor ? 'Sí' : 'No');
-            
-            // Toggle sidebar en móviles
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.getElementById('admin-sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-
-            menuToggle?.addEventListener('click', () => {
-                if (sidebar) sidebar.classList.toggle('-translate-x-full');
-                if (overlay) overlay.classList.toggle('hidden');
-            });
-
-            overlay?.addEventListener('click', () => {
-                if (sidebar) sidebar.classList.add('-translate-x-full');
-                if (overlay) overlay.classList.add('hidden');
-            });
-        });
-
-        // Reloj
-        function updateClock() {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            };
-            document.getElementById('clock').textContent = now.toLocaleDateString('es-ES', options);
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-    </script>
 
 </body>
 </html>

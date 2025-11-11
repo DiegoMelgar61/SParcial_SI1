@@ -1398,6 +1398,19 @@ Route::get('/admin/aulas', function () {
         $stmt = $db->execute_query($sql);
         $aulas = $db->fetch_all($stmt);
 
+        //OBTENER GESTIONES DISPONIBLES
+        $gestiones = [];
+        try {
+            $sqlGestiones = "SELECT id, nombre, fecha_i as fecha_inicio, fecha_f as fecha_fin
+                            FROM ex_g32.gestion 
+                            ORDER BY fecha_inicio DESC";
+            $stmtGestiones = $db->execute_query($sqlGestiones);
+            $gestiones = $db->fetch_all($stmtGestiones);
+        } catch (Exception $e) {
+            // Si falla, continuar sin gestiones
+            error_log("Error al obtener gestiones: " . $e->getMessage());
+        }
+
         $estado = 'SUCCESS';
         $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
 
@@ -1410,9 +1423,14 @@ Route::get('/admin/aulas', function () {
             'tel' => Session::get('tel'),
         ];
 
-        return view('admin_aulas', ['aulas' => $aulas, 'user' => $user]);
+        return view('admin_aulas', [
+            'aulas' => $aulas, 
+            'user' => $user,
+            'gestiones' => $gestiones
+        ]);
     } catch (Exception $e) {
-        return redirect('/admin')->with('error', 'Error al consultar usuarios: ' . $e->getMessage());
+        error_log("Error en /admin/aulas: " . $e->getMessage());
+        return redirect('/admin')->with('error', 'Error al cargar aulas: ' . $e->getMessage());
     } finally {
         if (isset($db) && $db !== null) {
             $db->close_conection();
@@ -1635,4 +1653,347 @@ Route::post('/admin/aulas/update', function (Request $request) {
         }
     }
 });
+
+// ============================================
+// GESTIÓN DE GESTIONES ACADÉMICAS
+// ============================================
+
+// Vista principal de gestiones
+Route::get('/admin/gestiones', function () {
+    // VALIDACIÓN: USUARIO EN SESIÓN
+    if (!Session::has('user_code')) {
+        return redirect('/login');
+    }
+
+    // VALIDACIÓN: USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return redirect('/');
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        // Obtener datos del usuario
+        $sqlUser = "SELECT u.codigo, p.ci, p.nomb_comp, p.correo, p.tel, r.nombre as rol
+                    FROM ex_g32.usuario u
+                    INNER JOIN ex_g32.persona p ON u.ci = p.ci
+                    INNER JOIN ex_g32.rol r ON u.id_rol = r.id
+                    WHERE u.codigo = ?";
+        $stmt = $db->execute_query($sqlUser, [Session::get('user_code')]);
+        $user = $db->fetch_one($stmt);
+
+        $db->close_conection();
+
+        return view('admin_gestiones', ['user' => $user]);
+
+    } catch (Exception $e) {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+        return redirect('/')->with('error', 'Error al cargar la vista');
+    }
+});
+
+// API: Listar todas las gestiones
+Route::get('/admin/gestiones/list', function () {
+    // VALIDACIÓN: USUARIO EN SESIÓN
+    if (!Session::has('user_code')) {
+        return response()->json(['success' => false, 'message' => 'No autenticado'], 401);
+    }
+
+    // VALIDACIÓN: USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json(['success' => false, 'message' => 'Acceso denegado'], 403);
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        $sql = "SELECT id, nombre, fecha_i as fecha_inicio, fecha_f as fecha_fin
+                FROM ex_g32.gestion
+                ORDER BY fecha_i DESC";
+        $stmt = $db->execute_query($sql);
+        $gestiones = $db->fetch_all($stmt);
+
+        $db->close_conection();
+
+        return response()->json([
+            'success' => true,
+            'gestiones' => $gestiones
+        ]);
+
+    } catch (Exception $e) {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener gestiones',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+// API: Crear nueva gestión
+Route::post('/admin/gestiones', function (Request $request) {
+    // VALIDACIÓN: USUARIO EN SESIÓN
+    if (!Session::has('user_code')) {
+        return response()->json(['success' => false, 'message' => 'No autenticado'], 401);
+    }
+
+    // VALIDACIÓN: USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json(['success' => false, 'message' => 'Acceso denegado'], 403);
+    }
+
+    $data = $request->json()->all();
+    $nombre = $data['nombre'] ?? '';
+    $fecha_inicio = $data['fecha_inicio'] ?? '';
+    $fecha_fin = $data['fecha_fin'] ?? '';
+
+    // Validaciones
+    if (empty($nombre) || empty($fecha_inicio) || empty($fecha_fin)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Todos los campos son obligatorios'
+        ], 400);
+    }
+
+    // Validar formato del nombre (N-YYYY)
+    if (!preg_match('/^[1-4]-\d{4}$/', $nombre)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'El nombre debe tener el formato N-YYYY (ejemplo: 1-2025)'
+        ], 400);
+    }
+
+    // Validar que fecha_inicio sea antes de fecha_fin
+    if (strtotime($fecha_inicio) >= strtotime($fecha_fin)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'La fecha de inicio debe ser anterior a la fecha de fin'
+        ], 400);
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        // Verificar si ya existe una gestión con ese nombre
+        $sqlCheck = "SELECT COUNT(*) as existe FROM ex_g32.gestion WHERE nombre = ?";
+        $stmt = $db->execute_query($sqlCheck, [$nombre]);
+        $result = $db->fetch_one($stmt);
+
+        if ($result['existe'] > 0) {
+            $db->close_conection();
+            return response()->json([
+                'success' => false,
+                'message' => 'Ya existe una gestión con ese nombre'
+            ], 400);
+        }
+
+        // Insertar nueva gestión
+        $sqlInsert = "INSERT INTO ex_g32.gestion (nombre, fecha_i, fecha_f)
+                      VALUES (?, ?, ?)";
+        $db->execute_query($sqlInsert, [$nombre, $fecha_inicio, $fecha_fin]);
+
+        // Bitácora
+        $accion = 'CREAR GESTIÓN';
+        $estado = 'SUCCESS';
+        $comentario = "Gestión '$nombre' creada correctamente";
+        $fecha = date('Y-m-d H:i:s');
+        $codigo = Session::get('user_code');
+
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        $db->close_conection();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Gestión creada exitosamente'
+        ]);
+
+    } catch (Exception $e) {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al crear la gestión',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+// API: Actualizar gestión
+Route::put('/admin/gestiones/{id}', function (Request $request, $id) {
+    // VALIDACIÓN: USUARIO EN SESIÓN
+    if (!Session::has('user_code')) {
+        return response()->json(['success' => false, 'message' => 'No autenticado'], 401);
+    }
+
+    // VALIDACIÓN: USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json(['success' => false, 'message' => 'Acceso denegado'], 403);
+    }
+
+    $data = $request->json()->all();
+    $nombre = $data['nombre'] ?? '';
+    $fecha_inicio = $data['fecha_inicio'] ?? '';
+    $fecha_fin = $data['fecha_fin'] ?? '';
+
+    // Validaciones
+    if (empty($nombre) || empty($fecha_inicio) || empty($fecha_fin)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Todos los campos son obligatorios'
+        ], 400);
+    }
+
+    // Validar formato del nombre (N-YYYY)
+    if (!preg_match('/^[1-4]-\d{4}$/', $nombre)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'El nombre debe tener el formato N-YYYY (ejemplo: 1-2025)'
+        ], 400);
+    }
+
+    // Validar que fecha_inicio sea antes de fecha_fin
+    if (strtotime($fecha_inicio) >= strtotime($fecha_fin)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'La fecha de inicio debe ser anterior a la fecha de fin'
+        ], 400);
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        // Verificar si existe otra gestión con ese nombre (excepto la actual)
+        $sqlCheck = "SELECT COUNT(*) as existe FROM ex_g32.gestion 
+                     WHERE nombre = ? AND id != ?";
+        $stmt = $db->execute_query($sqlCheck, [$nombre, $id]);
+        $result = $db->fetch_one($stmt);
+
+        if ($result['existe'] > 0) {
+            $db->close_conection();
+            return response()->json([
+                'success' => false,
+                'message' => 'Ya existe otra gestión con ese nombre'
+            ], 400);
+        }
+
+        // Actualizar gestión
+        $sqlUpdate = "UPDATE ex_g32.gestion 
+                      SET nombre = ?, fecha_i = ?, fecha_f = ?
+                      WHERE id = ?";
+        $db->execute_query($sqlUpdate, [$nombre, $fecha_inicio, $fecha_fin, $id]);
+
+        // Bitácora
+        $accion = 'ACTUALIZAR GESTIÓN';
+        $estado = 'SUCCESS';
+        $comentario = "Gestión ID $id actualizada a '$nombre'";
+        $fecha = date('Y-m-d H:i:s');
+        $codigo = Session::get('user_code');
+
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        $db->close_conection();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Gestión actualizada exitosamente'
+        ]);
+
+    } catch (Exception $e) {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar la gestión',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
+// API: Eliminar gestión
+Route::delete('/admin/gestiones/{id}', function ($id) {
+    // VALIDACIÓN: USUARIO EN SESIÓN
+    if (!Session::has('user_code')) {
+        return response()->json(['success' => false, 'message' => 'No autenticado'], 401);
+    }
+
+    // VALIDACIÓN: USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json(['success' => false, 'message' => 'Acceso denegado'], 403);
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        // Verificar si la gestión tiene clases asociadas
+        $sqlCheck = "SELECT COUNT(*) as total FROM ex_g32.clase WHERE id_gestion = ?";
+        $stmt = $db->execute_query($sqlCheck, [$id]);
+        $result = $db->fetch_one($stmt);
+
+        if ($result['total'] > 0) {
+            $db->close_conection();
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede eliminar la gestión porque tiene clases asociadas'
+            ], 400);
+        }
+
+        // Obtener nombre de la gestión antes de eliminar
+        $sqlGet = "SELECT nombre FROM ex_g32.gestion WHERE id = ?";
+        $stmt = $db->execute_query($sqlGet, [$id]);
+        $gestion = $db->fetch_one($stmt);
+
+        if (!$gestion) {
+            $db->close_conection();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gestión no encontrada'
+            ], 404);
+        }
+
+        $nombreGestion = $gestion['nombre'];
+
+        // Eliminar gestión
+        $sqlDelete = "DELETE FROM ex_g32.gestion WHERE id = ?";
+        $db->execute_query($sqlDelete, [$id]);
+
+        // Bitácora
+        $accion = 'ELIMINAR GESTIÓN';
+        $estado = 'SUCCESS';
+        $comentario = "Gestión '$nombreGestion' eliminada";
+        $fecha = date('Y-m-d H:i:s');
+        $codigo = Session::get('user_code');
+
+        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
+
+        $db->close_conection();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Gestión eliminada exitosamente'
+        ]);
+
+    } catch (Exception $e) {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al eliminar la gestión',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+});
+
 

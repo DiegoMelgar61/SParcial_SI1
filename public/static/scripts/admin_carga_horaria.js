@@ -7,6 +7,138 @@ document.addEventListener("DOMContentLoaded", () => {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 
     // ========================================
+    // MÓDULO 0: Selector de Gestión
+    // ========================================
+    const selectGestion = document.getElementById("select-gestion-carga");
+    const mensajeInicial = document.getElementById("mensaje-seleccionar-gestion");
+    const contentWrapper = document.getElementById("carga-content-wrapper");
+
+    if (selectGestion) {
+        selectGestion.addEventListener("change", async (e) => {
+            const gestionId = e.target.value;
+            if (gestionId) {
+                await cargarDocentesPorGestion(gestionId);
+            } else {
+                if (mensajeInicial) mensajeInicial.classList.remove("hidden");
+                if (contentWrapper) contentWrapper.classList.add("hidden");
+            }
+        });
+    }
+
+    async function cargarDocentesPorGestion(gestionId) {
+        try {
+            // Mostrar loading
+            if (mensajeInicial) {
+                mensajeInicial.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i><p class="mt-4 text-gray-600">Cargando docentes...</p></div>';
+                mensajeInicial.classList.remove("hidden");
+            }
+            if (contentWrapper) contentWrapper.classList.add("hidden");
+
+            const response = await fetch(`/admin/carga-horaria/docentes/${gestionId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrfToken
+                }
+            });
+
+            if (!response.ok) throw new Error("Error al cargar docentes");
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.message || "Error al cargar docentes");
+            }
+
+            const docentes = data.docentes || [];
+
+            // Ocultar mensaje y mostrar contenido
+            if (mensajeInicial) mensajeInicial.classList.add("hidden");
+            if (contentWrapper) contentWrapper.classList.remove("hidden");
+
+            // Actualizar estadísticas
+            actualizarEstadisticas(docentes);
+
+            // Actualizar tabla
+            actualizarTablaDocentes(docentes);
+
+        } catch (error) {
+            console.error("Error:", error);
+            if (mensajeInicial) {
+                mensajeInicial.innerHTML = '<div class="text-center text-red-600"><i class="fas fa-exclamation-circle text-4xl"></i><p class="mt-4">Error al cargar los datos</p></div>';
+                mensajeInicial.classList.remove("hidden");
+            }
+        }
+    }
+
+    function actualizarEstadisticas(docentes) {
+        const totalDocentes = docentes.length;
+        const totalHoras = docentes.reduce((sum, d) => sum + parseInt(d.carga_horaria_total || 0), 0);
+        const promedioHoras = totalDocentes > 0 ? Math.round(totalHoras / totalDocentes) : 0;
+
+        // Actualizar los valores en el DOM
+        const statTotal = document.querySelector('[data-stat="total"]');
+        const statHoras = document.querySelector('[data-stat="horas"]');
+        const statPromedio = document.querySelector('[data-stat="promedio"]');
+
+        if (statTotal) statTotal.textContent = totalDocentes;
+        if (statHoras) statHoras.textContent = totalHoras;
+        if (statPromedio) statPromedio.textContent = promedioHoras;
+    }
+
+    function actualizarTablaDocentes(docentes) {
+        const tbody = document.getElementById("tbody-docentes");
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+
+        if (docentes.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                        <i class="fas fa-inbox text-4xl mb-2"></i>
+                        <p>No hay docentes registrados para esta gestión</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        docentes.forEach((docente, index) => {
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-gray-50 transition-colors";
+
+            tr.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">${docente.nombre || ''}</div>
+                    <div class="text-sm text-gray-500">${docente.codigo}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                        ${docente.materias_count || 0} ${(docente.materias_count || 0) === 1 ? 'materia' : 'materias'}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                    ${docente.carga_horaria_total || 0} hrs
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button class="btn-ver-detalle text-blue-600 hover:text-blue-900 transition-colors"
+                            data-codigo="${docente.codigo}"
+                            data-nombre="${docente.nombre || ''}">
+                        <i class="fas fa-eye mr-1"></i> Ver Detalle
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+
+        // Re-asignar event listeners a los nuevos botones
+        asignarEventListenersDetalle();
+    }
+
+    // ========================================
     // MÓDULO 1: Panel de Usuario (Avatar)
     // ========================================
     const userAvatar = document.getElementById("user-avatar");
@@ -76,16 +208,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // ========================================
     // MÓDULO 3: Ver Detalle de Docente
     // ========================================
-    const botonesVerDetalle = document.querySelectorAll(".btn-ver-detalle");
+    function asignarEventListenersDetalle() {
+        const botonesVerDetalle = document.querySelectorAll(".btn-ver-detalle");
 
-    botonesVerDetalle.forEach(btn => {
-        btn.addEventListener("click", async function() {
-            const codigo = this.getAttribute("data-codigo");
-            const nombre = this.getAttribute("data-nombre");
+        botonesVerDetalle.forEach(btn => {
+            btn.addEventListener("click", async function() {
+                const codigo = this.getAttribute("data-codigo");
+                const nombre = this.getAttribute("data-nombre");
 
-            await cargarDetalleDocente(codigo, nombre);
+                await cargarDetalleDocente(codigo, nombre);
+            });
         });
-    });
+    }
+
+    // Asignar listeners iniciales (si hay docentes cargados desde el servidor)
+    asignarEventListenersDetalle();
 
     async function cargarDetalleDocente(codigo, nombre) {
         try {
@@ -293,3 +430,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("✅ Admin Carga Horaria JS cargado correctamente");
 });
+
+// ========================================
+// MÓDULO 6: Sidebar Toggle y Reloj
+// ========================================
+
+// Toggle sidebar en móviles
+const menuToggle = document.getElementById('menu-toggle');
+const sidebar = document.getElementById('admin-sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+
+menuToggle?.addEventListener('click', () => {
+    sidebar.classList.toggle('-translate-x-full');
+    overlay.classList.toggle('hidden');
+});
+
+overlay?.addEventListener('click', () => {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+});
+
+// Reloj en tiempo real
+function updateClock() {
+    const now = new Date();
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    };
+    const clockElement = document.getElementById('clock');
+    if (clockElement) {
+        clockElement.textContent = now.toLocaleDateString('es-ES', options);
+    }
+}
+setInterval(updateClock, 1000);
+updateClock();

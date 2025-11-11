@@ -103,6 +103,6 @@
     </div>
   </div>
 
-  <script src="{{ secure_asset('static/scripts/import_user.js') }}"></script>
+  <script src="{{ asset('static/scripts/import_user.js') }}"></script>
 </body>
 </html>

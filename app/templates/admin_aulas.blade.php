@@ -159,6 +159,17 @@
                     </li>
 
                     <li>
+                        <a href="/admin/gestiones"
+                        class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <span>Gestión de Gestiones</span>
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="/admin/carga-horaria"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -447,12 +458,27 @@
             
             <!-- Encabezado -->
             <div class="flex-shrink-0 flex items-center justify-between p-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
-                <div>
+                <div class="flex-1">
                     <h3 class="text-xl font-bold text-gray-900">Horario del Aula <span id="horario-aula-numero" class="text-indigo-600"></span></h3>
                     <p class="text-sm text-gray-600 mt-1">
                         <span id="horario-aula-info"></span>
                     </p>
                 </div>
+                
+                <!-- Selector de Gestión -->
+                <div class="flex items-center gap-3 mr-4">
+                    <label for="select-gestion-horario" class="text-sm font-medium text-gray-700">Gestión:</label>
+                    <select id="select-gestion-horario" 
+                            class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Seleccione gestión...</option>
+                        @if(isset($gestiones) && is_array($gestiones) && count($gestiones) > 0)
+                            @foreach($gestiones as $gestion)
+                                <option value="{{ $gestion['id'] }}">{{ $gestion['nombre'] }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+                
                 <button id="btn-close-horario" class="text-gray-400 hover:text-gray-600 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -460,8 +486,19 @@
                 </button>
             </div>
 
+            <!-- Mensaje: Seleccione Gestión -->
+            <div id="horario-sin-gestion" class="flex-1 flex items-center justify-center py-12">
+                <div class="text-center">
+                    <svg class="w-16 h-16 mx-auto text-indigo-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="text-gray-600 text-lg font-medium">Seleccione una gestión para ver el horario</p>
+                    <p class="text-gray-400 text-sm mt-2">Use el selector de gestión arriba</p>
+                </div>
+            </div>
+
             <!-- Horario -->
-            <div class="flex-1 overflow-auto p-6">
+            <div class="flex-1 overflow-auto p-6 hidden" id="horario-content-wrapper">
                 <div id="horario-loading" class="text-center py-12 hidden">
                     <svg class="animate-spin h-12 w-12 mx-auto text-indigo-600" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

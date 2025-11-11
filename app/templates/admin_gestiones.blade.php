@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Grupos — Plataforma Universitaria INF342</title>
+    <title>Gestión de Gestiones — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
@@ -48,7 +48,8 @@
             </div>
         </div>
     </header>
-    <!-- Panel lateral de usuario (copiado del index, necesario para el avatar) -->
+
+    <!-- Panel lateral de usuario -->
     <aside id="user-aside"
         class="hidden fixed top-16 right-4 w-64 bg-white shadow-2xl rounded-xl border border-gray-200 z-50 transition-all duration-300 opacity-0 scale-95 origin-top-right">
         <div class="p-5 text-sm text-gray-700">
@@ -79,12 +80,10 @@
         </div>
     </aside>
 
-    
-    <!-- Panel lateral de usuario -->
+    <!-- Sidebar -->
     <aside id="admin-sidebar"
         class="fixed top-0 left-0 w-64 bg-white shadow-lg h-full z-30 border-r border-gray-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
 
-        <!-- Contenedor con scroll -->
         <div class="flex flex-col h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
 
             <!-- Encabezado -->
@@ -132,7 +131,7 @@
 
                     <li>
                         <a href="/admin/grupos"
-                        class="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 rounded-lg font-semibold hover:bg-indigo-100 transition">
+                        class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 20h5v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2h5M16 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -165,7 +164,7 @@
 
                     <li>
                         <a href="/admin/gestiones"
-                        class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
+                        class="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 rounded-lg font-semibold hover:bg-indigo-100 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -210,182 +209,163 @@
                 </ul>
             </nav>
 
-            <!-- Footer -->
-            <div class="p-3 border-t border-gray-100 text-center text-[11px] text-gray-500">
-                Módulo Admin v1.1
+            <!-- Logout -->
+            <div class="p-3 border-t border-gray-100 mt-auto">
+                <form action="/logout" method="POST">
+                    @csrf
+                    <button type="submit"
+                        class="w-full flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition font-medium text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span>Cerrar sesión</span>
+                    </button>
+                </form>
             </div>
+
         </div>
     </aside>
 
-
     <!-- Overlay para móviles -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden hidden"></div>
+    <div id="sidebar-overlay" 
+         class="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden hidden"></div>
 
     <!-- Contenido principal -->
     <main class="flex-1 md:ml-64 p-6 transition-all duration-300">
-        <!-- Encabezado -->
-
-
+        
         <!-- Encabezado -->
         <div class="flex flex-col md:flex-row justify-between md:items-center mb-8">
             <div>
-                <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-1">Grupos del Sistema</h2>
-                <p class="text-gray-500 text-sm">Cree, edite o elimine grupos según sea necesario.</p>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-1">Gestión de Gestiones Académicas</h2>
+                <p class="text-gray-600 text-sm">Administra las gestiones y períodos académicos</p>
             </div>
-            <button id="btn-add"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            <button id="btn-crear-gestion" 
+                    class="mt-4 md:mt-0 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Agregar Grupo
+                Nueva Gestión
             </button>
         </div>
-        <!-- Tabla de grupos -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+        <!-- Tabla de Gestiones -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Gestiones Registradas</h3>
+                <p class="text-sm text-gray-600 mt-1">Lista de todas las gestiones académicas del sistema</p>
+            </div>
+
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    #</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Sigla del Grupo</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Acciones</th>
-                            </tr>
-                        </thead>
-                    <tbody id="grupos-table-body" class="bg-white divide-y divide-gray-200 text-sm">
-                        @forelse ($grupos as $index => $grupo)
-                            <tr class="grupo-row hover:bg-gray-50" data-grupo-id="{{ $grupo['sigla'] }}">
-                                <td class="px-6 py-4 text-gray-700">{{ $index + 1 }}</td>
-                                <td class="px-6 py-4 text-gray-800 font-medium">{{ $grupo['sigla'] }}</td>
-                                <td class="px-6 py-4 text-right">
-                                    <button data-id="{{ $grupo['sigla'] }}" data-sigla="{{ $grupo['sigla'] }}"
-                                        class="btn-delete text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100 transition"
-                                        title="Eliminar">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="3" class="px-6 py-8 text-center text-gray-500">No hay grupos registrados.</td>
-                            </tr>
-                        @endforelse
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-700">ID</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-700">Nombre</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-700">Fecha Inicio</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-700">Fecha Fin</th>
+                            <th class="px-6 py-3 text-center font-semibold text-gray-700">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-gestiones" class="divide-y divide-gray-200">
+                        <!-- Se carga dinámicamente -->
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <div class="mt-4 text-sm text-gray-500">Mostrando {{ count($grupos) }} grupos.</div>
     </main>
 
-    <!-- Pie de página -->
-    <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 mt-auto">
-        © 2025 Plataforma Universitaria — Todos los derechos reservados
+    <!-- Footer -->
+    <footer class="md:ml-64 bg-white border-t border-gray-200 py-4 text-center text-xs text-gray-500">
+        © 2025 Plataforma Universitaria — Sistema de Gestión Académica
     </footer>
 
-    <!-- Modal de Formulario (Agregar/Editar Grupo) -->
-    <div id="grupo-form-modal"
-        class="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 hidden">
-
-        <!-- Contenedor del modal con altura máxima y flex-col -->
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh]">
-
-            <!-- Encabezado del Modal (fijo) -->
-            <div class="flex-shrink-0 flex items-center justify-between p-5 border-b border-gray-200">
-                <h3 id="form-modal-title" class="text-lg font-semibold text-gray-900">Agregar Nuevo Grupo</h3>
-                <button id="btn-cancel-form-x" class="text-gray-400 hover:text-gray-600 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg>
-                </button>
+    <!-- Modal Crear/Editar Gestión -->
+    <div id="modal-gestion" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200">
+                <h3 id="modal-title" class="text-xl font-semibold text-gray-900">Nueva Gestión</h3>
+                <p class="text-sm text-gray-600 mt-1">Complete los datos de la gestión académica</p>
             </div>
 
-            <!-- Formulario (con contenedor flex para scroll) -->
-            <form id="grupo-form" class="flex-1 flex flex-col min-h-0">
-                <input type="hidden" id="form-grupo-id" name="id" value="">
+            <!-- Body -->
+            <form id="form-gestion" class="p-6 space-y-5">
+                
+                <!-- Campo oculto para ID (al editar) -->
+                <input type="hidden" id="gestion-id" value="">
 
-                <!-- Área de campos con scroll -->
-                <div class="p-6 overflow-y-auto">
-
-                    <!-- Sigla -->
-                    <div>
-                        <label for="form-sigla" class="block text-sm font-medium text-gray-700 mb-2">Sigla del
-                            Grupo</label>
-                        <input type="text" id="form-sigla" name="sigla"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            required maxlength="2">
-                        <p class="text-xs text-gray-500 mt-1">Máximo 2 caracteres</p>
-                    </div>
-
+                <!-- Selector de Semestre -->
+                <div>
+                    <label for="input-semestre" class="block text-sm font-medium text-gray-700 mb-2">
+                        Semestre <span class="text-red-500">*</span>
+                    </label>
+                    <select id="input-semestre" required
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Seleccione un semestre...</option>
+                        <option value="1">1 - Primer Semestre</option>
+                        <option value="2">2 - Segundo Semestre</option>
+                        <option value="3">3 - Verano </option>
+                        <option value="4">4 - Mesa</option>
+                    </select>
                 </div>
 
-                <!-- Footer del Formulario (Acciones) (fijo) -->
-                <div
-                    class="flex-shrink-0 bg-gray-50 px-6 py-4 flex justify-end gap-3 rounded-b-xl border-t border-gray-200">
-                    <button type="button" id="btn-cancel-form"
-                        class="text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition">
-                        Cancelar
-                    </button>
-                    <button type="submit" id="btn-save-form"
-                        class="text-sm font-medium text-white bg-indigo-600 rounded-lg px-4 py-2 hover:bg-indigo-700 transition">
-                        Guardar
-                    </button>
+                <!-- Selector de Año -->
+                <div>
+                    <label for="input-año" class="block text-sm font-medium text-gray-700 mb-2">
+                        Año <span class="text-red-500">*</span>
+                    </label>
+                    <select id="input-año" required
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Seleccione un año...</option>
+                        <!-- Se llena dinámicamente con año anterior, actual y siguiente -->
+                    </select>
                 </div>
+
+                <!-- Vista previa del nombre -->
+                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                    <p class="text-xs font-medium text-indigo-700 mb-1">Nombre de la Gestión:</p>
+                    <p id="preview-nombre" class="text-lg font-bold text-indigo-900">-</p>
+                </div>
+
+                <!-- Fecha Inicio -->
+                <div>
+                    <label for="input-fecha-inicio" class="block text-sm font-medium text-gray-700 mb-2">
+                        Fecha de Inicio <span class="text-red-500">*</span>
+                    </label>
+                    <input type="date" id="input-fecha-inicio" required
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <!-- Fecha Fin -->
+                <div>
+                    <label for="input-fecha-fin" class="block text-sm font-medium text-gray-700 mb-2">
+                        Fecha de Fin <span class="text-red-500">*</span>
+                    </label>
+                    <input type="date" id="input-fecha-fin" required
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
             </form>
-        </div>
 
-    </div>
-
-
-    <!-- Modal de Confirmación de Eliminación -->
-    <div id="delete-modal"
-        class="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
-            <div class="p-6">
-                <div class="flex items-start gap-3">
-                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-red-100">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Eliminar Grupo</h3>
-                        <p class="text-sm text-gray-600 mt-1">
-                            ¿Estás seguro de que deseas eliminar el grupo <strong id="delete-grupo-sigla"
-                                class="font-bold">...</strong>? Esta acción no se puede deshacer.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3 rounded-b-xl">
-                <button id="btn-cancel-delete"
-                    class="text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 transition">
+            <!-- Footer -->
+            <div class="p-6 border-t border-gray-200 flex gap-3 justify-end">
+                <button type="button" id="btn-cancelar-modal"
+                        class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm">
                     Cancelar
                 </button>
-                <button id="btn-confirm-delete"
-                    class="text-sm font-medium text-white bg-red-600 rounded-lg px-4 py-2 hover:bg-red-700 transition">
-                    Sí, eliminar
+                <button type="submit" form="form-gestion" id="btn-guardar-gestion"
+                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium text-sm shadow-sm">
+                    Guardar Gestión
                 </button>
             </div>
+
         </div>
     </div>
 
-    <!-- ====== FIN DE MODALES ====== -->
-    <!-- JS: Este archivo ahora debe contener toda la lógica -->
-    <script src="{{ asset('static/scripts/admin_grupos.js') }}">
-    </script>
-
+    <script src="/static/scripts/admin_gestiones.js"></script>
 </body>
 
 </html>

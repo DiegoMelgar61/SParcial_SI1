@@ -546,35 +546,23 @@ Route::get('/admin/carga-horaria', function () {
         $stmt = $db->execute_query($sql, $params);
         $user = $db->fetch_one($stmt);
 
-        // Obtener todos los docentes con su carga horaria
-        $sqlDocentes = "
-            SELECT 
-                u.codigo,
-                p.ci,
-                p.nomb_comp,
-                p.correo,
-                p.tel,
-                COUNT(DISTINCT c.id) as total_clases,
-                COALESCE(SUM(CAST(m.carga_horaria AS INTEGER)), 0) as carga_horaria_total
-            FROM ex_g32.usuario u
-            INNER JOIN ex_g32.persona p ON u.ci = p.ci
-            INNER JOIN ex_g32.rol r ON u.id_rol = r.id
-            LEFT JOIN ex_g32.clase c ON c.usuario_codigo = u.codigo
-            LEFT JOIN ex_g32.materia_grupo mg ON c.id_materia_grupo = mg.id
-            LEFT JOIN ex_g32.materia m ON mg.sigla_materia = m.sigla
-            WHERE r.nombre = 'docente'
-            GROUP BY u.codigo, p.ci, p.nomb_comp, p.correo, p.tel
-            ORDER BY p.nomb_comp ASC
-        ";
-        
-        $stmt = $db->execute_query($sqlDocentes, []);
-        $docentes = $db->fetch_all($stmt);
+        // Obtener gestiones disponibles
+        $gestiones = [];
+        try {
+            $sqlGestiones = "SELECT id, nombre,fecha_i as fecha_inicio, fecha_f as fecha_fin 
+                            FROM ex_g32.gestion 
+                            ORDER BY fecha_inicio DESC";
+            $stmtGestiones = $db->execute_query($sqlGestiones);
+            $gestiones = $db->fetch_all($stmtGestiones);
+        } catch (Exception $e) {
+            error_log("Error al obtener gestiones: " . $e->getMessage());
+        }
 
         $db->close_conection();
 
         return view('admin_carga_horaria', [
             'user' => $user,
-            'docentes' => $docentes
+            'gestiones' => $gestiones
         ]);
 
     } catch (Exception $e) {
@@ -582,6 +570,98 @@ Route::get('/admin/carga-horaria', function () {
             $db->close_conection();
         }
         return response('<h1>ERROR:</h1><pre>' . $e->getMessage() . "\n\n" . $e->getTraceAsString() . '</pre>', 500);
+    }
+});
+
+// ENDPOINT: Obtener docentes por gestión
+Route::get('/admin/carga-horaria/docentes/{gestion_id}', function ($gestion_id) {
+    // VALIDACIÓN: USUARIO EN SESIÓN
+    if (!Session::has('user_code')) {
+        return response()->json(['success' => false, 'message' => 'No autenticado'], 401);
+    }
+
+    // VALIDACIÓN: USUARIO ADMIN
+    if (Session::get('user_role') !== 'admin') {
+        return response()->json(['success' => false, 'message' => 'Acceso denegado'], 403);
+    }
+
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+
+        // Obtener todos los docentes con su carga horaria EN ESA GESTIÓN
+        // IMPORTANTE: Se suma la carga horaria por materia-grupo única (no por cada clase)
+        // Ej: Si tiene 2 clases de INF342-SA (135 hrs), solo suma 135 hrs
+        //     Pero si tiene INF342-SA (135 hrs) + INF342-SB (135 hrs) = 270 hrs
+        $sqlDocentes = "
+            SELECT 
+                u.codigo,
+                p.ci,
+                p.nomb_comp as nombre,
+                p.correo,
+                p.tel,
+                COALESCE(clases.total_clases, 0) as total_clases,
+                COALESCE(materias.materias_count, 0) as materias_count,
+                COALESCE(carga.carga_horaria_total, 0) as carga_horaria_total
+            FROM ex_g32.usuario u
+            INNER JOIN ex_g32.persona p ON u.ci = p.ci
+            INNER JOIN ex_g32.rol r ON u.id_rol = r.id
+            LEFT JOIN (
+                SELECT usuario_codigo, COUNT(*) as total_clases
+                FROM ex_g32.clase
+                WHERE id_gestion = :gestion_id_clases
+                GROUP BY usuario_codigo
+            ) clases ON clases.usuario_codigo = u.codigo
+            LEFT JOIN (
+                SELECT usuario_codigo, COUNT(DISTINCT id_materia_grupo) as materias_count
+                FROM ex_g32.clase
+                WHERE id_gestion = :gestion_id_materias
+                GROUP BY usuario_codigo
+            ) materias ON materias.usuario_codigo = u.codigo
+            LEFT JOIN (
+                SELECT 
+                    usuario_codigo,
+                    SUM(carga_horaria) as carga_horaria_total
+                FROM (
+                    SELECT DISTINCT
+                        c.usuario_codigo,
+                        mg.id as materia_grupo_id,
+                        CAST(m.carga_horaria AS INTEGER) as carga_horaria
+                    FROM ex_g32.clase c
+                    INNER JOIN ex_g32.materia_grupo mg ON c.id_materia_grupo = mg.id
+                    INNER JOIN ex_g32.materia m ON mg.sigla_materia = m.sigla
+                    WHERE c.id_gestion = :gestion_id_carga
+                ) materias_unicas
+                GROUP BY usuario_codigo
+            ) carga ON carga.usuario_codigo = u.codigo
+            WHERE r.nombre = 'docente'
+            ORDER BY p.nomb_comp ASC
+        ";
+        
+        $params = [
+            ':gestion_id_clases' => $gestion_id,
+            ':gestion_id_materias' => $gestion_id,
+            ':gestion_id_carga' => $gestion_id
+        ];
+        $stmt = $db->execute_query($sqlDocentes, $params);
+        $docentes = $db->fetch_all($stmt);
+
+        $db->close_conection();
+
+        return response()->json([
+            'success' => true,
+            'docentes' => $docentes
+        ]);
+
+    } catch (Exception $e) {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener docentes',
+            'error' => $e->getMessage()
+        ], 500);
     }
 });
 

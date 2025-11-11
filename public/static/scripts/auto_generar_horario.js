@@ -590,65 +590,131 @@ function renderizarHorarioGenerado(clases) {
         return;
     }
 
-    // Renderizar como tabla completa (estilo Excel)
+    // ========================================================================
+    // AGRUPAR CLASES POR MATERIA-GRUPO
+    // ========================================================================
+    // Estructura: { "MAT101-F1": [clase1, clase2, ...], ... }
+    const gruposMaterias = {};
+    
+    clases.forEach(clase => {
+        const key = `${clase.sigla_materia}-${clase.sigla_grupo}`;
+        if (!gruposMaterias[key]) {
+            gruposMaterias[key] = {
+                sigla_materia: clase.sigla_materia,
+                sigla_grupo: clase.sigla_grupo,
+                nombre_materia: clase.nombre_materia,
+                docente: clase.docente,
+                semestre: clase.semestre,
+                horarios: []
+            };
+        }
+        gruposMaterias[key].horarios.push({
+            dia: clase.dia,
+            hora_i: clase.hora_i,
+            hora_f: clase.hora_f,
+            nro_aula: clase.nro_aula,
+            tipo_aula: clase.tipo_aula
+        });
+    });
+
+    // ========================================================================
+    // RENDERIZAR TABLA AGRUPADA
+    // ========================================================================
     let html = `
         <div class="overflow-x-auto">
             <table class="w-full text-xs border-collapse">
                 <thead class="bg-gray-800 text-white sticky top-0">
                     <tr>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Día</th>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Hora Inicio</th>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Hora Fin</th>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Aula</th>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Tipo Aula</th>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Materia</th>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Sigla</th>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Grupo</th>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Docente</th>
-                        <th class="border border-gray-300 px-2 py-2 text-left font-semibold">Semestre</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">SEM</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">SIGLA</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">GR</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold">NOMBRE MATERIA</th>
+                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold">NOMBRE DOCENTE</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">DÍA</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">HORA</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">DÍA</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">HORA</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">DÍA</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">HORA</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">DÍA</th>
+                        <th class="border border-gray-300 px-3 py-2 text-center font-semibold">HORA</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white">
     `;
 
-    // Ordenar por día, luego por hora
-    const diasOrden = { 'Lun': 1, 'Mar': 2, 'Mie': 3, 'Jue': 4, 'Vie': 5, 'Sab': 6, 'Dom': 7 };
-    const clasesOrdenadas = [...clases].sort((a, b) => {
-        const diaA = diasOrden[a.dia] || 99;
-        const diaB = diasOrden[b.dia] || 99;
-        if (diaA !== diaB) return diaA - diaB;
-        return a.hora_i.localeCompare(b.hora_i);
+    // Ordenar grupos por semestre y luego por sigla
+    const gruposOrdenados = Object.entries(gruposMaterias).sort((a, b) => {
+        const semestreA = a[1].semestre;
+        const semestreB = b[1].semestre;
+        if (semestreA !== semestreB) return semestreA - semestreB;
+        return a[1].sigla_materia.localeCompare(b[1].sigla_materia);
     });
 
-    clasesOrdenadas.forEach((clase, index) => {
+    gruposOrdenados.forEach(([key, grupo], index) => {
         const bgColor = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+        
+        // Ordenar horarios por día
+        const diasOrden = { 'Lun': 1, 'Mar': 2, 'Mie': 3, 'Jue': 4, 'Vie': 5, 'Sab': 6, 'Dom': 7 };
+        const horariosOrdenados = grupo.horarios.sort((a, b) => {
+            return (diasOrden[a.dia] || 99) - (diasOrden[b.dia] || 99);
+        });
+
         html += `
             <tr class="${bgColor} hover:bg-blue-50">
-                <td class="border border-gray-300 px-2 py-1 font-medium">${clase.dia}</td>
-                <td class="border border-gray-300 px-2 py-1">${clase.hora_i}</td>
-                <td class="border border-gray-300 px-2 py-1">${clase.hora_f}</td>
-                <td class="border border-gray-300 px-2 py-1 text-center font-semibold">${clase.nro_aula}</td>
-                <td class="border border-gray-300 px-2 py-1 text-xs text-gray-600">${clase.tipo_aula}</td>
-                <td class="border border-gray-300 px-2 py-1">${clase.nombre_materia}</td>
-                <td class="border border-gray-300 px-2 py-1 text-center font-mono text-xs">${clase.sigla_materia}</td>
-                <td class="border border-gray-300 px-2 py-1 text-center font-semibold text-indigo-600">${clase.sigla_grupo}</td>
-                <td class="border border-gray-300 px-2 py-1">${clase.docente}</td>
-                <td class="border border-gray-300 px-2 py-1 text-center">${clase.semestre}</td>
-            </tr>
+                <td class="border border-gray-300 px-2 py-2 text-center font-semibold">${grupo.semestre}</td>
+                <td class="border border-gray-300 px-2 py-2 text-center font-mono font-semibold text-indigo-700">${grupo.sigla_materia}</td>
+                <td class="border border-gray-300 px-2 py-2 text-center font-bold text-purple-600">${grupo.sigla_grupo}</td>
+                <td class="border border-gray-300 px-2 py-2 font-medium">${grupo.nombre_materia}</td>
+                <td class="border border-gray-300 px-2 py-2 text-gray-700">${grupo.docente}</td>
         `;
+
+        // Agregar hasta 4 horarios (columnas de día y hora)
+        for (let i = 0; i < 4; i++) {
+            if (i < horariosOrdenados.length) {
+                const h = horariosOrdenados[i];
+                // Mapear días a abreviatura de 3 letras
+                const diaMap = {
+                    'Lun': 'Lun', 'Mar': 'Mar', 'Mie': 'Mie', 
+                    'Jue': 'Jue', 'Vie': 'Vie', 'Sab': 'Sab'
+                };
+                const diaAbrev = diaMap[h.dia] || h.dia;
+                
+                html += `
+                    <td class="border border-gray-300 px-2 py-2 text-center font-semibold text-green-700">${diaAbrev}</td>
+                    <td class="border border-gray-300 px-2 py-2 text-center text-xs">
+                        <div class="font-medium">${h.hora_i}-${h.hora_f}</div>
+                        <div class="text-gray-500 text-[10px]">Aula ${h.nro_aula}</div>
+                    </td>
+                `;
+            } else {
+                // Celdas vacías si no hay más horarios
+                html += `
+                    <td class="border border-gray-300 px-2 py-2 bg-gray-100"></td>
+                    <td class="border border-gray-300 px-2 py-2 bg-gray-100"></td>
+                `;
+            }
+        }
+
+        html += `</tr>`;
     });
 
     html += `
                 </tbody>
             </table>
         </div>
-        <div class="mt-4 text-sm text-gray-600 text-center">
-            <strong>Total de clases:</strong> ${clases.length}
+        <div class="mt-4 flex justify-between items-center text-sm text-gray-600">
+            <div>
+                <strong>Total de materias-grupo:</strong> ${gruposOrdenados.length}
+            </div>
+            <div>
+                <strong>Total de clases:</strong> ${clases.length}
+            </div>
         </div>
     `;
 
     contenedor.innerHTML = html;
-    console.log(`✅ Horario renderizado: ${clases.length} clases en tabla completa`);
+    console.log(`✅ Horario renderizado: ${gruposOrdenados.length} materias-grupo, ${clases.length} clases totales`);
 }
 
 function cerrarModalHorario() {
@@ -721,3 +787,48 @@ function ocultarLoader() {
         loader.classList.add('hidden');
     }
 }
+
+// ========================================
+// MÓDULO ADICIONAL: Sidebar Toggle y Reloj
+// ========================================
+
+// Verificar que el contenedor existe al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    const contenedor = document.getElementById('contenedor-horario-generado');
+    console.log('✅ Contenedor horario encontrado al cargar:', contenedor ? 'Sí' : 'No');
+    
+    // Toggle sidebar en móviles
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    menuToggle?.addEventListener('click', () => {
+        if (sidebar) sidebar.classList.toggle('-translate-x-full');
+        if (overlay) overlay.classList.toggle('hidden');
+    });
+
+    overlay?.addEventListener('click', () => {
+        if (sidebar) sidebar.classList.add('-translate-x-full');
+        if (overlay) overlay.classList.add('hidden');
+    });
+});
+
+// Reloj en tiempo real
+function updateClock() {
+    const now = new Date();
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    };
+    const clockElement = document.getElementById('clock');
+    if (clockElement) {
+        clockElement.textContent = now.toLocaleDateString('es-ES', options);
+    }
+}
+setInterval(updateClock, 1000);
+updateClock();

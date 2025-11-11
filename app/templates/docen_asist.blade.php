@@ -260,6 +260,6 @@
     © {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA
   </footer>
 
-  <script src="{{ secure_asset('static/scripts/docen_asist.js') }}"></script>
+  <script src="{{asset('static/scripts/docen_asist.js') }}"></script>
 </body>
 </html>

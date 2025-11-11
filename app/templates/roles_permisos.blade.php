@@ -130,7 +130,7 @@
                     </li>
 
                     <li>
-                        <a href="/admin/carga-docente"
+                        <a href="/admin/carga-horaria"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -141,7 +141,7 @@
                     </li>
 
                     <li>
-                        <a href="/admin/horarios"
+                        <a href="/auto/generar-horario"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -524,6 +524,6 @@
   </div>
 
   <!-- Script principal -->
-  <script src="{{ secure_asset('static/scripts/roles_permisos.js') }}"></script>
+  <script src="{{ asset('static/scripts/roles_permisos.js') }}"></script>
 </body>
 </html>

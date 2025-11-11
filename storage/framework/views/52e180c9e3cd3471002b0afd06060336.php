@@ -10,40 +10,37 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
 
-    <!-- BARRA SUPERIOR -->
-    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
-            <div class="flex items-center gap-4">
-                <button id="menu-toggle" class="block md:hidden p-2 text-gray-600 hover:text-indigo-600 rounded-md transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-                <h1 class="text-lg md:text-xl font-semibold text-gray-700 tracking-wide">
-                    Plataforma Universitaria
-                </h1>
-            </div>
+    <!-- Barra superior -->
+  <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
+      <div class="flex items-center gap-4">
+        <button id="menu-toggle" class="block md:hidden p-2 text-gray-600 hover:text-sky-600 rounded-md transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        <h1 class="text-lg md:text-xl font-semibold text-gray-800 tracking-wide">Módulo Docencia</h1>
+      </div>
 
-            <div class="flex items-center gap-4">
-                <div class="hidden sm:block text-right">
-                    <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp']); ?></p>
-                    <p class="text-xs text-gray-500"><?php echo e(ucfirst($user['rol'])); ?></p>
-                </div>
-
-                <!-- Avatar -->
-                <div id="user-avatar"
-                    class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
-                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
-
-                </div>
-
-                <!-- Botón de inicio -->
-                <a href="/" class="text-sm bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 px-4 py-2 rounded-md font-medium transition">
-                    Inicio
-                </a>
-            </div>
+      <div class="flex items-center gap-4">
+        <div class="hidden sm:block text-right">
+          <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp']); ?></p>
+          <p class="text-xs text-sky-600 font-medium"><?php echo e(ucfirst($user['rol'])); ?></p>
         </div>
-    </header>
+
+        <div id="user-avatar"
+             class="w-10 h-10 rounded-full bg-sky-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
+          <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
+        </div>
+
+        <a href="/"
+           class="text-sm bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md font-medium transition shadow-sm">
+          Inicio
+        </a>
+      </div>
+    </div>
+  </header>
 
     <!-- Panel lateral de usuario -->
     <aside id="user-aside"
@@ -77,34 +74,61 @@
         </div>
     </aside>
 
-    <!-- PANEL LATERAL (SIDEBAR) -->
-    <aside id="admin-sidebar" class="fixed top-0 left-0 w-64 bg-white shadow-lg h-full z-30 border-r border-gray-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+    <!-- Sidebar -->
+    <aside id="docencia-sidebar"
+    class="fixed top-0 left-0 w-64 bg-white shadow-lg h-full z-30 border-r border-gray-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
         <div class="flex flex-col h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             
+            <!-- Encabezado -->
             <div class="p-4 border-b border-gray-100">
-                <h3 class="text-sm font-semibold text-gray-800">Panel de Docente</h3>
-                <p class="text-xs text-indigo-600 mt-1 font-medium">Gestión de licencias</p>
+            <h3 class="text-sm font-semibold text-gray-800">Panel de Docencia</h3>
+            <p class="text-xs text-sky-600 mt-1 font-medium">Gestión docente</p>
             </div>
 
+            <!-- Navegación -->
             <nav class="flex-1 p-3">
-                <ul class="space-y-1 text-sm">
-                    <li>
-                        <a href="/docente/licencias" class="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 rounded-lg font-semibold hover:bg-indigo-100 transition">
-                            <i class="fas fa-calendar-times w-4"></i>
-                            <span>Mis Licencias</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/" class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
-                            <i class="fas fa-home w-4"></i>
-                            <span>Volver al Inicio</span>
-                        </a>
-                    </li>
-                </ul>
+            <ul class="space-y-1 text-sm">
+                
+                <!-- Panel principal -->
+                <li>
+                <a href="/docen/mod-doc"
+                    class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-sky-50 hover:text-sky-700 rounded-lg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
+                    </svg>
+                    <span>Panel Docencia</span>
+                </a>
+                </li>
+
+                <!-- Asistencia -->
+                <li>
+                <a href="/docen/asistencia"
+                    class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-sky-50 hover:text-sky-700 rounded-lg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>Asistencia</span>
+                </a>
+                </li>
+
+                <!-- Licencia -->
+                <li>
+                <a href="/docencia/licencia"
+                    class="flex items-center gap-2 px-3 py-2 text-sky-700 bg-sky-50 rounded-lg font-semibold hover:bg-sky-100 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Licencia</span>
+                </a>
+                </li>
+            </ul>
             </nav>
 
+            <!-- Footer -->
             <div class="p-3 border-t border-gray-100 text-center text-[11px] text-gray-500">
-                Sistema de Licencias v1.0
+            Módulo Docencia v1.0
             </div>
         </div>
     </aside>
@@ -182,7 +206,6 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Inicio</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Fin</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Días</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
@@ -379,28 +402,6 @@
             </div>
         </div>
     </div>
-
-    <!-- SCRIPT PARA MENÚ MÓVIL -->
-    <script>
-        // Toggle del menú lateral en móviles
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('admin-sidebar');
-        
-        if (menuToggle) {
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-            });
-        }
-
-        // Cerrar sidebar al hacer clic fuera en móviles
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth < 768) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    sidebar.classList.add('-translate-x-full');
-                }
-            }
-        });
-    </script>
 
     <!-- Incluir el archivo JavaScript -->
     <script src="/static/scripts/docente_licencia.js"></script>
