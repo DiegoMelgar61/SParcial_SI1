@@ -262,6 +262,6 @@
 
   <!-- Librería para generar códigos QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="{{asset('static/scripts/docen_asist.js') }}"></script>
+  <script src="{{secure_asset('static/scripts/docen_asist.js') }}"></script>
 </body>
 </html>

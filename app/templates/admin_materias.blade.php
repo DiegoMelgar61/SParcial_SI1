@@ -633,7 +633,7 @@
     </div>
 
     <!-- JS -->
-    <script src="{{ asset('static/scripts/admin_materias.js') }}"></script>
+    <script src="{{ secure_asset('static/scripts/admin_materias.js') }}"></script>
 
 </body>
 

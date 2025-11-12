@@ -265,6 +265,8 @@
     © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
   </footer>
 
+  <!-- Librería para generar códigos QR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="<?php echo e(asset('static/scripts/docen_asist.js')); ?>"></script>
 </body>
 </html><?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/docen_asist.blade.php ENDPATH**/ ?>
