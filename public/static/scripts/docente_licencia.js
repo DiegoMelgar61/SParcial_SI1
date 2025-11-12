@@ -57,16 +57,18 @@ let diasDisponiblesGlobal = 0;
  * Inicializa el sistema cuando el DOM está completamente cargado
  * Configura event listeners y carga datos iniciales
  */
-// Toggle del menú lateral en móviles
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('admin-sidebar');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Iniciando Sistema de Gestión de Licencias');
+    
+    // Toggle del menú lateral en móviles
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('docencia-sidebar');
+    
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
         
-        if (menuToggle) {
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-            });
-        }
-
         // Cerrar sidebar al hacer clic fuera en móviles
         document.addEventListener('click', (e) => {
             if (window.innerWidth < 768) {
@@ -75,13 +77,14 @@ let diasDisponiblesGlobal = 0;
                 }
             }
         });
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Iniciando Sistema de Gestión de Licencias');
+    }
     
     // Establecer fecha mínima en el input de fecha (hoy)
     const inputFechaInicio = document.getElementById('inputFechaInicio');
-    const hoy = new Date().toISOString().split('T')[0];
-    inputFechaInicio.min = hoy;
+    if (inputFechaInicio) {
+        const hoy = new Date().toISOString().split('T')[0];
+        inputFechaInicio.min = hoy;
+    }
     
     // Configurar panel de usuario (avatar clickeable)
     configurarPanelUsuario();
@@ -148,29 +151,50 @@ function configurarPanelUsuario() {
  */
 function configurarEventListeners() {
     // Botón: Nueva Licencia
-    document.getElementById('btnNuevaLicencia').addEventListener('click', abrirModalNuevo);
+    const btnNuevaLicencia = document.getElementById('btnNuevaLicencia');
+    if (btnNuevaLicencia) {
+        btnNuevaLicencia.addEventListener('click', abrirModalNuevo);
+    }
     
     // Botones: Cerrar modales
-    document.getElementById('btnCerrarModal').addEventListener('click', cerrarModalLicencia);
-    document.getElementById('btnCancelarModal').addEventListener('click', cerrarModalLicencia);
-    document.getElementById('btnCancelarEliminar').addEventListener('click', cerrarModalConfirmacion);
-    document.getElementById('btnCerrarMensaje').addEventListener('click', cerrarModalMensaje);
+    const btnCerrarModal = document.getElementById('btnCerrarModal');
+    const btnCancelarModal = document.getElementById('btnCancelarModal');
+    const btnCancelarEliminar = document.getElementById('btnCancelarEliminar');
+    const btnCerrarMensaje = document.getElementById('btnCerrarMensaje');
+    
+    if (btnCerrarModal) btnCerrarModal.addEventListener('click', cerrarModalLicencia);
+    if (btnCancelarModal) btnCancelarModal.addEventListener('click', cerrarModalLicencia);
+    if (btnCancelarEliminar) btnCancelarEliminar.addEventListener('click', cerrarModalConfirmacion);
+    if (btnCerrarMensaje) btnCerrarMensaje.addEventListener('click', cerrarModalMensaje);
     
     // Botón: Confirmar eliminación
-    document.getElementById('btnConfirmarEliminar').addEventListener('click', confirmarEliminacion);
+    const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
+    if (btnConfirmarEliminar) {
+        btnConfirmarEliminar.addEventListener('click', confirmarEliminacion);
+    }
     
     // Cerrar modales al hacer clic fuera
-    document.getElementById('modalLicencia').addEventListener('click', (e) => {
-        if (e.target.id === 'modalLicencia') cerrarModalLicencia();
-    });
+    const modalLicencia = document.getElementById('modalLicencia');
+    const modalConfirmacion = document.getElementById('modalConfirmacion');
+    const modalMensaje = document.getElementById('modalMensaje');
     
-    document.getElementById('modalConfirmacion').addEventListener('click', (e) => {
-        if (e.target.id === 'modalConfirmacion') cerrarModalConfirmacion();
-    });
+    if (modalLicencia) {
+        modalLicencia.addEventListener('click', (e) => {
+            if (e.target.id === 'modalLicencia') cerrarModalLicencia();
+        });
+    }
     
-    document.getElementById('modalMensaje').addEventListener('click', (e) => {
-        if (e.target.id === 'modalMensaje') cerrarModalMensaje();
-    });
+    if (modalConfirmacion) {
+        modalConfirmacion.addEventListener('click', (e) => {
+            if (e.target.id === 'modalConfirmacion') cerrarModalConfirmacion();
+        });
+    }
+    
+    if (modalMensaje) {
+        modalMensaje.addEventListener('click', (e) => {
+            if (e.target.id === 'modalMensaje') cerrarModalMensaje();
+        });
+    }
 }
 
 /**
@@ -182,11 +206,17 @@ function configurarFormulario() {
     const inputDias = document.getElementById('inputDias');
     
     // Submit del formulario
-    form.addEventListener('submit', manejarSubmitFormulario);
+    if (form) {
+        form.addEventListener('submit', manejarSubmitFormulario);
+    }
     
     // Calcular fecha fin cuando cambien fecha inicio o días
-    inputFechaInicio.addEventListener('change', calcularFechaFin);
-    inputDias.addEventListener('change', calcularFechaFin);
+    if (inputFechaInicio) {
+        inputFechaInicio.addEventListener('change', calcularFechaFin);
+    }
+    if (inputDias) {
+        inputDias.addEventListener('change', calcularFechaFin);
+    }
 }
 
 // =====================================================================
@@ -213,22 +243,27 @@ async function cargarDiasDisponibles() {
             diasDisponiblesGlobal = data.dias_disponibles;
             
             // Actualizar UI principal
-            document.getElementById('diasDisponibles').textContent = data.dias_disponibles;
-            document.getElementById('diasUsados').textContent = data.dias_usados;
+            const diasDisponiblesEl = document.getElementById('diasDisponibles');
+            const diasUsadosEl = document.getElementById('diasUsados');
+            
+            if (diasDisponiblesEl) diasDisponiblesEl.textContent = data.dias_disponibles;
+            if (diasUsadosEl) diasUsadosEl.textContent = data.dias_usados;
             
             // Cambiar color según días disponibles
             const cardDias = document.querySelector('.bg-gradient-to-r.from-green-500');
-            if (data.dias_disponibles === 0) {
-                cardDias.classList.remove('from-green-500', 'to-green-600');
-                cardDias.classList.add('from-red-500', 'to-red-600');
-            } else if (data.dias_disponibles <= 2) {
-                cardDias.classList.remove('from-green-500', 'to-green-600');
-                cardDias.classList.add('from-yellow-500', 'to-yellow-600');
+            if (cardDias) {
+                if (data.dias_disponibles === 0) {
+                    cardDias.classList.remove('from-green-500', 'to-green-600');
+                    cardDias.classList.add('from-red-500', 'to-red-600');
+                } else if (data.dias_disponibles <= 2) {
+                    cardDias.classList.remove('from-green-500', 'to-green-600');
+                    cardDias.classList.add('from-yellow-500', 'to-yellow-600');
+                }
             }
             
             // Deshabilitar botón si no hay días disponibles
             const btnNuevaLicencia = document.getElementById('btnNuevaLicencia');
-            if (data.dias_disponibles === 0) {
+            if (btnNuevaLicencia && data.dias_disponibles === 0) {
                 btnNuevaLicencia.disabled = true;
                 btnNuevaLicencia.classList.add('opacity-50', 'cursor-not-allowed');
                 btnNuevaLicencia.title = 'Has alcanzado el límite de días este mes';
@@ -253,13 +288,20 @@ function actualizarSelectorDias(diasDisponibles) {
     const selectDias = document.getElementById('inputDias');
     const diasDisponiblesModal = document.getElementById('diasDisponiblesModal');
     
+    if (!selectDias) {
+        console.warn('⚠️ Elemento inputDias no encontrado');
+        return;
+    }
+    
     console.log(`🔄 Actualizando selector con ${diasDisponibles} días disponibles`);
     
     // Limpiar opciones existentes
     selectDias.innerHTML = '<option value="">Selecciona los días...</option>';
     
     // Actualizar contador en el modal
-    diasDisponiblesModal.textContent = diasDisponibles;
+    if (diasDisponiblesModal) {
+        diasDisponiblesModal.textContent = diasDisponibles;
+    }
     
     // Si no hay días disponibles
     if (diasDisponibles === 0 || diasDisponibles < 0) {
@@ -300,11 +342,17 @@ async function cargarLicencias() {
     console.log('🔍 tablaContainer:', tablaContainer);
     console.log('🔍 tablaLicencias:', tablaLicencias);
     
+    // Verificar que los elementos existan
+    if (!tablaContainer || !tablaLicencias) {
+        console.warn('⚠️ Elementos de tabla no encontrados, abortando cargarLicencias()');
+        return;
+    }
+    
     try {
         // Mostrar spinner
-        loadingSpinner.classList.remove('hidden');
+        if (loadingSpinner) loadingSpinner.classList.remove('hidden');
         tablaContainer.classList.add('hidden');
-        noLicencias.classList.add('hidden');
+        if (noLicencias) noLicencias.classList.add('hidden');
         
         console.log('🔍 Haciendo fetch a /docente/licencias/listar');
         
@@ -323,12 +371,12 @@ async function cargarLicencias() {
         
         if (data.success) {
             // Ocultar spinner
-            loadingSpinner.classList.add('hidden');
+            if (loadingSpinner) loadingSpinner.classList.add('hidden');
             
             if (data.licencias.length === 0) {
                 console.log('📋 No hay licencias, mostrando mensaje');
                 // Mostrar mensaje de no hay licencias
-                noLicencias.classList.remove('hidden');
+                if (noLicencias) noLicencias.classList.remove('hidden');
             } else {
                 console.log('✅ Mostrando tabla con', data.licencias.length, 'licencias');
                 // Mostrar tabla
@@ -338,7 +386,7 @@ async function cargarLicencias() {
                 // Limpiar tabla y cards
                 tablaLicencias.innerHTML = '';
                 const cardsLicencias = document.getElementById('cardsLicencias');
-                cardsLicencias.innerHTML = '';
+                if (cardsLicencias) cardsLicencias.innerHTML = '';
                 
                 // Llenar tabla y cards con datos
                 data.licencias.forEach(licencia => {
@@ -571,9 +619,18 @@ function cerrarModalMensaje() {
  * La fecha fin = fecha inicio + (días - 1)
  */
 function calcularFechaFin() {
-    const fechaInicio = document.getElementById('inputFechaInicio').value;
-    const dias = parseInt(document.getElementById('inputDias').value);
+    const inputFechaInicio = document.getElementById('inputFechaInicio');
+    const inputDias = document.getElementById('inputDias');
     const fechaFinDisplay = document.getElementById('fechaFinCalculada');
+    
+    // Verificar que los elementos existan
+    if (!inputFechaInicio || !inputDias || !fechaFinDisplay) {
+        console.warn('⚠️ Elementos de fecha no encontrados');
+        return;
+    }
+    
+    const fechaInicio = inputFechaInicio.value;
+    const dias = parseInt(inputDias.value);
     
     // Validar que ambos campos tengan valor
     if (!fechaInicio || !dias) {
