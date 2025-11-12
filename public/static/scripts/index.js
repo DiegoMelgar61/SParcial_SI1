@@ -19,6 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const importBtn = document.getElementById('btn-import-users');
   const mod_adm=document.getElementById('btn-mod-adm');
   const mod_doc=document.getElementById('btn-mod-docen');
+  const mod_rep=document.getElementById('btn-mod-report');
+
+  if (mod_rep)
+  {
+    mod_rep.addEventListener('click',()=>
+    {
+      window.location.href='/reportes';
+    })
+  }
 
   if (importBtn)
   {

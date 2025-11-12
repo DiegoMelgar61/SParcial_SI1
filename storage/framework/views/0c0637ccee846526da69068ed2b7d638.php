@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Gestiones — Plataforma Universitaria INF342</title>
+    <title>Bitácora — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
@@ -16,11 +15,9 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
             <div class="flex items-center gap-4">
                 <!-- Botón de menú lateral para móviles -->
-                <button id="menu-toggle"
-                    class="block md:hidden p-2 text-gray-600 hover:text-indigo-600 rounded-md transition">
+                <button id="menu-toggle" class="block md:hidden p-2 text-gray-600 hover:text-indigo-600 rounded-md transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
                 <h1 class="text-lg md:text-xl font-semibold text-gray-700 tracking-wide">
@@ -30,57 +27,59 @@
 
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
-                    <p class="font-medium text-gray-800">{{ $user['nomb_comp'] }}</p>
-                    <p class="text-xs text-gray-500">{{ ucfirst($user['rol']) }}</p>
+                    <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp']); ?></p>
+                    <p class="text-xs text-gray-500"><?php echo e(ucfirst($user['rol'])); ?></p>
                 </div>
 
                 <!-- Avatar -->
                 <div id="user-avatar"
-                    class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                     class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
 
                 <!-- Botón de inicio -->
                 <a href="/"
-                    class="text-sm bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 px-4 py-2 rounded-md font-medium transition">
+                   class="text-sm bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 px-4 py-2 rounded-md font-medium transition">
                     Inicio
                 </a>
             </div>
         </div>
     </header>
 
-    <!-- Panel lateral de usuario -->
+    <!-- Panel lateral de usuario (copiado del index, necesario para el avatar) -->
     <aside id="user-aside"
-        class="hidden fixed top-16 right-4 w-64 bg-white shadow-2xl rounded-xl border border-gray-200 z-50 transition-all duration-300 opacity-0 scale-95 origin-top-right">
+           class="hidden fixed top-16 right-4 w-64 bg-white shadow-2xl rounded-xl border border-gray-200 z-50 transition-all duration-300 opacity-0 scale-95 origin-top-right">
         <div class="p-5 text-sm text-gray-700">
             <div class="flex items-center gap-3 mb-3">
-                <div
-                    class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm">
+                    <?php echo e(strtoupper(substr($user['nomb_comp'],0,1))); ?>
+
                 </div>
                 <div>
-                    <p class="font-semibold text-gray-800 leading-tight">{{ $user['nomb_comp'] }}</p>
+                    <p class="font-semibold text-gray-800 leading-tight"><?php echo e($user['nomb_comp']); ?></p>
                     <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-                        {{ ucfirst($user['rol']) }}
+                        <?php echo e(ucfirst($user['rol'])); ?>
+
                     </span>
                 </div>
             </div>
             <hr class="my-3 border-gray-200">
             <ul class="space-y-2 text-sm">
-                <li><span class="font-medium text-gray-600">CI:</span> {{ $user['ci'] }}</li>
-                <li><span class="font-medium text-gray-600">Correo:</span> {{ $user['correo'] ?? '—' }}</li>
-                <li><span class="font-medium text-gray-600">Teléfono:</span> {{ $user['tel'] ?? '—' }}</li>
+                <li><span class="font-medium text-gray-600">CI:</span> <?php echo e($user['ci']); ?></li>
+                <li><span class="font-medium text-gray-600">Correo:</span> <?php echo e($user['correo'] ?? '—'); ?></li>
+                <li><span class="font-medium text-gray-600">Teléfono:</span> <?php echo e($user['tel'] ?? '—'); ?></li>
             </ul>
             <div class="mt-4 pt-3 border-t border-gray-100">
                 <a href="/perfil"
-                    class="text-indigo-600 text-sm font-medium hover:underline hover:text-indigo-700 transition">
+                   class="text-indigo-600 text-sm font-medium hover:underline hover:text-indigo-700 transition">
                     Ver perfil completo →
                 </a>
             </div>
         </div>
     </aside>
 
-    <!-- Sidebar -->
+    <!-- Panel lateral de usuario -->
     <aside id="admin-sidebar"
         class="fixed top-0 left-0 w-64 bg-white shadow-lg h-full z-30 border-r border-gray-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
 
@@ -165,7 +164,7 @@
 
                     <li>
                         <a href="/admin/gestiones"
-                        class="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 rounded-lg font-semibold hover:bg-indigo-100 transition">
+                        class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -198,7 +197,7 @@
 
                     <li>
                         <a href="/admin/bitacora"
-                        class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
+                        class="flex items-center gap-2 px-3 py-2 text-indigo-700 bg-indigo-50 rounded-lg font-semibold hover:bg-indigo-100 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
@@ -223,136 +222,130 @@
 
     <!-- Contenido principal -->
     <main class="flex-1 md:ml-64 p-6 transition-all duration-300">
-        
         <!-- Encabezado -->
         <div class="flex flex-col md:flex-row justify-between md:items-center mb-8">
             <div>
-                <h2 class="text-2xl font-semibold text-gray-800 mb-1">Gestión de Gestiones Académicas</h2>
-                <p class="text-gray-600 text-sm">Administra las gestiones y períodos académicos</p>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-1">Historial de Acciones (Bitácora)</h2>
+                <p class="text-gray-500 text-sm">Registro de actividades del sistema.</p>
             </div>
-            <button id="btn-crear-gestion" 
-                    class="mt-4 md:mt-0 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Nueva Gestión
-            </button>
+            <div class="flex items-center gap-4 mt-3 md:mt-0">
+                <div id="clock" class="text-sm text-gray-600 font-medium"></div>
+                <button id="refresh-btn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 border border-gray-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
         </div>
 
-        <!-- Tabla de Gestiones -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div class="p-6 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Gestiones Registradas</h3>
-                <p class="text-sm text-gray-600 mt-1">Lista de todas las gestiones académicas del sistema</p>
+        <!-- Filtros -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+            <h3 class="text-base font-semibold text-gray-800 mb-4">Filtros</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="filter-status" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                    <select id="filter-status" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Todos los estados</option>
+                        <option value="SUCCESS">Éxito</option>
+                        <option value="ERROR">Error</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-action" class="block text-sm font-medium text-gray-700 mb-2">Acción</label>
+                    <input type="text" id="filter-action" placeholder="Buscar por acción..." class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="filter-user" class="block text-sm font-medium text-gray-700 mb-2">Usuario (Código)</label>
+                    <input type="text" id="filter-user" placeholder="Buscar por código de usuario..." class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
             </div>
+        </div>
 
+        <!-- Tabla de bitácora -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50 border-b border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left font-semibold text-gray-700">ID</th>
-                            <th class="px-6 py-3 text-left font-semibold text-gray-700">Nombre</th>
-                            <th class="px-6 py-3 text-left font-semibold text-gray-700">Fecha Inicio</th>
-                            <th class="px-6 py-3 text-left font-semibold text-gray-700">Fecha Fin</th>
-                            <th class="px-6 py-3 text-center font-semibold text-gray-700">Acciones</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha y Hora</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario (Código)</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comentario</th>
                         </tr>
                     </thead>
-                    <tbody id="tbody-gestiones" class="divide-y divide-gray-200">
-                        <!-- Se carga dinámicamente -->
+                    <tbody id="bitacora-table-body" class="bg-white divide-y divide-gray-200 text-sm">
+                        
+                        <!-- Bucle de Blade para renderizar los datos -->
+                        <?php $__empty_1 = true; $__currentLoopData = $bitacora; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <tr class="log-row hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+                                    <?php echo e(\Carbon\Carbon::parse($log['fecha_hora'])->format('d/m/Y H:i:s')); ?>
+
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium user-cell">
+                                    <?php echo e($log['codigo_usuario']); ?>
+
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-800 action-cell">
+                                    <?php echo e($log['accion']); ?>
+
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap status-cell">
+                                    <?php if(strtoupper($log['estado']) == 'SUCCESS'): ?>
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Éxito
+                                        </span>
+                                    <?php elseif(strtoupper($log['estado']) == 'ERROR'): ?>
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                            Error
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            <?php echo e($log['estado']); ?>
+
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-6 py-4 text-gray-600">
+                                    <?php echo e($log['comentario']); ?>
+
+                                </td>
+                            </tr>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                            <!-- Estado vacío -->
+                            <tr id="no-records">
+                                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                    No se encontraron registros en la bitácora.
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+
                     </tbody>
                 </table>
             </div>
         </div>
 
+        <!-- Información de paginación -->
+        <div class="mt-4 flex items-center justify-between text-sm text-gray-600" id="table-footer-info">
+            <div id="total-records">
+                Mostrando <?php echo e(count($bitacora)); ?> de los últimos 30 registros.
+            </div>
+            <div id="last-update" class="text-xs text-gray-500">
+                Última carga: <?php echo e(\Carbon\Carbon::now()->format('d/m/Y H:i:s')); ?>
+
+            </div>
+        </div>
     </main>
 
     <!-- Footer -->
-    <footer class="md:ml-64 bg-white border-t border-gray-200 py-4 text-center text-xs text-gray-500">
-        © 2025 Plataforma Universitaria — Sistema de Gestión Académica
+    <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10 md:ml-64">
+        © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
     </footer>
 
-    <!-- Modal Crear/Editar Gestión -->
-    <div id="modal-gestion" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl"> <!-- Aumenté el ancho máximo -->
-
-        <!-- Header -->
-        <div class="p-6 border-b border-gray-200">
-        <h3 id="modal-title" class="text-xl font-semibold text-gray-900">Nueva Gestión</h3>
-        <p class="text-sm text-gray-600 mt-1">Complete los datos de la gestión académica</p>
-        </div>
-
-        <!-- Body -->
-        <form id="form-gestion" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6"> <!-- Diseño en 2 columnas -->
-        <input type="hidden" id="gestion-id" value="">
-
-        <!-- Selector de Semestre -->
-        <div class="col-span-1">
-            <label for="input-semestre" class="block text-sm font-medium text-gray-700 mb-2">
-            Semestre <span class="text-red-500">*</span>
-            </label>
-            <select id="input-semestre" required
-            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-            <option value="">Seleccione un semestre...</option>
-            <option value="1">1 - Primer Semestre</option>
-            <option value="2">2 - Segundo Semestre</option>
-            <option value="3">3 - Verano</option>
-            <option value="4">4 - Mesa</option>
-            </select>
-        </div>
-
-        <!-- Selector de Año -->
-        <div class="col-span-1">
-            <label for="input-año" class="block text-sm font-medium text-gray-700 mb-2">
-            Año <span class="text-red-500">*</span>
-            </label>
-            <select id="input-año" required
-            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-            <option value="">Seleccione un año...</option>
-            </select>
-        </div>
-
-        <!-- Vista previa del nombre -->
-        <div class="col-span-2">
-            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-indigo-700 mb-1">Nombre de la Gestión:</p>
-            <p id="preview-nombre" class="text-lg font-bold text-indigo-900">-</p>
-            </div>
-        </div>
-
-        <!-- Fechas -->
-        <div>
-            <label for="input-fecha-inicio" class="block text-sm font-medium text-gray-700 mb-2">
-            Fecha de Inicio <span class="text-red-500">*</span>
-            </label>
-            <input type="date" id="input-fecha-inicio" required
-            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-        </div>
-
-        <div>
-            <label for="input-fecha-fin" class="block text-sm font-medium text-gray-700 mb-2">
-            Fecha de Fin <span class="text-red-500">*</span>
-            </label>
-            <input type="date" id="input-fecha-fin" required
-            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-        </div>
-        </form>
-
-        <!-- Footer -->
-        <div class="p-6 border-t border-gray-200 flex gap-3 justify-end">
-        <button type="button" id="btn-cancelar-modal"
-            class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm">
-            Cancelar
-        </button>
-        <button type="submit" form="form-gestion" id="btn-guardar-gestion"
-            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium text-sm shadow-sm">
-            Guardar Gestión
-        </button>
-        </div>
-    </div>
-    </div>
-
-
-    <script src="/static/scripts/admin_gestiones.js"></script>
+    <!-- JS: Este archivo ahora debe contener toda la lógica -->
+    <script src="<?php echo e(asset('static/scripts/bitacora.js')); ?>"></script>
 </body>
-
 </html>
+<?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/admin_bitacora.blade.php ENDPATH**/ ?>
