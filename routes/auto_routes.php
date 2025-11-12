@@ -775,6 +775,63 @@ Route::post('/auto/generar-horario/asignar-clase', function (Request $request) {
         error_log("📅 Horarios seleccionados: " . json_encode($horarios, JSON_PRETTY_PRINT));
 
         // ========================================================================
+        // PASO 8.5: VALIDAR QUE EL DOCENTE NO TENGA CONFLICTOS DE HORARIO
+        // ========================================================================
+        // Verificar que el docente no tenga otras clases asignadas en los
+        // mismos horarios (mismo día + solapamiento de horas) en la misma gestión
+        
+        foreach ($horarios as $horario) {
+            $sqlCheckDocenteConflicto = "SELECT 
+                    c.id,
+                    mg.sigla_materia,
+                    mg.sigla_grupo,
+                    h.dia,
+                    TO_CHAR(h.hora_i, 'HH24:MI') as hora_i,
+                    TO_CHAR(h.hora_f, 'HH24:MI') as hora_f,
+                    m.nombre as nombre_materia,
+                    c.nro_aula
+                FROM ex_g32.clase c
+                INNER JOIN ex_g32.horario h ON c.id_horario = h.id
+                INNER JOIN ex_g32.materia_grupo mg ON c.id_materia_grupo = mg.id
+                INNER JOIN ex_g32.materia m ON mg.sigla_materia = m.sigla
+                WHERE c.usuario_codigo = :usuario_codigo
+                AND c.id_gestion = :id_gestion
+                AND h.dia = :dia
+                AND (h.hora_i < :hora_f::time AND h.hora_f > :hora_i::time)";
+            
+            $stmtCheckDocente = $db->execute_query($sqlCheckDocenteConflicto, [
+                ':usuario_codigo' => $docenteCodigo,
+                ':id_gestion' => $gestionId,
+                ':dia' => $horario['dia'],
+                ':hora_i' => $horario['hora_i'],
+                ':hora_f' => $horario['hora_f']
+            ]);
+            
+            $conflictosDocente = $db->fetch_all($stmtCheckDocente);
+            
+            if (!empty($conflictosDocente)) {
+                $pdo->rollBack();
+                
+                // Preparar mensaje con detalles del conflicto
+                $conflicto = $conflictosDocente[0];
+                $mensaje = "El docente ya tiene clase asignada en este horario: " .
+                          "{$conflicto['dia']} {$conflicto['hora_i']}-{$conflicto['hora_f']} " .
+                          "({$conflicto['sigla_materia']}-{$conflicto['sigla_grupo']} - " .
+                          "{$conflicto['nombre_materia']}, Aula {$conflicto['nro_aula']})";
+                
+                error_log("❌ Conflicto de horario para docente {$docenteCodigo}: " . $mensaje);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => $mensaje,
+                    'conflictos' => $conflictosDocente
+                ], 400);
+            }
+        }
+        
+        error_log("✅ Docente {$docenteCodigo} no tiene conflictos de horario");
+
+        // ========================================================================
         // PASO 9: CALCULAR HORAS SEMANALES Y VALIDAR DÍAS
         // ========================================================================
         $horasSemanales = 0;
@@ -1011,13 +1068,13 @@ Route::post('/auto/generar-horario/asignar-clase', function (Request $request) {
                 // (hora_inicio_nuevo < hora_fin_existente) Y (hora_fin_nuevo > hora_inicio_existente)
                 //
                 // Ejemplos:
-                // ✅ Aula 10, Gestión 1/2025, Lunes 10:00-12:00 (ocupada)
+                //  Aula 10, Gestión 1/2025, Lunes 10:00-12:00 (ocupada)
                 //    Aula 10, Gestión 2/2025, Lunes 10:00-12:00 (DISPONIBLE - diferente gestión)
                 //
-                // ❌ Aula 10, Gestión 1/2025, Lunes 10:00-12:00 (ocupada)
+                //  Aula 10, Gestión 1/2025, Lunes 10:00-12:00 (ocupada)
                 //    Aula 10, Gestión 1/2025, Lunes 11:00-13:00 (NO DISPONIBLE - mismo día, se solapa)
                 //
-                // ✅ Aula 10, Gestión 1/2025, Lunes 10:00-12:00 (ocupada)
+                //  Aula 10, Gestión 1/2025, Lunes 10:00-12:00 (ocupada)
                 //    Aula 10, Gestión 1/2025, Martes 10:00-12:00 (DISPONIBLE - diferente día)
                 
                 $sqlCheckSolapamiento = "SELECT COUNT(*) as total 

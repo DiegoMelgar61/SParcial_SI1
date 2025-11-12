@@ -180,7 +180,7 @@
                         </a>
                     </li>
 
-                    <li>
+                      <li>
                         <a href="/admin/gestiones"
                         class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -435,10 +435,10 @@
 
                 <div class="mt-6 flex gap-4">
                     <button id="btn-asignacion-manual" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition shadow-sm">
-                        ✋ Asignación Manual
+                         Asignación Manual
                     </button>
                     <button id="btn-ver-horario" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition shadow-sm">
-                        📋 Ver Horario Generado
+                         Ver Horario Generado
                     </button>
                 </div>
             </div>
