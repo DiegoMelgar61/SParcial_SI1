@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inicio — Plataforma Universitaria INF342</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
@@ -19,19 +19,20 @@
 
       <div class="flex items-center gap-4">
         <div class="hidden sm:block text-right">
-          <p class="font-medium text-gray-800">{{ $user['nomb_comp'] }}</p>
-          <p class="text-xs text-gray-500">{{ ucfirst($user['rol']) }}</p>
+          <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp']); ?></p>
+          <p class="text-xs text-gray-500"><?php echo e(ucfirst($user['rol'])); ?></p>
         </div>
 
         <!-- Avatar con hover -->
         <div id="user-avatar"
              class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
-          {{ strtoupper(substr($user['nomb_comp'],0,1)) }}
+          <?php echo e(strtoupper(substr($user['nomb_comp'],0,1))); ?>
+
         </div>
 
         <!-- Logout -->
         <form action="/logout" method="POST">
-          @csrf
+          <?php echo csrf_field(); ?>
           <button type="submit"
                   class="ml-2 text-sm bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 px-3 py-1.5 rounded-md font-medium transition">
             Cerrar sesión
@@ -47,20 +48,22 @@
     <div class="p-5 text-sm text-gray-700">
       <div class="flex items-center gap-3 mb-3">
         <div class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold shadow-sm">
-          {{ strtoupper(substr($user['nomb_comp'],0,1)) }}
+          <?php echo e(strtoupper(substr($user['nomb_comp'],0,1))); ?>
+
         </div>
         <div>
-          <p class="font-semibold text-gray-800 leading-tight">{{ $user['nomb_comp'] }}</p>
+          <p class="font-semibold text-gray-800 leading-tight"><?php echo e($user['nomb_comp']); ?></p>
           <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
-            {{ ucfirst($user['rol']) }}
+            <?php echo e(ucfirst($user['rol'])); ?>
+
           </span>
         </div>
       </div>
       <hr class="my-3 border-gray-200">
       <ul class="space-y-2 text-sm">
-        <li><span class="font-medium text-gray-600">CI:</span> {{ $user['ci'] }}</li>
-        <li><span class="font-medium text-gray-600">Correo:</span> {{ $user['correo'] ?? '—' }}</li>
-        <li><span class="font-medium text-gray-600">Teléfono:</span> {{ $user['tel'] ?? '—' }}</li>
+        <li><span class="font-medium text-gray-600">CI:</span> <?php echo e($user['ci']); ?></li>
+        <li><span class="font-medium text-gray-600">Correo:</span> <?php echo e($user['correo'] ?? '—'); ?></li>
+        <li><span class="font-medium text-gray-600">Teléfono:</span> <?php echo e($user['tel'] ?? '—'); ?></li>
       </ul>
       <div class="mt-4 pt-3 border-t border-gray-100">
         <a href="/perfil"
@@ -90,17 +93,17 @@
       <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
         <h3 class="text-base font-semibold text-indigo-700 mb-3">Datos personales</h3>
         <ul class="text-sm text-gray-600 space-y-1">
-          <li><span class="font-medium">CI:</span> {{ $user['ci'] }}</li>
-          <li><span class="font-medium">Correo:</span> {{ $user['correo'] ?? '—' }}</li>
-          <li><span class="font-medium">Teléfono:</span> {{ $user['tel'] ?? '—' }}</li>
-          <li><span class="font-medium">Rol:</span> {{ ucfirst($user['rol']) }}</li>
+          <li><span class="font-medium">CI:</span> <?php echo e($user['ci']); ?></li>
+          <li><span class="font-medium">Correo:</span> <?php echo e($user['correo'] ?? '—'); ?></li>
+          <li><span class="font-medium">Teléfono:</span> <?php echo e($user['tel'] ?? '—'); ?></li>
+          <li><span class="font-medium">Rol:</span> <?php echo e(ucfirst($user['rol'])); ?></li>
         </ul>
       </div>
 
-      @php $rol = strtolower($user['rol']); @endphp
+      <?php $rol = strtolower($user['rol']); ?>
 
       <!-- ADMIN -->   
-      @if ($rol === 'admin')
+      <?php if($rol === 'admin'): ?>
         <div id="admin-card" 
              class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition cursor-pointer">
           <h3 class="text-base font-semibold text-gray-800 mb-2">Modulo de Administracion</h3>
@@ -137,7 +140,7 @@
             Ir al Modulo de Importación
           </button>
         </div>
-      @elseif ($rol === 'autoridad')
+      <?php elseif($rol === 'autoridad'): ?>
         <div class="bg-gradient-to-br from-purple-50 to-gray-50 p-6 rounded-xl border border-purple-100 shadow-sm hover:shadow-md transition">
           <h3 class="text-base font-semibold text-purple-700 mb-3">Panel de autoridad</h3>
           <ul class="text-sm text-gray-600 space-y-1 leading-relaxed">
@@ -146,7 +149,7 @@
             <li>Monitoreo de horarios y aulas</li>
           </ul>
         </div>
-      @elseif ($rol === 'docente')
+      <?php elseif($rol === 'docente'): ?>
         <div class="bg-gradient-to-br from-sky-50 to-gray-50 p-6 rounded-xl border border-sky-100 shadow-sm hover:shadow-md transition">
           <h3 class="text-base font-semibold text-sky-700 mb-3">Panel docente</h3>
           <ul class="text-sm text-gray-600 space-y-1 leading-relaxed">
@@ -155,7 +158,7 @@
             <li>Consulta de horarios académicos</li>
           </ul>
         </div>
-      @elseif ($rol === 'administrativo')
+      <?php elseif($rol === 'administrativo'): ?>
         <div class="bg-gradient-to-br from-gray-100 to-indigo-50 p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
           <h3 class="text-base font-semibold text-gray-700 mb-3">Panel administrativo</h3>
           <ul class="text-sm text-gray-600 space-y-1 leading-relaxed">
@@ -164,9 +167,9 @@
             <li>Gestión de aulas y materiales</li>
           </ul>
         </div>
-      @endif
+      <?php endif; ?>
 
-      @if ($rol == 'admin' or $rol=='docente')
+      <?php if($rol == 'admin' or $rol=='docente'): ?>
         <div id="import-users-card" 
              class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition cursor-pointer">
           <h3 class="text-base font-semibold text-gray-800 mb-2">Modulo de Docencia</h3>
@@ -178,7 +181,7 @@
             Ir al Modulo de Docencia
           </button>
         </div> 
-      @endif
+      <?php endif; ?>
 
       <!-- Avisos -->
       <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
@@ -194,9 +197,10 @@
 
   <!-- Footer -->
   <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10">
-    © {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA
+    © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
   </footer>
 
-  <script src="{{ asset('static/scripts/index.js') }}"></script>
+  <script src="<?php echo e(asset('static/scripts/index.js')); ?>"></script>
 </body>
 </html>
+<?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/index.blade.php ENDPATH**/ ?>

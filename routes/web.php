@@ -7,3 +7,4 @@ require_once __DIR__ . '/admin_routes.php';
 require_once __DIR__ . '/auto_routes.php';
 require_once __DIR__ . '/materia_routes.php';
 require_once __DIR__ . '/docente_routes.php';
+require_once __DIR__ . '/report_routes.php';
