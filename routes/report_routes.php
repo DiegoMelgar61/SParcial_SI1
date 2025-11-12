@@ -2,93 +2,143 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Http\Request;
 use App\Config;
 use App\Classes\Postgres_DB;
 
+// ===============================
+// 1. MÓDULO PRINCIPAL DE REPORTES
+// ===============================
 Route::get('/reportes', function () {
-    // VALIDAR SESIÓN
     if (!Session::has('user_code')) {
         return redirect('/login');
     }
 
-    // VALIDAR ROL ADMIN
     if (Session::get('user_role') != 'admin') {
         return redirect('/');
     }
+
+    $user = [
+        'nomb_comp' => Session::get('name'),
+        'rol'       => Session::get('user_role'),
+        'ci'        => Session::get('ci'),
+        'correo'    => Session::get('mail'),
+        'tel'       => Session::get('tel'),
+    ];
+
+    try {
+        $db = Config::$db;
+        $db->create_conection();
+        $accion = 'ACCESO A MÓDULO REPORTES';
+        $fecha = date('Y-m-d H:i:s');
+        $db->save_log_bitacora($accion, $fecha, 'SUCCESS', 'El usuario accedió al módulo de reportes.', Session::get('user_code'));
+    } catch (Exception $e) {
+        return redirect('/')->with('error', 'Error al registrar acceso: ' . $e->getMessage());
+    } finally {
+        if (isset($db)) $db->close_conection();
+    }
+
+    return view('reportes', ['user' => $user]);
+});
+
+
+// ===================================
+// 2. VISTA WEB: REPORTE DE ASISTENCIA
+// ===================================
+Route::get('/reportes/asistencia/ver', function () {
+    if (!Session::has('user_code')) return redirect('/login');
+    if (Session::get('user_role') != 'admin') return redirect('/');
+
+    $user = [
+        'nomb_comp' => Session::get('name'),
+        'rol'       => Session::get('user_role'),
+        'ci'        => Session::get('ci'),
+        'correo'    => Session::get('mail'),
+        'tel'       => Session::get('tel'),
+    ];
 
     try {
         $db = Config::$db;
         $db->create_conection();
 
-        // Total de usuarios
-        $sql = "SELECT COUNT(*) AS cant_user FROM ex_g32.usuario;";
+        $sql = "SELECT a.id, a.fecha, a.estado, a.metodo_r, p.nomb_comp AS docente, m.nombre AS materia, g.sigla AS grupo
+                FROM ex_g32.asistencia a
+                INNER JOIN ex_g32.clase c ON c.id = a.id_clase
+                INNER JOIN ex_g32.usuario u ON u.codigo = c.usuario_codigo
+                INNER JOIN ex_g32.persona p ON p.ci = u.ci
+                INNER JOIN ex_g32.materia_grupo mg ON mg.id = c.id_materia_grupo
+                INNER JOIN ex_g32.materia m ON m.sigla = mg.sigla_materia
+                INNER JOIN ex_g32.grupo g ON g.sigla = mg.sigla_grupo
+                ORDER BY a.fecha DESC;";
         $stmt = $db->execute_query($sql);
-        $cant_usuarios = $db->fetch_one($stmt)['cant_user'] ?? 0;
-
-        // Total de docentes
-        $sql = "SELECT COUNT(u.codigo) AS cant_docente
-                FROM ex_g32.usuario u
-                INNER JOIN ex_g32.rol r ON r.id = u.id_rol
-                WHERE LOWER(r.nombre) = 'docente';";
-        $stmt = $db->execute_query($sql);
-        $cant_docente = $db->fetch_one($stmt)['cant_docente'] ?? 0;
-
-        // Total de clases
-        $sql = "SELECT COUNT(*) AS total_clases FROM ex_g32.clase;";
-        $stmt = $db->execute_query($sql);
-        $cant_clases = $db->fetch_one($stmt)['total_clases'] ?? 0;
-
-        // Total de asistencias registradas
-        $sql = "SELECT COUNT(*) AS total_asist FROM ex_g32.asistencia;";
-        $stmt = $db->execute_query($sql);
-        $cant_asist = $db->fetch_one($stmt)['total_asist'] ?? 0;
-
-        // Total de licencias
-        $sql = "SELECT COUNT(*) AS total_lic FROM ex_g32.licencia;";
-        $stmt = $db->execute_query($sql);
-        $cant_lic = $db->fetch_one($stmt)['total_lic'] ?? 0;
-
-        // Gestión actual
-        $sql = "SELECT nombre
-                FROM ex_g32.gestion
-                WHERE CURRENT_DATE BETWEEN fecha_i AND fecha_f;";
-        $stmt = $db->execute_query($sql);
-        $gestion = $db->fetch_one($stmt);
-        $gestion_actual = $gestion['nombre'] ?? 'Sin gestión activa';
-
-        // Registrar en bitácora
-        $accion = 'ACCESO A MÓDULO REPORTES';
-        $fecha = date('Y-m-d H:i:s');
-        $estado = 'SUCCESS';
-        $comentario = 'El usuario accedió al módulo de reportes.';
-        $codigo = Session::get('user_code');
-        $db->save_log_bitacora($accion, $fecha, $estado, $comentario, $codigo);
-
-        // Usuario actual
-        $user = [
-            'nomb_comp' => Session::get('name'),
-            'rol' => Session::get('user_role'),
-            'ci' => Session::get('ci'),
-            'correo' => Session::get('mail'),
-            'tel' => Session::get('tel'),
-        ];
-
-        // Renderizar vista
-        return view('reportes', [
-            'cant_usuarios'   => $cant_usuarios,
-            'cant_docente'    => $cant_docente,
-            'cant_clases'     => $cant_clases,
-            'cant_asist'      => $cant_asist,
-            'cant_lic'        => $cant_lic,
-            'gestion_actual'  => $gestion_actual,
-            'user'            => $user,
-        ]);
+        $asistencias = $db->fetch_all($stmt);
     } catch (Exception $e) {
-        return redirect('/')->with('error', 'Error en la base de datos: ' . $e->getMessage());
+        $asistencias = [];
     } finally {
-        if (isset($db) && $db !== null) {
-            $db->close_conection();
+        if (isset($db)) $db->close_conection();
+    }
+
+    return view('reportes_asistencias', ['user' => $user, 'asistencias' => $asistencias]);
+});
+
+
+// =================================
+// 3. VISTA WEB: REPORTE DE LICENCIAS
+// =================================
+Route::get('/reportes/licencia/ver', function () {
+    if (!Session::has('user_code')) return redirect('/login');
+    if (Session::get('user_role') != 'admin') return redirect('/');
+
+    $user = [
+        'nomb_comp' => Session::get('name'),
+        'rol'       => Session::get('user_role'),
+        'ci'        => Session::get('ci'),
+        'correo'    => Session::get('mail'),
+        'tel'       => Session::get('tel'),
+    ];
+
+    try {
+        $db = Config::$db;
+        $db->create_conection();
+
+        $sql = "SELECT l.nro, p.nomb_comp AS docente, l.descripcion, l.fecha_i, l.fecha_f, l.fecha_hora
+                FROM ex_g32.licencia l
+                INNER JOIN ex_g32.usuario u ON u.codigo = l.codigo_usuario
+                INNER JOIN ex_g32.persona p ON p.ci = u.ci
+                ORDER BY l.fecha_hora DESC;";
+        $stmt = $db->execute_query($sql);
+        $licencias = $db->fetch_all($stmt);
+    } catch (Exception $e) {
+        $licencias = [];
+    } finally {
+        if (isset($db)) $db->close_conection();
+    }
+
+    return view('reportes_licencias', ['user' => $user, 'licencias' => $licencias]);
+});
+
+
+// =============================
+// 4. EXPORTAR REPORTES (PDF/EXCEL)
+// =============================
+Route::get('/api/reportes/{tipo}/{formato}', function ($tipo, $formato) {
+    if (!Session::has('user_code')) return redirect('/login');
+    if (Session::get('user_role') != 'admin') return redirect('/');
+
+    $formatos = ['pdf', 'excel'];
+    if (!in_array($formato, $formatos)) {
+        return response('Formato inválido.', 400);
+    }
+
+    try {
+        if ($formato === 'pdf') {
+            $filePath = generar_reporte_pdf($tipo);
+        } else {
+            $filePath = generar_reporte_excel($tipo);
         }
+
+        return response()->download($filePath);
+
+    } catch (Exception $e) {
+        return response('Error al generar reporte: ' . $e->getMessage(), 500);
     }
 });

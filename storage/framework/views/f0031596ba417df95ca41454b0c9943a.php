@@ -204,7 +204,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-            <select name="estado"
+            <select name="estado_asist"
                     class="w-full border border-gray-300 rounded-md focus:ring-1 focus:ring-sky-500 px-2 py-1.5 text-sm">
               <option value="Presente">Presente</option>
               <option value="Ausente">Ausente</option>

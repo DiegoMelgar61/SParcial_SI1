@@ -103,8 +103,8 @@ Cada acción realizada en los módulos se registra con fecha, usuario, descripci
 Facultad de Ingeniería en Ciencias de la Computación y Telecomunicaciones  
 **Universidad Autónoma Gabriel René Moreno (UAGRM)**
 
-- Auad Castillo Miguel Andres
-- Marces Gutierrez Erick Miguel
+- Auad Castillo Miguel Andres    -   221043756
+- Marces Gutierrez Erick Miguel  -   223043257
 ---
 
 © 2025 Grupo 32 — FICCT UAGRM | Proyecto académico INF342-SA
