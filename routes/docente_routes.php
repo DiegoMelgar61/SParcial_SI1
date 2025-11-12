@@ -179,6 +179,227 @@ Route::post('/docen/asistencia/marcar', function (Request $request) {
     }
 });
 
+// GENERAR QR CON TOKEN ÚNICO
+Route::post('/docen/asistencia/generar-qr', function (Request $request) {
+    
+    #VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        return response()->json(['success' => false, 'message' => 'No autenticado'], 401);
+    }
+
+    #VALIDACION: USUARIO DOCENTE O ADMIN
+    $rol = Session::get('user_role');
+    if ($rol !== 'docente' && $rol !== 'admin') {
+        return response()->json(['success' => false, 'message' => 'No autorizado'], 403);
+    }
+
+    #OBTENER ID DE CLASE
+    $id_clase = $request->input('id_clase');
+    
+    if (!$id_clase) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Falta el identificador de clase.'
+        ]);
+    }
+
+    try {
+        // Generar token único: qr_[timestamp]_[random]
+        $timestamp = time();
+        $random = bin2hex(random_bytes(4));
+        $token = "qr_{$timestamp}_{$random}";
+        
+        // Construir URL completa para el QR
+        $baseUrl = $request->getSchemeAndHttpHost();
+        $qrUrl = "{$baseUrl}/docen/asistencia/scan/{$token}?clase={$id_clase}";
+        
+        return response()->json([
+            'success' => true,
+            'token' => $token,
+            'qr_url' => $qrUrl,
+            'expira_en' => '5 minutos'
+        ]);
+        
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al generar QR: ' . $e->getMessage()
+        ]);
+    }
+});
+
+// REGISTRAR ASISTENCIA AUTOMÁTICA AL ESCANEAR QR
+Route::get('/docen/asistencia/scan/{token}', function (Request $request, $token) {
+    
+    #VALIDACION: USUARIO EN SESION
+    if (!Session::has('user_code')) {
+        // Si no está autenticado, mostrar página de error
+        return view('qr_result', [
+            'success' => false,
+            'message' => 'Debe iniciar sesión para registrar asistencia',
+            'redirect_url' => '/login'
+        ]);
+    }
+
+    $id_clase = $request->query('clase');
+    
+    if (!$id_clase) {
+        return view('qr_result', [
+            'success' => false,
+            'message' => 'QR inválido: falta identificador de clase',
+            'redirect_url' => '/docen/asistencia'
+        ]);
+    }
+    
+    // Validar formato del token: qr_[timestamp]_[random]
+    if (!preg_match('/^qr_(\d+)_[a-f0-9]+$/', $token, $matches)) {
+        return view('qr_result', [
+            'success' => false,
+            'message' => 'Token QR inválido',
+            'redirect_url' => '/docen/asistencia'
+        ]);
+    }
+    
+    $timestamp = (int)$matches[1];
+    $ahora = time();
+    $diferencia_minutos = ($ahora - $timestamp) / 60;
+    
+    // Validar que el QR no haya expirado (5 minutos)
+    if ($diferencia_minutos > 5) {
+        return view('qr_result', [
+            'success' => false,
+            'message' => 'El código QR ha expirado',
+            'detalle' => 'El código QR tiene una validez de 5 minutos. Por favor, genera uno nuevo.',
+            'redirect_url' => '/docen/asistencia'
+        ]);
+    }
+    
+    #CONEXION A LA BD
+    $db = Config::$db;
+    try {
+        $db->create_conection();
+        
+        // Obtener información de la clase
+        $sql_clase = "
+            SELECT 
+                c.id,
+                h.dia,
+                TO_CHAR(h.hora_i, 'HH24:MI:SS') as hora_inicio,
+                m.nombre as materia,
+                g.sigla as grupo
+            FROM ex_g32.clase c
+            INNER JOIN ex_g32.horario h ON c.id_horario = h.id
+            INNER JOIN ex_g32.materia_grupo mg ON c.id_materia_grupo = mg.id
+            INNER JOIN ex_g32.materia m ON mg.sigla_materia = m.sigla
+            INNER JOIN ex_g32.grupo g ON mg.sigla_grupo = g.sigla
+            WHERE c.id = :id_clase
+        ";
+        
+        $stmt = $db->execute_query($sql_clase, [':id_clase' => $id_clase]);
+        $clase = $db->fetch_one($stmt);
+        
+        if (!$clase) {
+            return view('qr_result', [
+                'success' => false,
+                'message' => 'Clase no encontrada',
+                'redirect_url' => '/docen/asistencia'
+            ]);
+        }
+        /*
+        // Validar que la clase sea HOY
+        $dia_hoy = date('l'); // Monday, Tuesday, etc.
+        $dias_es = [
+            'Monday' => 'Lunes',
+            'Tuesday' => 'Martes',
+            'Wednesday' => 'Miércoles',
+            'Thursday' => 'Jueves',
+            'Friday' => 'Viernes',
+            'Saturday' => 'Sábado',
+            'Sunday' => 'Domingo'
+        ];
+        $dia_hoy_es = $dias_es[$dia_hoy];
+        
+        if ($clase['dia'] !== $dia_hoy_es) {
+            return view('qr_result', [
+                'success' => false,
+                'message' => "Esta clase es el día {$clase['dia']}, no hoy ({$dia_hoy_es})",
+                'redirect_url' => '/docen/asistencia'
+            ]);
+        }
+        */
+        
+        $fecha_hoy = date('Y-m-d');
+        
+        // Verificar si ya existe registro de asistencia
+        $sql_check = "
+            SELECT COUNT(*) AS total
+            FROM ex_g32.asistencia 
+            WHERE id_clase = :id_clase 
+              AND fecha = :fecha
+        ";
+        
+        $stmt = $db->execute_query($sql_check, [
+            ':id_clase' => $id_clase,
+            ':fecha' => $fecha_hoy
+        ]);
+        
+        $exists = $db->fetch_one($stmt)['total'];
+        
+        if ($exists > 0) {
+            return view('qr_result', [
+                'success' => false,
+                'message' => 'Ya se registró asistencia para esta clase hoy',
+                'detalle' => "Materia: {$clase['materia']} - Grupo {$clase['grupo']}",
+                'redirect_url' => '/docen/asistencia'
+            ]);
+        }
+        
+        // Registrar automáticamente con estado "Presente" y observación "Asistencia por QR"
+        $sql_insert = "
+            INSERT INTO ex_g32.asistencia (fecha, estado, metodo_r, observacion, id_clase)
+            VALUES (:fecha, :estado, :metodo_r, :observacion, :id_clase)
+        ";
+        
+        $db->execute_query($sql_insert, [
+            ':fecha' => $fecha_hoy,
+            ':estado' => 'Presente',
+            ':metodo_r' => 'QR',
+            ':observacion' => 'Asistencia por QR',
+            ':id_clase' => $id_clase
+        ]);
+        
+        // Registrar en bitácora
+        $accion = 'REGISTRO DE ASISTENCIA POR QR';
+        $fecha_bit = date('Y-m-d H:i:s');
+        $estado_bit = 'SUCCESS';
+        $comentario = "Asistencia registrada por QR para clase {$clase['materia']} - {$clase['grupo']}";
+        $codigo = Session::get('user_code');
+        $db->save_log_bitacora($accion, $fecha_bit, $estado_bit, $comentario, $codigo);
+        
+        return view('qr_result', [
+            'success' => true,
+            'message' => '✅ Asistencia registrada correctamente',
+            'detalle' => "{$clase['materia']} - Grupo {$clase['grupo']}",
+            'fecha' => date('d/m/Y H:i:s'),
+            'estado' => 'Presente',
+            'metodo' => 'QR',
+            'redirect_url' => '/docen/asistencia'
+        ]);
+        
+    } catch (Exception $e) {
+        return view('qr_result', [
+            'success' => false,
+            'message' => 'Error al registrar asistencia',
+            'detalle' => $e->getMessage(),
+            'redirect_url' => '/docen/asistencia'
+        ]);
+    } finally {
+        if (isset($db) && $db !== null) {
+            $db->close_conection();
+        }
+    }
+});
+
 
 //SECCION DE ASISTENCIA
 Route::get('/docen/asistencia', function () {

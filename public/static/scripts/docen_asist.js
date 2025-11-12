@@ -205,5 +205,103 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
       }
     });
+
+
+    // OPCIÓN: GENERAR QR
+   
+    btnQr?.addEventListener('click', async () => {
+      if (!claseSeleccionada) {
+        alert('No hay clase seleccionada');
+        return;
+      }
+
+      modalOpciones.classList.add('hidden');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      modalTitulo.textContent = 'Generando código QR...';
+      modalContenido.innerHTML = `
+        <div class="flex items-center justify-center py-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600"></div>
+        </div>
+      `;
+
+      try {
+        const formData = new FormData();
+        formData.append('id_clase', claseSeleccionada);
+
+        const response = await fetch('/docen/asistencia/generar-qr', {
+          method: 'POST',
+          headers: { 
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+          },
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          modalTitulo.textContent = 'Código QR generado';
+          
+          // Generar QR usando una librería externa (QRCode.js)
+          modalContenido.innerHTML = `
+            <div class="text-center">
+              <p class="text-sm text-gray-700 mb-4">
+                Escanea este código QR para registrar asistencia automáticamente
+              </p>
+              <div id="qrcode" class="flex justify-center mb-4"></div>
+              <p class="text-xs text-gray-500 mb-2">
+                <strong>Válido por:</strong> ${result.expira_en}
+              </p>
+              <p class="text-xs text-gray-400">
+                Al escanear, la asistencia se registrará automáticamente como "Presente"<br>
+                con la observación "Asistencia por QR"
+              </p>
+              <div class="mt-4 p-3 bg-sky-50 rounded-lg border border-sky-200">
+                <p class="text-xs text-sky-800 font-mono break-all">${result.qr_url}</p>
+              </div>
+            </div>
+          `;
+
+          // Generar el QR visual usando QRCode.js
+          // Nota: Asegúrate de incluir la librería en el HTML
+          if (typeof QRCode !== 'undefined') {
+            new QRCode(document.getElementById('qrcode'), {
+              text: result.qr_url,
+              width: 256,
+              height: 256,
+              colorDark: '#0369a1',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.H
+            });
+          } else {
+            // Fallback: usar API de Google Charts (deprecado pero funcional)
+            const qrcodeDiv = document.getElementById('qrcode');
+            qrcodeDiv.innerHTML = `
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(result.qr_url)}" 
+                   alt="Código QR" 
+                   class="mx-auto shadow-lg rounded-lg border-4 border-white">
+            `;
+          }
+
+        } else {
+          modalTitulo.textContent = 'Error';
+          modalContenido.innerHTML = `
+            <div class="text-center py-8">
+              <p class="text-red-600">${result.message}</p>
+            </div>
+          `;
+        }
+
+      } catch (error) {
+        console.error('Error al generar QR:', error);
+        modalTitulo.textContent = 'Error';
+        modalContenido.innerHTML = `
+          <div class="text-center py-8">
+            <p class="text-red-600">Error al generar el código QR</p>
+          </div>
+        `;
+      }
+    });
   }
 });
