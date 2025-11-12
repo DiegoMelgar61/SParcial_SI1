@@ -200,7 +200,7 @@
     © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
   </footer>
 
-  <script src="<?php echo e(asset('static/scripts/index.js')); ?>"></script>
+  <script src="<?php echo e(secure_asset('static/scripts/index.js')); ?>"></script>
 </body>
 </html>
 <?php /**PATH C:\Users\migue\OneDrive\Escritorio\projects\inf342_2exa\app\templates/index.blade.php ENDPATH**/ ?>
