@@ -14,6 +14,7 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\BitacoraController;
+use App\Http\Controllers\AsistenciaDocenteController;
 
 // Public routes
 
@@ -69,4 +70,14 @@ Route::middleware(['auth'])->group(function () {
 
     //Bitácora
     Route::get('bitacora', [BitacoraController::class, 'index'])->name('bitacora.index');
+
+    //Asistencia Docente
+    Route::prefix('asistencia-docente')->name('asistencia-docente.')->group(function () {
+        Route::get('/', [AsistenciaDocenteController::class, 'index'])->name('index');
+        Route::get('/crear', [AsistenciaDocenteController::class, 'create'])->name('create');
+        Route::post('/', [AsistenciaDocenteController::class, 'store'])->name('store');
+        Route::get('/mis-materias', [AsistenciaDocenteController::class, 'misMaterias'])->name('mis-materias');
+        Route::get('/{id}', [AsistenciaDocenteController::class, 'show'])->name('show');
+    });
+    
 });

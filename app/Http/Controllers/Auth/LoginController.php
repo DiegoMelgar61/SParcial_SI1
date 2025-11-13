@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Usuario;
 use App\Services\AuditoriaService;
+use App\Helpers\BitacoraHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -86,12 +87,33 @@ class LoginController extends Controller
     {
         $usuario = Auth::user();
         
-        // Registrar logout en auditoría antes de cerrar sesión
+        // Registrar logout en auditoría y bitácora antes de cerrar sesión
         if ($usuario) {
             try {
+                // Cargar el rol si no está cargado
+                if (!$usuario->relationLoaded('rol')) {
+                    $usuario->load('rol');
+                }
+                
+                // Registrar en AuditoriaService
                 AuditoriaService::logLogout($usuario);
+                
+                // Registrar en BitacoraHelper
+                BitacoraHelper::registrar(
+                    'logout',
+                    'usuarios',
+                    $usuario->id,
+                    "Usuario cerró sesión: {$usuario->nombre} {$usuario->apellido} ({$usuario->email})",
+                    null,
+                    [
+                        'email' => $usuario->email,
+                        'nombre_completo' => $usuario->nombre . ' ' . $usuario->apellido,
+                        'rol' => $usuario->rol ? $usuario->rol->nombre : 'N/A',
+                    ],
+                    $usuario->id // Pasar el usuario_id explícitamente antes de cerrar sesión
+                );
             } catch (\Exception $e) {
-                Log::error('Error al registrar logout en auditoría: ' . $e->getMessage());
+                Log::error('Error al registrar logout en auditoría/bitácora: ' . $e->getMessage());
             }
         }
 
@@ -104,8 +126,7 @@ class LoginController extends Controller
         // Regenerar el token CSRF después de invalidar la sesión
         $request->session()->regenerateToken();
 
-        // Usar Inertia::location para hacer una redirección completa del navegador
-        // Esto asegura que se obtenga un nuevo token CSRF
-        return Inertia::location('/login');
+        // Redirigir a login usando redirect normal (no Inertia) para evitar problemas con el token
+        return redirect('/login');
     }
 }
