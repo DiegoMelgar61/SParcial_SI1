@@ -6,6 +6,129 @@ export default function AuthenticatedLayout({ children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
+    // Determinar el rol del usuario
+    const rolUsuario = auth.user?.rol?.nombre;
+    const esDocente = rolUsuario === 'Docente';
+
+    // Menú para docentes
+    const navigationDocente = [
+        {
+            name: 'Inicio',
+            href: '/dashboard',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Mi Asistencia',
+            href: '/asistencia-docente',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Registrar Asistencia',
+            href: '/asistencia-docente/crear',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Mis Materias',
+            href: '/asistencia-docente/mis-materias',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                </svg>
+            ),
+        },
+    ];
+
+    // Menú para administradores (menú completo)
+    const navigationAdmin = [
+        {
+            name: 'Dashboard',
+            href: '/dashboard',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Usuarios',
+            href: '/usuarios',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Materias',
+            href: '/materias',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Grupos',
+            href: '/grupos',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Aulas',
+            href: '/aulas',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Horarios',
+            href: '/horarios',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Docentes',
+            href: '/docentes',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                </svg>
+            ),
+        },
+        {
+            name: 'Carreras',
+            href: '/carreras',
+            icon: (
+                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H4zm1 2h10v10H5V5zm2 1v2h6V6H7z" />
+                </svg>
+            ),
+        },
+    ];
+
+    // Seleccionar el menú según el rol
+    const navigation = esDocente ? navigationDocente : navigationAdmin;
+
     return (
         <div className="min-h-screen bg-gray-100">
             {/* Navigation */}
@@ -61,95 +184,17 @@ export default function AuthenticatedLayout({ children }) {
             <aside className={`fixed top-16 left-0 z-20 h-full transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-white border-r border-gray-200 w-64`}>
                 <div className="h-full px-3 py-4 overflow-y-auto">
                     <ul className="space-y-2 font-medium">
-                        <li>
-                            <Link
-                                href="/dashboard"
-                                className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-                            >
-                                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                                </svg>
-                                <span className="ml-3">Dashboard</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/usuarios"
-                                className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-                            >
-                                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                                </svg>
-                                <span className="ml-3">Usuarios</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/materias"
-                                className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-                            >
-                                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
-                                </svg>
-                                <span className="ml-3">Materias</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/grupos"
-                                className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-                            >
-                                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                                </svg>
-                                <span className="ml-3">Grupos</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/aulas"
-                                className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-                            >
-                                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
-                                </svg>
-                                <span className="ml-3">Aulas</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/horarios"
-                                className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-                            >
-                                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                                </svg>
-                                <span className="ml-3">Horarios</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/docentes"
-                                className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-                            >
-                                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                                </svg>
-                                <span className="ml-3">Docentes</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/carreras"
-                                className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-                            >
-                                <svg className="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M4 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H4zm1 2h10v10H5V5zm2 1v2h6V6H7z" />
-                                </svg>
-                                <span className="ml-3">Carreras</span>
-                            </Link>
-                        </li>
-
+                        {navigation.map((item, index) => (
+                            <li key={index}>
+                                <Link
+                                    href={item.href}
+                                    className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
+                                >
+                                    {item.icon}
+                                    <span className="ml-3">{item.name}</span>
+                                </Link>
+                            </li>
+                        ))}
                     </ul>
                 </div>
             </aside>
