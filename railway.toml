@@ -1,0 +1,20 @@
+# railway.toml
+[build]
+builder = "Nixpacks"
+
+[phases.setup]
+nixPkgs = ["php82", "composer", "nodejs_22", "npm"]
+
+[phases.install]
+cmds = [
+  "composer install --no-dev --optimize-autoloader",
+  "npm install"
+]
+
+[phases.build]
+cmds = [
+  "npm run build"
+]
+
+[start]
+cmd = "php artisan migrate --force && php artisan serve --host 0.0.0.0 --port $PORT"
