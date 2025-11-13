@@ -1,5 +1,5 @@
 import { Head, Link } from "@inertiajs/react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import AuthenticatedLayout from "@/layouts/AuthenticatedLayout";
 
 export default function Show({ asistencia }) {
     const getEstadoBadge = (estado) => {
