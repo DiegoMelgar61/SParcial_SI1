@@ -5,22 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reporte de Licencias — Plataforma Universitaria INF342</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            navy: {
+              900: '#0f2942',
+              800: '#1e3a5f'
+            },
+            gold: {
+              500: '#c9a961',
+              600: '#b8974f'
+            }
+          }
+        }
+      }
+    }
+  </script>
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
 
   <!-- Encabezado -->
-  <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <header class="bg-navy-900 border-b-4 border-gold-500 sticky top-0 z-40">
     <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
       <div class="flex items-center gap-4">
-        <h1 class="text-lg md:text-xl font-semibold text-gray-800 tracking-wide">
+        <h1 class="text-lg md:text-xl font-semibold text-white tracking-wide">
           Reporte de Licencias Docentes
         </h1>
       </div>
 
       <a href="/reportes"
-        class="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition shadow-sm">
+        class="text-sm bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 border-b-4 border-gold-600 font-medium transition shadow-sm">
         Volver
       </a>
     </div>
@@ -36,10 +60,10 @@
       <div id="clock" class="text-sm text-gray-600 font-medium mt-3 md:mt-0"></div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-white shadow-sm border-2 border-navy-900 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm text-left text-gray-700">
-          <thead class="bg-gray-100 text-gray-700 uppercase text-xs font-semibold">
+          <thead class="bg-navy-900 text-white uppercase text-xs font-semibold">
             <tr>
               <th scope="col" class="px-6 py-3">Docente</th>
               <th scope="col" class="px-6 py-3">Descripción</th>
@@ -68,7 +92,7 @@
     </div>
   </main>
 
-  <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10">
+  <footer class="text-center py-4 text-xs text-gold-500 border-t-4 border-gold-500 bg-navy-900 mt-10">
     © {{ date('Y') }} Universidad Autónoma Gabriel René Moreno — INF342
   </footer>
 
