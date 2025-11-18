@@ -450,23 +450,49 @@
                 </button>
             </div>
 
-            <!-- Lista de Aulas -->
+            <!-- Lista de Aulas en formato Paquetes -->
             <div class="p-6 overflow-y-auto">
-                <div id="aulas-lista-horarios" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    @foreach ($aulas as $aula)
+                <div id="aulas-lista-horarios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach ($aulas as $index => $aula)
+                        @php $isNavy = $index % 2 === 0; @endphp
                         <button data-aula-nro="{{ $aula['nro'] }}" data-aula-capacidad="{{ $aula['capacidad'] }}" data-aula-modulo="{{ $aula['modulo'] }}" data-aula-tipo="{{ $aula['tipo'] }}"
-                            class="aula-card-selectable group bg-slate-50 hover:bg-navy-900 border-2 border-slate-300 hover:border-gold-500 p-4 transition-all duration-200 text-left">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="w-10 h-10 border-2 border-navy-900 group-hover:border-gold-500 bg-navy-100 group-hover:bg-gold-500 flex items-center justify-center transition-all">
-                                    <svg class="w-5 h-5 text-navy-900 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="aula-card-selectable group bg-white border-4 {{ $isNavy ? 'border-navy-900 hover:border-gold-500' : 'border-gold-500 hover:border-navy-900' }} shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden text-left">
+                            <!-- Header del Paquete -->
+                            <div class="p-5 text-center {{ $isNavy ? 'bg-navy-900 border-b-4 border-gold-500' : 'bg-gold-500 border-b-4 border-navy-900' }}">
+                                <div class="w-16 h-16 mx-auto {{ $isNavy ? 'bg-gold-500' : 'bg-navy-900' }} flex items-center justify-center text-4xl mb-3 border-4 border-white">
+                                    <svg class="w-8 h-8 {{ $isNavy ? 'text-navy-900' : 'text-gold-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                     </svg>
                                 </div>
-                                <span class="text-xs px-2 py-1 border border-gold-500 bg-navy-900 text-gold-500 font-bold uppercase tracking-wide">{{ $aula['tipo'] }}</span>
+                                <span class="inline-block {{ $isNavy ? 'bg-gold-500 text-navy-900' : 'bg-navy-900 text-gold-500' }} px-3 py-1 text-xs font-black uppercase tracking-wider">
+                                    {{ $aula['tipo'] }}
+                                </span>
                             </div>
-                            <h4 class="text-lg font-black text-navy-900 group-hover:text-white mb-1 uppercase tracking-wide">Aula {{ $aula['nro'] }}</h4>
-                            <p class="text-sm text-slate-600 group-hover:text-gold-500 font-semibold">Capacidad: {{ $aula['capacidad'] }} personas</p>
-                            <p class="text-sm text-slate-600 group-hover:text-gold-500 font-semibold">Módulo: {{ $aula['modulo'] }}</p>
+
+                            <!-- Contenido del Paquete -->
+                            <div class="p-5">
+                                <h4 class="text-2xl font-black text-navy-900 mb-3 uppercase tracking-wide text-center">Aula {{ $aula['nro'] }}</h4>
+
+                                <!-- Mini estadísticas -->
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div class="bg-slate-50 p-3 border-l-4 border-navy-900 text-center">
+                                        <p class="text-xs uppercase font-bold text-slate-600 mb-1">Capacidad</p>
+                                        <p class="text-xl font-black text-navy-900">{{ $aula['capacidad'] }}</p>
+                                    </div>
+                                    <div class="bg-slate-50 p-3 border-l-4 border-gold-500 text-center">
+                                        <p class="text-xs uppercase font-bold text-slate-600 mb-1">Módulo</p>
+                                        <p class="text-xl font-black text-gold-600">{{ $aula['modulo'] }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Botón de acción -->
+                                <div class="w-full py-2.5 {{ $isNavy ? 'bg-navy-900' : 'bg-gold-500' }} {{ $isNavy ? 'text-white' : 'text-navy-900' }} font-bold uppercase tracking-wide text-center text-sm border-b-4 {{ $isNavy ? 'border-navy-800' : 'border-gold-600' }} flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>Ver Horario</span>
+                                </div>
+                            </div>
                         </button>
                     @endforeach
                 </div>
@@ -544,24 +570,11 @@
                     <p class="text-slate-600 text-sm mt-2 font-semibold">El aula está completamente disponible</p>
                 </div>
 
-                <!-- Tabla de Horario -->
-                <div id="horario-tabla-container" class="overflow-x-auto hidden">
-                    <table class="min-w-full border-collapse border-2 border-slate-300">
-                        <thead>
-                            <tr class="bg-navy-900">
-                                <th class="border-2 border-slate-300 px-4 py-3 text-sm font-black text-white uppercase tracking-wide w-32">HORARIO</th>
-                                <th class="border-2 border-slate-300 px-4 py-3 text-sm font-black text-white uppercase tracking-wide">Lun</th>
-                                <th class="border-2 border-slate-300 px-4 py-3 text-sm font-black text-white uppercase tracking-wide">Mar</th>
-                                <th class="border-2 border-slate-300 px-4 py-3 text-sm font-black text-white uppercase tracking-wide">Mie</th>
-                                <th class="border-2 border-slate-300 px-4 py-3 text-sm font-black text-white uppercase tracking-wide">Jue</th>
-                                <th class="border-2 border-slate-300 px-4 py-3 text-sm font-black text-white uppercase tracking-wide">Vie</th>
-                                <th class="border-2 border-slate-300 px-4 py-3 text-sm font-black text-white uppercase tracking-wide">Sab</th>
-                            </tr>
-                        </thead>
-                        <tbody id="horario-tbody">
-                            <!-- Se llenará dinámicamente -->
-                        </tbody>
-                    </table>
+                <!-- Horario en formato Timeline por Día -->
+                <div id="horario-tabla-container" class="hidden">
+                    <div id="horario-timeline-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Se llenará dinámicamente con JS -->
+                    </div>
                 </div>
             </div>
 
@@ -569,12 +582,12 @@
             <div class="flex-shrink-0 bg-slate-100 px-6 py-4 flex justify-between items-center border-t-2 border-slate-300">
                 <div class="flex gap-4 text-xs">
                     <div class="flex items-center gap-2">
-                        <div class="w-4 h-4 bg-yellow-200 border-2 border-yellow-400"></div>
-                        <span class="text-slate-700 font-bold uppercase tracking-wide">Clases asignadas</span>
+                        <div class="w-4 h-4 bg-navy-900 border-2 border-gold-500"></div>
+                        <span class="text-slate-700 font-bold uppercase tracking-wide">Bloques ocupados</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="w-4 h-4 bg-white border-2 border-slate-300"></div>
-                        <span class="text-slate-700 font-bold uppercase tracking-wide">Disponible</span>
+                        <div class="w-4 h-4 bg-slate-100 border-2 border-slate-300"></div>
+                        <span class="text-slate-700 font-bold uppercase tracking-wide">Bloques libres</span>
                     </div>
                 </div>
                 <button id="btn-cerrar-horario" class="text-sm font-bold text-white bg-navy-900 px-5 py-2 border-b-4 border-gold-500 hover:bg-navy-800 transition uppercase tracking-wide">

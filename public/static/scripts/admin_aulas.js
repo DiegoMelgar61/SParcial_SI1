@@ -491,14 +491,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Función para renderizar el horario en formato tabla
+    // Función para renderizar el horario en formato Timeline por Día
     function renderizarHorario(horarios) {
-        const tbody = document.getElementById("horario-tbody");
-        if (!tbody) return;
-        
-        tbody.innerHTML = "";
-        
-        console.log("Renderizando horarios:", horarios);
+        const container = document.getElementById("horario-timeline-container");
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        console.log("Renderizando horarios en formato timeline:", horarios);
 
         // Definir bloques horarios comunes
         const bloquesHorarios = [
@@ -519,7 +519,14 @@ document.addEventListener("DOMContentLoaded", () => {
             { inicio: "22:00", fin: "22:45" }
         ];
 
-        const dias = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+        const diasCompletos = [
+            { abrev: "Lun", nombre: "Lunes", color: "navy" },
+            { abrev: "Mar", nombre: "Martes", color: "gold" },
+            { abrev: "Mie", nombre: "Miércoles", color: "navy" },
+            { abrev: "Jue", nombre: "Jueves", color: "gold" },
+            { abrev: "Vie", nombre: "Viernes", color: "navy" },
+            { abrev: "Sab", nombre: "Sábado", color: "gold" }
+        ];
 
         // Mapeo de nombres completos a abreviados
         const diaMap = {
@@ -545,33 +552,29 @@ document.addEventListener("DOMContentLoaded", () => {
             const bFin = horaAMinutos(bloqueFin);
             const rIni = horaAMinutos(rangoInicio);
             const rFin = horaAMinutos(rangoFin);
-            
-            // El bloque está ocupado si hay algún solapamiento
+
             return bIni < rFin && bFin > rIni;
         }
 
-        // Crear estructura de datos para el horario
-        // Para cada día y bloque, guardar las clases que lo ocupan
-        const ocupacion = {};
-        
-        dias.forEach(dia => {
-            ocupacion[dia] = {};
+        // Crear estructura de datos por día
+        const ocupacionPorDia = {};
+
+        diasCompletos.forEach(dia => {
+            ocupacionPorDia[dia.abrev] = {};
             bloquesHorarios.forEach(bloque => {
-                ocupacion[dia][`${bloque.inicio}-${bloque.fin}`] = [];
+                ocupacionPorDia[dia.abrev][`${bloque.inicio}-${bloque.fin}`] = [];
             });
         });
 
         // Llenar la estructura con las clases
         horarios.forEach(h => {
             const diaAbreviado = diaMap[h.dia] || h.dia;
-            
-            console.log(`Procesando: ${h.dia} (${diaAbreviado}) ${h.hora_i}-${h.hora_f}`);
-            
+
             // Para cada bloque, verificar si está ocupado por esta clase
             bloquesHorarios.forEach(bloque => {
                 if (bloqueEnRango(bloque.inicio, bloque.fin, h.hora_i, h.hora_f)) {
                     const bloqueKey = `${bloque.inicio}-${bloque.fin}`;
-                    ocupacion[diaAbreviado][bloqueKey].push({
+                    ocupacionPorDia[diaAbreviado][bloqueKey].push({
                         materia: h.sigla_materia || 'N/A',
                         grupo: h.sigla_grupo || 'N/A',
                         nombreMateria: h.nombre_materia || 'Sin asignar',
@@ -579,47 +582,61 @@ document.addEventListener("DOMContentLoaded", () => {
                         claseId: h.clase_id,
                         rangoCompleto: `${h.hora_i}-${h.hora_f}`
                     });
-                    console.log(`  ✓ Ocupa bloque ${bloqueKey} en ${diaAbreviado}`);
                 }
             });
         });
 
-        console.log("Ocupación final:", ocupacion);
+        // Renderizar cards por día
+        diasCompletos.forEach(dia => {
+            const dayCard = document.createElement("div");
+            dayCard.className = `bg-white border-4 ${dia.color === 'navy' ? 'border-navy-900' : 'border-gold-500'} shadow-lg`;
 
-        // Renderizar filas
-        bloquesHorarios.forEach(bloque => {
-            const bloqueKey = `${bloque.inicio}-${bloque.fin}`;
-            const row = document.createElement("tr");
+            // Header del día
+            const header = document.createElement("div");
+            header.className = `p-4 text-center ${dia.color === 'navy' ? 'bg-navy-900 border-b-4 border-gold-500' : 'bg-gold-500 border-b-4 border-navy-900'}`;
+            header.innerHTML = `
+                <h3 class="text-xl font-black ${dia.color === 'navy' ? 'text-white' : 'text-navy-900'} uppercase tracking-wide">${dia.nombre}</h3>
+            `;
+            dayCard.appendChild(header);
 
-            // Columna de horario
-            const tdHorario = document.createElement("td");
-            tdHorario.className = "border border-gray-300 px-2 py-2 text-xs font-medium text-gray-700 bg-gray-50";
-            tdHorario.textContent = `${bloque.inicio} - ${bloque.fin}`;
-            row.appendChild(tdHorario);
+            // Contenedor de bloques con scroll
+            const blocksContainer = document.createElement("div");
+            blocksContainer.className = "p-4 space-y-2 max-h-[500px] overflow-y-auto";
 
-            // Columnas por día
-            dias.forEach(dia => {
-                const td = document.createElement("td");
-                td.className = "border border-gray-300 px-2 py-2 text-center text-xs";
+            bloquesHorarios.forEach(bloque => {
+                const bloqueKey = `${bloque.inicio}-${bloque.fin}`;
+                const clasesEnBloque = ocupacionPorDia[dia.abrev][bloqueKey];
 
-                const clasesEnBloque = ocupacion[dia][bloqueKey];
-                
+                const bloqueDiv = document.createElement("div");
+
                 if (clasesEnBloque && clasesEnBloque.length > 0) {
-                    const clase = clasesEnBloque[0]; // Tomar la primera (no deberían haber conflictos)
-                    td.className += " bg-yellow-100 hover:bg-yellow-200 transition";
-                    td.innerHTML = `
-                        <div class="font-semibold text-gray-900">${clase.materia} - ${clase.grupo}</div>
-                        <div class="text-gray-600 text-[10px] mt-1">${clase.nombreMateria}</div>
+                    // Bloque ocupado
+                    const clase = clasesEnBloque[0];
+                    bloqueDiv.className = "bg-navy-900 border-l-4 border-gold-500 p-3 hover:shadow-md transition-all";
+                    bloqueDiv.innerHTML = `
+                        <div class="flex items-start justify-between mb-2">
+                            <span class="text-xs font-bold text-gold-500 uppercase tracking-wide">${bloque.inicio} - ${bloque.fin}</span>
+                            <span class="px-2 py-0.5 bg-gold-500 text-navy-900 text-xs font-black uppercase">${clase.grupo}</span>
+                        </div>
+                        <div class="text-white font-bold text-sm mb-1">${clase.materia}</div>
+                        <div class="text-gold-500 text-xs font-semibold">${clase.nombreMateria}</div>
                     `;
                 } else {
-                    td.className += " bg-white hover:bg-gray-50 transition";
-                    td.innerHTML = `<span class="text-gray-300">—</span>`;
+                    // Bloque libre
+                    bloqueDiv.className = "bg-slate-50 border-l-4 border-slate-300 p-3 hover:bg-slate-100 transition-all";
+                    bloqueDiv.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">${bloque.inicio} - ${bloque.fin}</span>
+                            <span class="text-slate-400 text-xs font-bold uppercase">Libre</span>
+                        </div>
+                    `;
                 }
 
-                row.appendChild(td);
+                blocksContainer.appendChild(bloqueDiv);
             });
 
-            tbody.appendChild(row);
+            dayCard.appendChild(blocksContainer);
+            container.appendChild(dayCard);
         });
     }
 });
