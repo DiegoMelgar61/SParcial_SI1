@@ -527,6 +527,6 @@
     <!-- ====== FIN DE MODALES ====== -->
 
 
-    <script src="{{ asset('static/scripts/admin_users.js') }}"></script>
+    <script src="{{ secure_asset('static/scripts/admin_users.js') }}"></script>
 </body>
 </html>

@@ -320,7 +320,7 @@
     <footer class="text-center py-4 text-xs text-gray-300 border-t-4 border-gold-500 bg-navy-900 mt-10 md:ml-64">
         © {{ date('Y') }} Grupo 31 — UAGRM | INF342 - SA
     </footer>
-    <script src="{{ asset('static/scripts/admin.js') }}"></script>
+    <script src="{{ secure_asset('static/scripts/admin.js') }}"></script>
 </body>
 
 </html>

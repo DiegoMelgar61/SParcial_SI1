@@ -23,7 +23,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 RUN composer install --no-dev --optimize-autoloader
 
 # EXPONER EL PUERTO 8000 (USADO POR RENDER)
-EXPOSE 8000
+EXPOSE 8080
 
 # COMANDO PARA INICIAR LA APLICACIÓN
 CMD ["php", "run.php"]

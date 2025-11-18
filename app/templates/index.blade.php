@@ -562,6 +562,6 @@
     <p class="font-bold uppercase tracking-widest">© {{ date('Y') }} Grupo 31 — UAGRM | INF342 - SA</p>
   </footer>
 
-  <script src="{{ asset('static/scripts/index.js') }}"></script>
+  <script src="{{ secure_asset('static/scripts/index.js') }}"></script>
 </body>
 </html>

@@ -80,7 +80,7 @@
         <!-- Header corporativo -->
         <div class="bg-navy-900 px-8 py-6 border-b-4 border-gold-500">
           <div class="flex items-center gap-4 mb-3">
-            <img src="{{ asset('static/images/logo2.png') }}" alt="FICCT Logo"
+            <img src="{{ secure_asset('static/images/logo2.png') }}" alt="FICCT Logo"
                  class="w-14 h-14 border-2 border-gold-500 bg-white p-1">
             <div>
               <h2 class="text-white text-xl font-bold tracking-wide">FICCT - UAGRM</h2>
@@ -186,6 +186,6 @@
     </div>
   </div>
 
-  <script src="{{ asset('static/scripts/login.js') }}"></script>
+  <script src="{{ secure_asset('static/scripts/login.js') }}"></script>
 </body>
 </html>

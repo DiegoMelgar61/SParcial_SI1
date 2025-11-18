@@ -172,6 +172,6 @@
     © {{ date('Y') }} Grupo 31 — UAGRM | INF342 - SA
   </footer>
 
-  <script src="{{ asset('static/scripts/mod_docencia.js') }}"></script>
+  <script src="{{ secure_asset('static/scripts/mod_docencia.js') }}"></script>
 </body>
 </html>
