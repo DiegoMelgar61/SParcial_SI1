@@ -41,7 +41,7 @@
             Rellénala con los datos de los usuarios y luego súbela utilizando el formulario inferior.
           </p>
         </div>
-        <a href="{{ secure_asset('static/files/plantilla_usuarios.xlsx') }}" download
+        <a href="{{ asset('static/files/plantilla_usuarios.xlsx') }}" download
            class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-3-3m3 3l3-3M4 16h16" />
@@ -103,6 +103,6 @@
     </div>
   </div>
 
-  <script src="{{ secure_asset('static/scripts/import_user.js') }}"></script>
+  <script src="{{ asset('static/scripts/import_user.js') }}"></script>
 </body>
 </html>

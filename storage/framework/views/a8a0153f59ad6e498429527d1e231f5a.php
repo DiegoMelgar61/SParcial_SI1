@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inicio — Plataforma Universitaria INF342</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     body { font-family: 'Inter', sans-serif; }
@@ -50,19 +50,20 @@
 
       <div class="flex items-center gap-4">
         <div class="hidden sm:block text-right">
-          <p class="font-bold text-white">{{ $user['nomb_comp'] }}</p>
-          <p class="text-xs text-gold-500 uppercase tracking-wider font-semibold">{{ ucfirst($user['rol']) }}</p>
+          <p class="font-bold text-white"><?php echo e($user['nomb_comp']); ?></p>
+          <p class="text-xs text-gold-500 uppercase tracking-wider font-semibold"><?php echo e(ucfirst($user['rol'])); ?></p>
         </div>
 
         <!-- Avatar corporativo -->
         <div id="user-avatar"
              class="w-11 h-11 bg-gold-500 text-navy-900 flex items-center justify-center font-black text-lg border-2 border-white shadow-md cursor-pointer select-none hover:bg-gold-600 transition-all">
-          {{ strtoupper(substr($user['nomb_comp'],0,1)) }}
+          <?php echo e(strtoupper(substr($user['nomb_comp'],0,1))); ?>
+
         </div>
 
         <!-- Logout corporativo -->
         <form action="/logout" method="POST">
-          @csrf
+          <?php echo csrf_field(); ?>
           <button type="submit"
                   class="text-sm bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 font-bold uppercase tracking-wide transition-all border-l-4 border-gold-500 hover:border-gold-400">
             Cerrar sesión
@@ -78,12 +79,14 @@
     <div class="bg-navy-900 px-5 py-4 border-b-4 border-gold-500">
       <div class="flex items-center gap-3">
         <div class="w-12 h-12 bg-gold-500 text-navy-900 flex items-center justify-center font-black text-xl border-2 border-white shadow-md">
-          {{ strtoupper(substr($user['nomb_comp'],0,1)) }}
+          <?php echo e(strtoupper(substr($user['nomb_comp'],0,1))); ?>
+
         </div>
         <div>
-          <p class="font-bold text-white leading-tight">{{ $user['nomb_comp'] }}</p>
+          <p class="font-bold text-white leading-tight"><?php echo e($user['nomb_comp']); ?></p>
           <span class="text-xs px-2 py-1 bg-gold-500 text-navy-900 font-bold uppercase tracking-wider inline-block mt-1">
-            {{ ucfirst($user['rol']) }}
+            <?php echo e(ucfirst($user['rol'])); ?>
+
           </span>
         </div>
       </div>
@@ -92,15 +95,15 @@
       <div class="space-y-3 bg-slate-50 p-4 border border-slate-200">
         <div class="flex justify-between">
           <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">CI:</span>
-          <span class="text-navy-900 font-semibold">{{ $user['ci'] }}</span>
+          <span class="text-navy-900 font-semibold"><?php echo e($user['ci']); ?></span>
         </div>
         <div class="flex justify-between">
           <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">Correo:</span>
-          <span class="text-navy-900 font-semibold">{{ $user['correo'] ?? '—' }}</span>
+          <span class="text-navy-900 font-semibold"><?php echo e($user['correo'] ?? '—'); ?></span>
         </div>
         <div class="flex justify-between">
           <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">Teléfono:</span>
-          <span class="text-navy-900 font-semibold">{{ $user['tel'] ?? '—' }}</span>
+          <span class="text-navy-900 font-semibold"><?php echo e($user['tel'] ?? '—'); ?></span>
         </div>
       </div>
       <div class="mt-4">
@@ -137,27 +140,27 @@
         <ul class="text-sm space-y-2.5">
           <li class="flex justify-between border-b border-slate-200 pb-2">
             <span class="font-bold text-slate-600 uppercase text-xs">CI:</span>
-            <span class="text-navy-900 font-semibold">{{ $user['ci'] }}</span>
+            <span class="text-navy-900 font-semibold"><?php echo e($user['ci']); ?></span>
           </li>
           <li class="flex justify-between border-b border-slate-200 pb-2">
             <span class="font-bold text-slate-600 uppercase text-xs">Correo:</span>
-            <span class="text-navy-900 font-semibold">{{ $user['correo'] ?? '—' }}</span>
+            <span class="text-navy-900 font-semibold"><?php echo e($user['correo'] ?? '—'); ?></span>
           </li>
           <li class="flex justify-between border-b border-slate-200 pb-2">
             <span class="font-bold text-slate-600 uppercase text-xs">Teléfono:</span>
-            <span class="text-navy-900 font-semibold">{{ $user['tel'] ?? '—' }}</span>
+            <span class="text-navy-900 font-semibold"><?php echo e($user['tel'] ?? '—'); ?></span>
           </li>
           <li class="flex justify-between">
             <span class="font-bold text-slate-600 uppercase text-xs">Rol:</span>
-            <span class="text-navy-900 font-black uppercase">{{ ucfirst($user['rol']) }}</span>
+            <span class="text-navy-900 font-black uppercase"><?php echo e(ucfirst($user['rol'])); ?></span>
           </li>
         </ul>
       </div>
 
-      @php $rol = strtolower($user['rol']); @endphp
+      <?php $rol = strtolower($user['rol']); ?>
 
       <!-- ADMIN -->
-      @if ($rol === 'admin')
+      <?php if($rol === 'admin'): ?>
         <div id="admin-card"
              class="bg-white p-6 border-2 border-navy-800 shadow-lg hover:shadow-xl hover:border-gold-500 transition-all cursor-pointer">
           <div class="border-b-2 border-gold-500 pb-3 mb-4">
@@ -200,7 +203,7 @@
             Ingresar al Módulo
           </button>
         </div>
-      @elseif ($rol === 'autoridad')
+      <?php elseif($rol === 'autoridad'): ?>
         <div class="bg-slate-50 border-l-4 border-navy-700 p-6 shadow-lg hover:shadow-xl transition-all">
           <h3 class="text-base font-black text-navy-900 mb-4 uppercase tracking-wide">Panel de Autoridad</h3>
           <ul class="text-sm text-slate-700 space-y-2.5 leading-relaxed font-medium">
@@ -218,7 +221,7 @@
             </li>
           </ul>
         </div>
-      @elseif ($rol === 'docente')
+      <?php elseif($rol === 'docente'): ?>
         <div class="bg-slate-50 border-l-4 border-navy-700 p-6 shadow-lg hover:shadow-xl transition-all">
           <h3 class="text-base font-black text-navy-900 mb-4 uppercase tracking-wide">Panel Docente</h3>
           <ul class="text-sm text-slate-700 space-y-2.5 leading-relaxed font-medium">
@@ -236,7 +239,7 @@
             </li>
           </ul>
         </div>
-      @elseif ($rol === 'administrativo')
+      <?php elseif($rol === 'administrativo'): ?>
         <div class="bg-slate-50 border-l-4 border-navy-700 p-6 shadow-lg hover:shadow-xl transition-all">
           <h3 class="text-base font-black text-navy-900 mb-4 uppercase tracking-wide">Panel Administrativo</h3>
           <ul class="text-sm text-slate-700 space-y-2.5 leading-relaxed font-medium">
@@ -254,9 +257,9 @@
             </li>
           </ul>
         </div>
-      @endif
+      <?php endif; ?>
 
-      @if ($rol == 'admin' or $rol=='docente')
+      <?php if($rol == 'admin' or $rol=='docente'): ?>
         <div id="import-users-card"
              class="bg-white p-6 border-2 border-navy-800 shadow-lg hover:shadow-xl hover:border-gold-500 transition-all cursor-pointer">
           <div class="border-b-2 border-gold-500 pb-3 mb-4">
@@ -270,7 +273,7 @@
             Ingresar al Módulo
           </button>
         </div>
-      @endif
+      <?php endif; ?>
 
       <!-- Avisos corporativos -->
       <div class="bg-white p-6 border-2 border-slate-300 shadow-lg hover:shadow-xl transition-all">
@@ -297,9 +300,10 @@
 
   <!-- Footer corporativo -->
   <footer class="text-center py-5 text-xs bg-navy-900 text-slate-300 border-t-4 border-gold-500 mt-12">
-    <p class="font-bold uppercase tracking-widest">© {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA</p>
+    <p class="font-bold uppercase tracking-widest">© <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA</p>
   </footer>
 
-  <script src="{{ asset('static/scripts/index.js') }}"></script>
+  <script src="<?php echo e(asset('static/scripts/index.js')); ?>"></script>
 </body>
 </html>
+<?php /**PATH C:\Users\diego\OneDrive\Escritorio\exa2_inf342\app\templates/index.blade.php ENDPATH**/ ?>

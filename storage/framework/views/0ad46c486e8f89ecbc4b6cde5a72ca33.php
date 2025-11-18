@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bitácora — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -58,14 +58,15 @@
 
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
-                    <p class="font-bold text-white">{{ $user['nomb_comp'] }}</p>
-                    <p class="text-xs text-gold-500 uppercase tracking-wider font-semibold">{{ ucfirst($user['rol']) }}</p>
+                    <p class="font-bold text-white"><?php echo e($user['nomb_comp']); ?></p>
+                    <p class="text-xs text-gold-500 uppercase tracking-wider font-semibold"><?php echo e(ucfirst($user['rol'])); ?></p>
                 </div>
 
                 <!-- Avatar corporativo -->
                 <div id="user-avatar"
                      class="w-11 h-11 bg-gold-500 text-navy-900 flex items-center justify-center font-black text-lg border-2 border-white shadow-md cursor-pointer select-none hover:bg-gold-600 transition-all">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
 
                 <!-- Botón de inicio corporativo -->
@@ -83,12 +84,14 @@
         <div class="bg-navy-900 px-5 py-4 border-b-4 border-gold-500">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-gold-500 text-navy-900 flex items-center justify-center font-black text-xl border-2 border-white shadow-md">
-                    {{ strtoupper(substr($user['nomb_comp'],0,1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'],0,1))); ?>
+
                 </div>
                 <div>
-                    <p class="font-bold text-white leading-tight">{{ $user['nomb_comp'] }}</p>
+                    <p class="font-bold text-white leading-tight"><?php echo e($user['nomb_comp']); ?></p>
                     <span class="text-xs px-2 py-1 bg-gold-500 text-navy-900 font-bold uppercase tracking-wider inline-block mt-1">
-                        {{ ucfirst($user['rol']) }}
+                        <?php echo e(ucfirst($user['rol'])); ?>
+
                     </span>
                 </div>
             </div>
@@ -97,15 +100,15 @@
             <div class="space-y-3 bg-slate-50 p-4 border border-slate-200">
                 <div class="flex justify-between">
                     <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">CI:</span>
-                    <span class="text-navy-900 font-semibold">{{ $user['ci'] }}</span>
+                    <span class="text-navy-900 font-semibold"><?php echo e($user['ci']); ?></span>
                 </div>
                 <div class="flex justify-between">
                     <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">Correo:</span>
-                    <span class="text-navy-900 font-semibold">{{ $user['correo'] ?? '—' }}</span>
+                    <span class="text-navy-900 font-semibold"><?php echo e($user['correo'] ?? '—'); ?></span>
                 </div>
                 <div class="flex justify-between">
                     <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">Teléfono:</span>
-                    <span class="text-navy-900 font-semibold">{{ $user['tel'] ?? '—' }}</span>
+                    <span class="text-navy-900 font-semibold"><?php echo e($user['tel'] ?? '—'); ?></span>
                 </div>
             </div>
             <div class="mt-4">
@@ -330,44 +333,49 @@
                     <tbody id="bitacora-table-body" class="bg-white divide-y divide-slate-200 text-sm">
 
                         <!-- Bucle de Blade para renderizar los datos -->
-                        @forelse ($bitacora as $log)
+                        <?php $__empty_1 = true; $__currentLoopData = $bitacora; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr class="log-row hover:bg-slate-50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap text-slate-700 font-semibold border-r border-slate-200">
-                                    {{ \Carbon\Carbon::parse($log['fecha_hora'])->format('d/m/Y H:i:s') }}
+                                    <?php echo e(\Carbon\Carbon::parse($log['fecha_hora'])->format('d/m/Y H:i:s')); ?>
+
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-navy-900 font-black user-cell border-r border-slate-200">
-                                    {{ $log['codigo_usuario'] }}
+                                    <?php echo e($log['codigo_usuario']); ?>
+
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-navy-900 font-semibold action-cell border-r border-slate-200">
-                                    {{ $log['accion'] }}
+                                    <?php echo e($log['accion']); ?>
+
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap status-cell border-r border-slate-200">
-                                    @if (strtoupper($log['estado']) == 'SUCCESS')
+                                    <?php if(strtoupper($log['estado']) == 'SUCCESS'): ?>
                                         <span class="px-3 py-1.5 inline-flex text-xs font-black uppercase tracking-wider border-2 border-green-600 bg-green-50 text-green-800">
                                             Éxito
                                         </span>
-                                    @elseif (strtoupper($log['estado']) == 'ERROR')
+                                    <?php elseif(strtoupper($log['estado']) == 'ERROR'): ?>
                                         <span class="px-3 py-1.5 inline-flex text-xs font-black uppercase tracking-wider border-2 border-red-600 bg-red-50 text-red-800">
                                             Error
                                         </span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="px-3 py-1.5 inline-flex text-xs font-black uppercase tracking-wider border-2 border-slate-400 bg-slate-100 text-slate-800">
-                                            {{ $log['estado'] }}
+                                            <?php echo e($log['estado']); ?>
+
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4 text-slate-700 font-medium">
-                                    {{ $log['comentario'] }}
+                                    <?php echo e($log['comentario']); ?>
+
                                 </td>
                             </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <!-- Estado vacío -->
                             <tr id="no-records">
                                 <td colspan="5" class="px-6 py-12 text-center text-slate-600 font-semibold uppercase tracking-wide">
                                     No se encontraron registros en la bitácora.
                                 </td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?>
 
                     </tbody>
                 </table>
@@ -377,19 +385,21 @@
         <!-- Información de paginación corporativa -->
         <div class="mt-6 bg-white border-2 border-slate-300 px-6 py-4 flex items-center justify-between text-sm shadow-md" id="table-footer-info">
             <div id="total-records" class="font-bold text-navy-900 uppercase tracking-wide">
-                Mostrando {{ count($bitacora) }} de los últimos 30 registros.
+                Mostrando <?php echo e(count($bitacora)); ?> de los últimos 30 registros.
             </div>
             <div id="last-update" class="text-xs text-slate-600 font-semibold bg-slate-100 px-3 py-2 border border-slate-300">
-                Última carga: {{ \Carbon\Carbon::now()->format('d/m/Y H:i:s') }}
+                Última carga: <?php echo e(\Carbon\Carbon::now()->format('d/m/Y H:i:s')); ?>
+
             </div>
         </div>
     </main>
 
     <!-- Footer corporativo -->
     <footer class="text-center py-5 text-xs bg-navy-900 text-slate-300 border-t-4 border-gold-500 mt-12 md:ml-64">
-        <p class="font-bold uppercase tracking-widest">© {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA</p>
+        <p class="font-bold uppercase tracking-widest">© <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA</p>
     </footer>
 
-    <script src="{{ asset('static/scripts/bitacora.js') }}"></script>
+    <script src="<?php echo e(asset('static/scripts/bitacora.js')); ?>"></script>
 </body>
 </html>
+<?php /**PATH C:\Users\diego\OneDrive\Escritorio\exa2_inf342\app\templates/admin_bitacora.blade.php ENDPATH**/ ?>

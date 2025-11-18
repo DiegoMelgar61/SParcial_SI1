@@ -145,6 +145,6 @@
         © {{ date('Y') }} Universidad Autónoma Gabriel René Moreno — Sistema de Reportes Académicos INF342
     </footer>
 
-    <script src="{{ secure_asset('static/scripts/reportes.js') }}"></script>
+    <script src="{{ asset('static/scripts/reportes.js') }}"></script>
 </body>
 </html>

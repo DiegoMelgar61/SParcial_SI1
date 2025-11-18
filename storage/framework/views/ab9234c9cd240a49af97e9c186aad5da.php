@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Materias — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -84,14 +84,15 @@
 
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
-                    <p class="font-bold text-white">{{ $user['nomb_comp'] }}</p>
-                    <p class="text-xs text-gold-500 uppercase tracking-wider font-semibold">{{ ucfirst($user['rol']) }}</p>
+                    <p class="font-bold text-white"><?php echo e($user['nomb_comp']); ?></p>
+                    <p class="text-xs text-gold-500 uppercase tracking-wider font-semibold"><?php echo e(ucfirst($user['rol'])); ?></p>
                 </div>
 
                 <!-- Avatar corporativo -->
                 <div id="user-avatar"
                     class="w-11 h-11 bg-gold-500 text-navy-900 flex items-center justify-center font-black text-lg border-2 border-white shadow-md cursor-pointer select-none hover:bg-gold-600 transition-all">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
 
                 <!-- Botón de inicio -->
@@ -109,12 +110,14 @@
         <div class="bg-navy-900 px-5 py-4 border-b-4 border-gold-500">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-gold-500 text-navy-900 flex items-center justify-center font-black text-xl border-2 border-white shadow-md">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
                 <div>
-                    <p class="font-bold text-white leading-tight">{{ $user['nomb_comp'] }}</p>
+                    <p class="font-bold text-white leading-tight"><?php echo e($user['nomb_comp']); ?></p>
                     <span class="text-xs px-2 py-1 bg-gold-500 text-navy-900 font-bold uppercase tracking-wider inline-block mt-1">
-                        {{ ucfirst($user['rol']) }}
+                        <?php echo e(ucfirst($user['rol'])); ?>
+
                     </span>
                 </div>
             </div>
@@ -123,15 +126,15 @@
             <div class="space-y-3 bg-slate-50 p-4 border border-slate-200">
                 <div class="flex justify-between">
                     <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">CI:</span>
-                    <span class="text-navy-900 font-semibold">{{ $user['ci'] }}</span>
+                    <span class="text-navy-900 font-semibold"><?php echo e($user['ci']); ?></span>
                 </div>
                 <div class="flex justify-between">
                     <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">Correo:</span>
-                    <span class="text-navy-900 font-semibold">{{ $user['correo'] ?? '—' }}</span>
+                    <span class="text-navy-900 font-semibold"><?php echo e($user['correo'] ?? '—'); ?></span>
                 </div>
                 <div class="flex justify-between">
                     <span class="font-bold text-slate-600 uppercase text-xs tracking-wider">Teléfono:</span>
-                    <span class="text-navy-900 font-semibold">{{ $user['tel'] ?? '—' }}</span>
+                    <span class="text-navy-900 font-semibold"><?php echo e($user['tel'] ?? '—'); ?></span>
                 </div>
             </div>
             <div class="mt-4">
@@ -358,28 +361,28 @@
                         </tr>
                     </thead>
                     <tbody id="materias-table-body" class="bg-white divide-y divide-slate-200 text-sm">
-                        @forelse ($materias as $index => $materia)
-                            <tr class="materia-row hover:bg-slate-50 transition-all" data-materia-id="{{ $materia['sigla'] }}">
-                                <td class="px-6 py-4 text-slate-700 font-semibold border-r border-slate-200">{{ $index + 1 }}</td>
-                                <td class="px-6 py-4 text-navy-900 font-bold border-r border-slate-200 sigla-cell">{{ $materia['sigla'] }}</td>
-                                <td class="px-6 py-4 text-navy-900 font-semibold border-r border-slate-200 nombre-cell">{{ $materia['nombre'] }}</td>
-                                <td class="px-6 py-4 text-slate-700 border-r border-slate-200 semestre-cell">{{ $materia['semestre'] }}</td>
-                                <td class="px-6 py-4 text-slate-700 border-r border-slate-200">{{ $materia['carga_horaria'] }} hrs</td>
+                        <?php $__empty_1 = true; $__currentLoopData = $materias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $materia): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <tr class="materia-row hover:bg-slate-50 transition-all" data-materia-id="<?php echo e($materia['sigla']); ?>">
+                                <td class="px-6 py-4 text-slate-700 font-semibold border-r border-slate-200"><?php echo e($index + 1); ?></td>
+                                <td class="px-6 py-4 text-navy-900 font-bold border-r border-slate-200 sigla-cell"><?php echo e($materia['sigla']); ?></td>
+                                <td class="px-6 py-4 text-navy-900 font-semibold border-r border-slate-200 nombre-cell"><?php echo e($materia['nombre']); ?></td>
+                                <td class="px-6 py-4 text-slate-700 border-r border-slate-200 semestre-cell"><?php echo e($materia['semestre']); ?></td>
+                                <td class="px-6 py-4 text-slate-700 border-r border-slate-200"><?php echo e($materia['carga_horaria']); ?> hrs</td>
                                 <td class="px-6 py-4 border-r border-slate-200">
-                                    @if (!empty($materia['grupos']) && count($materia['grupos']) > 0)
+                                    <?php if(!empty($materia['grupos']) && count($materia['grupos']) > 0): ?>
                                         <div class="flex flex-wrap gap-1">
-                                            @foreach ($materia['grupos'] as $grupo)
-                                                <span class="inline-block px-2 py-1 text-xs bg-navy-900 text-gold-500 font-bold border border-gold-500">{{ $grupo }}</span>
-                                            @endforeach
+                                            <?php $__currentLoopData = $materia['grupos']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $grupo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <span class="inline-block px-2 py-1 text-xs bg-navy-900 text-gold-500 font-bold border border-gold-500"><?php echo e($grupo); ?></span>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </div>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-slate-400 italic text-sm font-semibold">Sin grupos</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4 text-right space-x-2">
-                                    <button data-sigla="{{ $materia['sigla'] }}" data-nombre="{{ $materia['nombre'] }}"
-                                        data-semestre="{{ $materia['semestre'] }}"
-                                        data-carga="{{ $materia['carga_horaria'] }}"
+                                    <button data-sigla="<?php echo e($materia['sigla']); ?>" data-nombre="<?php echo e($materia['nombre']); ?>"
+                                        data-semestre="<?php echo e($materia['semestre']); ?>"
+                                        data-carga="<?php echo e($materia['carga_horaria']); ?>"
                                         class="btn-edit text-blue-600 hover:text-white hover:bg-blue-600 p-2 border-2 border-blue-600 transition-all"
                                         title="Editar">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -387,7 +390,7 @@
                                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                     </button>
-                                    <button data-sigla="{{ $materia['sigla'] }}" data-nombre="{{ $materia['nombre'] }}"
+                                    <button data-sigla="<?php echo e($materia['sigla']); ?>" data-nombre="<?php echo e($materia['nombre']); ?>"
                                         class="btn-assign-groups text-green-600 hover:text-white hover:bg-green-600 p-2 border-2 border-green-600 transition-all"
                                         title="Asignar Grupos">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -395,7 +398,7 @@
                                                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                     </button>
-                                    <button data-sigla="{{ $materia['sigla'] }}" data-nombre="{{ $materia['nombre'] }}"
+                                    <button data-sigla="<?php echo e($materia['sigla']); ?>" data-nombre="<?php echo e($materia['nombre']); ?>"
                                         class="btn-delete text-red-600 hover:text-white hover:bg-red-600 p-2 border-2 border-red-600 transition-all"
                                         title="Eliminar">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -405,12 +408,12 @@
                                     </button>
                                 </td>
                             </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr id="no-records">
                                 <td colspan="7" class="px-6 py-8 text-center text-slate-500 font-semibold uppercase tracking-wide">No hay materias registradas.
                                 </td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -418,48 +421,49 @@
 
         <!-- Vista Móvil/Tablet (Cards) -->
         <div class="md:hidden space-y-4" id="materias-cards">
-            @forelse ($materias as $materia)
+            <?php $__empty_1 = true; $__currentLoopData = $materias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $materia): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div class="materia-card bg-white border-2 border-slate-300 shadow-md p-4"
-                    data-materia-id="{{ $materia['sigla'] }}">
+                    data-materia-id="<?php echo e($materia['sigla']); ?>">
                     <div class="flex justify-between items-start mb-3">
                         <div class="flex-1">
-                            <h3 class="font-black text-navy-900 uppercase tracking-wide sigla-cell">{{ $materia['sigla'] }}</h3>
-                            <p class="text-sm text-slate-700 font-semibold nombre-cell">{{ $materia['nombre'] }}</p>
-                            <p class="text-sm text-slate-600 semestre-cell mt-1 font-semibold">Semestre: {{ $materia['semestre'] }}</p>
+                            <h3 class="font-black text-navy-900 uppercase tracking-wide sigla-cell"><?php echo e($materia['sigla']); ?></h3>
+                            <p class="text-sm text-slate-700 font-semibold nombre-cell"><?php echo e($materia['nombre']); ?></p>
+                            <p class="text-sm text-slate-600 semestre-cell mt-1 font-semibold">Semestre: <?php echo e($materia['semestre']); ?></p>
                             <div class="mt-2">
-                                @if (!empty($materia['grupos']) && count($materia['grupos']) > 0)
+                                <?php if(!empty($materia['grupos']) && count($materia['grupos']) > 0): ?>
                                     <p class="text-xs text-slate-600 mb-1 font-bold uppercase tracking-wide">Grupos:</p>
                                     <div class="flex flex-wrap gap-1">
-                                        @foreach ($materia['grupos'] as $grupo)
-                                            <span class="inline-block px-2 py-1 text-xs bg-navy-900 text-gold-500 font-bold border border-gold-500">{{ $grupo }}</span>
-                                        @endforeach
+                                        <?php $__currentLoopData = $materia['grupos']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $grupo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <span class="inline-block px-2 py-1 text-xs bg-navy-900 text-gold-500 font-bold border border-gold-500"><?php echo e($grupo); ?></span>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </div>
-                                @else
+                                <?php else: ?>
                                     <span class="text-xs text-slate-400 italic font-semibold">Sin grupos asignados</span>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                         <span
-                            class="text-xs bg-navy-900 text-gold-500 px-3 py-1 font-bold border-2 border-gold-500">{{ $materia['carga_horaria'] }}
+                            class="text-xs bg-navy-900 text-gold-500 px-3 py-1 font-bold border-2 border-gold-500"><?php echo e($materia['carga_horaria']); ?>
+
                             hrs</span>
                     </div>
                     <div class="flex justify-end gap-2 pt-3 border-t-2 border-slate-300">
-                        <button data-sigla="{{ $materia['sigla'] }}" data-nombre="{{ $materia['nombre'] }}"
-                            data-semestre="{{ $materia['semestre'] }}" data-carga="{{ $materia['carga_horaria'] }}"
+                        <button data-sigla="<?php echo e($materia['sigla']); ?>" data-nombre="<?php echo e($materia['nombre']); ?>"
+                            data-semestre="<?php echo e($materia['semestre']); ?>" data-carga="<?php echo e($materia['carga_horaria']); ?>"
                             class="btn-edit text-blue-600 hover:text-white hover:bg-blue-600 p-2 border-2 border-blue-600 transition-all" title="Editar">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                         </button>
-                        <button data-sigla="{{ $materia['sigla'] }}" data-nombre="{{ $materia['nombre'] }}"
+                        <button data-sigla="<?php echo e($materia['sigla']); ?>" data-nombre="<?php echo e($materia['nombre']); ?>"
                             class="btn-assign-groups text-green-600 hover:text-white hover:bg-green-600 p-2 border-2 border-green-600 transition-all" title="Asignar Grupos">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </button>
-                        <button data-sigla="{{ $materia['sigla'] }}" data-nombre="{{ $materia['nombre'] }}"
+                        <button data-sigla="<?php echo e($materia['sigla']); ?>" data-nombre="<?php echo e($materia['nombre']); ?>"
                             class="btn-delete text-red-600 hover:text-white hover:bg-red-600 p-2 border-2 border-red-600 transition-all" title="Eliminar">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -468,23 +472,23 @@
                         </button>
                     </div>
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div id="no-records-mobile" class="bg-white border-2 border-slate-300 shadow-md p-8 text-center">
                     <p class="text-slate-500 font-semibold uppercase tracking-wide">No hay materias registradas.</p>
                 </div>
-            @endforelse
+            <?php endif; ?>
         </div>
 
         <!-- Contador de registros -->
         <div class="mt-4 text-sm text-slate-600 font-semibold bg-slate-50 px-4 py-3 border-2 border-slate-300" id="total-records">
-            Mostrando {{ count($materias) }} registros.
+            Mostrando <?php echo e(count($materias)); ?> registros.
         </div>
 
     </main>
 
     <!-- Pie de página corporativo -->
     <footer class="md:ml-64 text-center py-5 text-xs bg-navy-900 text-slate-300 border-t-4 border-gold-500 mt-12">
-        <p class="font-bold uppercase tracking-widest">© {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA</p>
+        <p class="font-bold uppercase tracking-widest">© <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA</p>
     </footer>
 
     <!-- Modal de Formulario (Agregar/Editar Materia) -->
@@ -669,8 +673,9 @@
     </div>
 
     <!-- JS -->
-    <script src="{{ asset('static/scripts/admin_materias.js') }}"></script>
+    <script src="<?php echo e(asset('static/scripts/admin_materias.js')); ?>"></script>
 
 </body>
 
 </html>
+<?php /**PATH C:\Users\diego\OneDrive\Escritorio\exa2_inf342\app\templates/admin_materias.blade.php ENDPATH**/ ?>

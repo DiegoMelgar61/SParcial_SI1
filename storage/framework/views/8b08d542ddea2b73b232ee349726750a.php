@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Módulo Admin — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 </head>
 
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
@@ -30,14 +30,15 @@
 
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
-                    <p class="font-medium text-gray-800">{{ $user['nomb_comp'] }}</p>
-                    <p class="text-xs text-indigo-600 font-medium">{{ ucfirst($user['rol']) }}</p>
+                    <p class="font-medium text-gray-800"><?php echo e($user['nomb_comp']); ?></p>
+                    <p class="text-xs text-indigo-600 font-medium"><?php echo e(ucfirst($user['rol'])); ?></p>
                 </div>
 
                 <!-- Avatar con colores característicos -->
                 <div id="user-avatar"
                     class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
 
                 <!-- Botón de inicio -->
@@ -213,7 +214,7 @@
                         </svg>
                     </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-800 mb-2">{{ $cant_usuarios ?? '—' }}</p>
+                <p class="text-3xl font-bold text-gray-800 mb-2"><?php echo e($cant_usuarios ?? '—'); ?></p>
                 <p class="text-sm text-gray-500">Usuarios registrados en el sistema</p>
             </div>
 
@@ -228,7 +229,7 @@
                         </svg>
                     </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-800 mb-2">{{ $cant_docente ?? '—' }}</p>
+                <p class="text-3xl font-bold text-gray-800 mb-2"><?php echo e($cant_docente ?? '—'); ?></p>
                 <p class="text-sm text-gray-500">Docentes activos en el sistema</p>
             </div>
 
@@ -243,7 +244,7 @@
                         </svg>
                     </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-800 mb-2">{{ $gestion_actual ?? '2025-II' }}</p>
+                <p class="text-3xl font-bold text-gray-800 mb-2"><?php echo e($gestion_actual ?? '2025-II'); ?></p>
                 <p class="text-sm text-gray-500">Periodo académico vigente</p>
             </div>
         </div>
@@ -294,9 +295,9 @@
 
     <!-- Footer -->
     <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10 md:ml-64">
-        © {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA
+        © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
     </footer>
-    <script src="{{ asset('static/scripts/admin.js') }}"></script>
+    <script src="<?php echo e(asset('static/scripts/admin.js')); ?>"></script>
 </body>
 
-</html>
+</html><?php /**PATH C:\Users\diego\OneDrive\Escritorio\exa2_inf342\app\templates/mod_admin.blade.php ENDPATH**/ ?>

@@ -148,6 +148,6 @@
     © {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA
   </footer>
 
-  <script src="{{ secure_asset('static/scripts/mod_docencia.js') }}"></script>
+  <script src="{{ asset('static/scripts/mod_docencia.js') }}"></script>
 </body>
 </html>

@@ -31,7 +31,7 @@
             }
         }
     </script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 </head>
 
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
@@ -55,14 +55,15 @@
 
             <div class="flex items-center gap-4">
                 <div class="hidden sm:block text-right">
-                    <p class="font-bold text-white text-sm">{{ $user['nomb_comp'] }}</p>
-                    <p class="text-xs text-gold-500 uppercase tracking-wide font-semibold">{{ ucfirst($user['rol']) }}</p>
+                    <p class="font-bold text-white text-sm"><?php echo e($user['nomb_comp']); ?></p>
+                    <p class="text-xs text-gold-500 uppercase tracking-wide font-semibold"><?php echo e(ucfirst($user['rol'])); ?></p>
                 </div>
 
                 <!-- Avatar -->
                 <div id="user-avatar"
                     class="w-10 h-10 border-2 border-gold-500 bg-navy-800 text-gold-500 flex items-center justify-center font-black shadow-md cursor-pointer select-none">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
 
                 <!-- Botón de inicio -->
@@ -81,20 +82,22 @@
             <div class="flex items-center gap-3 mb-3">
                 <div
                     class="w-10 h-10 border-2 border-gold-500 bg-navy-900 text-gold-500 flex items-center justify-center font-black shadow-sm">
-                    {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
+                    <?php echo e(strtoupper(substr($user['nomb_comp'], 0, 1))); ?>
+
                 </div>
                 <div>
-                    <p class="font-bold text-navy-900 leading-tight uppercase tracking-wide text-xs">{{ $user['nomb_comp'] }}</p>
+                    <p class="font-bold text-navy-900 leading-tight uppercase tracking-wide text-xs"><?php echo e($user['nomb_comp']); ?></p>
                     <span class="text-xs px-2 py-0.5 border border-gold-500 bg-navy-900 text-gold-500 font-bold uppercase tracking-wide">
-                        {{ ucfirst($user['rol']) }}
+                        <?php echo e(ucfirst($user['rol'])); ?>
+
                     </span>
                 </div>
             </div>
             <hr class="my-3 border-slate-300">
             <ul class="space-y-2 text-sm">
-                <li><span class="font-bold text-slate-600 uppercase tracking-wide text-xs">CI:</span> {{ $user['ci'] }}</li>
-                <li><span class="font-bold text-slate-600 uppercase tracking-wide text-xs">Correo:</span> {{ $user['correo'] ?? '—' }}</li>
-                <li><span class="font-bold text-slate-600 uppercase tracking-wide text-xs">Teléfono:</span> {{ $user['tel'] ?? '—' }}</li>
+                <li><span class="font-bold text-slate-600 uppercase tracking-wide text-xs">CI:</span> <?php echo e($user['ci']); ?></li>
+                <li><span class="font-bold text-slate-600 uppercase tracking-wide text-xs">Correo:</span> <?php echo e($user['correo'] ?? '—'); ?></li>
+                <li><span class="font-bold text-slate-600 uppercase tracking-wide text-xs">Teléfono:</span> <?php echo e($user['tel'] ?? '—'); ?></li>
             </ul>
             <div class="mt-4 pt-3 border-t-2 border-gold-500">
                 <a href="/perfil"
@@ -381,3 +384,4 @@
 </body>
 
 </html>
+<?php /**PATH C:\Users\diego\OneDrive\Escritorio\exa2_inf342\app\templates/admin_gestiones.blade.php ENDPATH**/ ?>

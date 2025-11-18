@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inicio de Sesión — Sistema FICCT</title>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -80,7 +80,7 @@
         <!-- Header corporativo -->
         <div class="bg-navy-900 px-8 py-6 border-b-4 border-gold-500">
           <div class="flex items-center gap-4 mb-3">
-            <img src="{{ asset('static/images/logo2.png') }}" alt="FICCT Logo"
+            <img src="<?php echo e(asset('static/images/logo2.png')); ?>" alt="FICCT Logo"
                  class="w-14 h-14 border-2 border-gold-500 bg-white p-1">
             <div>
               <h2 class="text-white text-xl font-bold tracking-wide">FICCT - UAGRM</h2>
@@ -158,7 +158,7 @@
         <!-- Footer corporativo -->
         <div class="bg-slate-50 px-8 py-4 border-t border-slate-200 text-center">
           <p class="text-xs text-slate-600 font-medium">
-            © {{ date('Y') }} Facultad de Ingeniería — UAGRM
+            © <?php echo e(date('Y')); ?> Facultad de Ingeniería — UAGRM
           </p>
         </div>
 
@@ -186,6 +186,7 @@
     </div>
   </div>
 
-  <script src="{{ asset('static/scripts/login.js') }}"></script>
+  <script src="<?php echo e(asset('static/scripts/login.js')); ?>"></script>
 </body>
 </html>
+<?php /**PATH C:\Users\diego\OneDrive\Escritorio\exa2_inf342\app\templates/login.blade.php ENDPATH**/ ?>
