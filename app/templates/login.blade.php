@@ -143,7 +143,7 @@
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div class="bg-white px-3 py-2 border border-slate-200">
                   <span class="block text-slate-500 text-xs font-semibold mb-1">CÓDIGO</span>
-                  <span class="font-bold text-navy-900">37</span>
+                  <span class="font-bold text-navy-900">45</span>
                 </div>
                 <div class="bg-white px-3 py-2 border border-slate-200">
                   <span class="block text-slate-500 text-xs font-semibold mb-1">CONTRASEÑA</span>
