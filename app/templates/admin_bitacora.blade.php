@@ -387,7 +387,7 @@
 
     <!-- Footer corporativo -->
     <footer class="text-center py-5 text-xs bg-navy-900 text-slate-300 border-t-4 border-gold-500 mt-12 md:ml-64">
-        <p class="font-bold uppercase tracking-widest">© {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA</p>
+        <p class="font-bold uppercase tracking-widest">© {{ date('Y') }} Grupo 31 — UAGRM | INF342 - SA</p>
     </footer>
 
     <script src="{{ asset('static/scripts/bitacora.js') }}"></script>

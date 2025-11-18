@@ -341,7 +341,7 @@
 
     <!-- Footer -->
     <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10 md:ml-64">
-        © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
+        © <?php echo e(date('Y')); ?> Grupo 31 — UAGRM | INF342 - SA
     </footer>
 
     <!-- JS: Este archivo ahora debe contener toda la lógica -->

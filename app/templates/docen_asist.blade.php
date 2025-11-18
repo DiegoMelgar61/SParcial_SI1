@@ -281,7 +281,7 @@
 
 
   <footer class="text-center py-4 text-xs text-gold-500 border-t-4 border-gold-500 bg-navy-900 mt-10 md:ml-64">
-    © {{ date('Y') }} Grupo 32 — UAGRM | INF342 - SA
+    © {{ date('Y') }} Grupo 31 — UAGRM | INF342 - SA
   </footer>
 
   <!-- Librería para generar códigos QR -->

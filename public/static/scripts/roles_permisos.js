@@ -2,11 +2,11 @@
  * ============================================================================
  * GESTIÓN DE ROLES Y PERMISOS - Frontend JavaScript
  * ============================================================================
- * 
+ *
  * Este archivo contiene toda la lógica del frontend para la gestión de roles
  * y permisos del sistema. Está organizado en módulos para facilitar su
  * mantenimiento y lectura.
- * 
+ *
  * MÓDULOS PRINCIPALES:
  * 1. Configuración inicial y variables globales
  * 2. Lógica del Sidebar (menú lateral)
@@ -14,8 +14,8 @@
  * 4. Gestión de ROLES (CRUD completo)
  * 5. Gestión de PERMISOS (CRUD completo)
  * 6. Asignación de Roles a Permisos (modal con checkboxes)
- * 
- * @author Grupo 32 - INF342 SA
+ *
+ * @author Grupo 31 - INF342 SA
  * @version 1.0
  */
 
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================================
   // MÓDULO 1: CONFIGURACIÓN INICIAL Y VARIABLES GLOBALES
   // ============================================================================
-  
+
   /**
    * Token CSRF de Laravel - requerido para todas las peticiones POST
    * Se obtiene del meta tag en el HTML
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================================
   // MÓDULO 2: LÓGICA DEL SIDEBAR (Menú lateral)
   // ============================================================================
-  
+
   const sidebar = document.getElementById("admin-sidebar");
   const toggleButton = document.getElementById("menu-toggle");
   const overlay = document.getElementById("sidebar-overlay");
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================================
   // MÓDULO 3: LÓGICA DEL PANEL DE USUARIO (Avatar)
   // ============================================================================
-  
+
   const userAvatar = document.getElementById("user-avatar");
   const userAside = document.getElementById("user-aside");
 
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
-   * Event listener global para cerrar el panel de usuario 
+   * Event listener global para cerrar el panel de usuario
    * cuando se hace clic fuera de él
    */
   document.addEventListener("click", (e) => {
@@ -138,7 +138,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const hiddenRolId = document.getElementById("form-rol-id");
   const inputRolNombre = document.getElementById("form-rol-nombre");
   const inputRolDescripcion = document.getElementById("form-rol-descripcion");
-  const permisosCheckboxesContainer = document.getElementById("permisos-checkboxes");
+  const permisosCheckboxesContainer = document.getElementById(
+    "permisos-checkboxes"
+  );
 
   // Elementos para eliminar rol
   const deleteRolModal = document.getElementById("delete-rol-modal");
@@ -196,7 +198,11 @@ document.addEventListener("DOMContentLoaded", () => {
                  class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
           <span class="text-sm text-gray-700">
             <strong>${permiso.nombre}</strong>
-            ${permiso.descripcion ? `<span class="text-gray-500"> - ${permiso.descripcion}</span>` : ""}
+            ${
+              permiso.descripcion
+                ? `<span class="text-gray-500"> - ${permiso.descripcion}</span>`
+                : ""
+            }
           </span>
         </label>
       `;
@@ -212,7 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btnAddRol.addEventListener("click", async () => {
       // Resetear formulario
       if (rolForm) rolForm.reset();
-      if (rolFormModalTitle) rolFormModalTitle.textContent = "Agregar Nuevo Rol";
+      if (rolFormModalTitle)
+        rolFormModalTitle.textContent = "Agregar Nuevo Rol";
       if (hiddenRolId) hiddenRolId.value = "";
 
       // Renderizar permisos sin selección
@@ -244,17 +251,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (hiddenRolId) hiddenRolId.value = rolId;
     if (inputRolNombre) inputRolNombre.value = dataset.nombre || "";
-    if (inputRolDescripcion) inputRolDescripcion.value = dataset.descripcion || "";
+    if (inputRolDescripcion)
+      inputRolDescripcion.value = dataset.descripcion || "";
 
     // Obtener permisos asignados a este rol
     try {
-      const response = await fetch(`/admin/roles/get-permisos?role_id=${rolId}`, {
-        method: "GET",
-        headers: {
-          "X-CSRF-TOKEN": csrfToken,
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      });
+      const response = await fetch(
+        `/admin/roles/get-permisos?role_id=${rolId}`,
+        {
+          method: "GET",
+          headers: {
+            "X-CSRF-TOKEN": csrfToken,
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        }
+      );
 
       let permisosAsignados = [];
       if (response.ok) {
@@ -282,8 +293,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.classList.remove("overflow-hidden");
   }
 
-  if (btnCancelRolForm) btnCancelRolForm.addEventListener("click", closeRolFormModal);
-  if (btnCancelRolFormX) btnCancelRolFormX.addEventListener("click", closeRolFormModal);
+  if (btnCancelRolForm)
+    btnCancelRolForm.addEventListener("click", closeRolFormModal);
+  if (btnCancelRolFormX)
+    btnCancelRolFormX.addEventListener("click", closeRolFormModal);
 
   // ---------- 4.6: GUARDAR ROL (CREAR O ACTUALIZAR) ----------
 
@@ -342,13 +355,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (response.ok) {
           alert(
             result.message ||
-              (isEditing ? "Rol actualizado con éxito." : "Rol creado con éxito.")
+              (isEditing
+                ? "Rol actualizado con éxito."
+                : "Rol creado con éxito.")
           );
           // Recargar página para mostrar cambios
           window.location.reload();
         } else {
           let errorMessage = "Error al guardar el rol. ";
-          if (result.errors) errorMessage += Object.values(result.errors).join(" ");
+          if (result.errors)
+            errorMessage += Object.values(result.errors).join(" ");
           else errorMessage += result.message || "Inténtalo de nuevo.";
           alert(errorMessage);
         }
@@ -437,18 +453,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------- 5.1: ELEMENTOS DEL DOM PARA PERMISOS ----------
   const permisoFormModal = document.getElementById("permiso-form-modal");
   const permisoForm = document.getElementById("permiso-form");
-  const btnCancelPermisoForm = document.getElementById("btn-cancel-permiso-form");
-  const btnCancelPermisoFormX = document.getElementById("btn-cancel-permiso-form-x");
-  const permisoFormModalTitle = document.getElementById("permiso-form-modal-title");
+  const btnCancelPermisoForm = document.getElementById(
+    "btn-cancel-permiso-form"
+  );
+  const btnCancelPermisoFormX = document.getElementById(
+    "btn-cancel-permiso-form-x"
+  );
+  const permisoFormModalTitle = document.getElementById(
+    "permiso-form-modal-title"
+  );
   const btnSavePermiso = document.getElementById("btn-save-permiso");
   const hiddenPermisoId = document.getElementById("form-permiso-id");
   const inputPermisoNombre = document.getElementById("form-permiso-nombre");
-  const inputPermisoDescripcion = document.getElementById("form-permiso-descripcion");
+  const inputPermisoDescripcion = document.getElementById(
+    "form-permiso-descripcion"
+  );
 
   // Elementos para eliminar permiso
   const deletePermisoModal = document.getElementById("delete-permiso-modal");
-  const btnCancelDeletePermiso = document.getElementById("btn-cancel-delete-permiso");
-  const btnConfirmDeletePermiso = document.getElementById("btn-confirm-delete-permiso");
+  const btnCancelDeletePermiso = document.getElementById(
+    "btn-cancel-delete-permiso"
+  );
+  const btnConfirmDeletePermiso = document.getElementById(
+    "btn-confirm-delete-permiso"
+  );
   const deletePermisoNombre = document.getElementById("delete-permiso-nombre");
   let permisoIdToDelete = null;
 
@@ -493,8 +521,12 @@ document.addEventListener("DOMContentLoaded", () => {
         html += `
           <tr class="hover:bg-gray-50 transition permiso-row">
             <td class="px-6 py-4 text-gray-700">${index + 1}</td>
-            <td class="px-6 py-4 font-medium text-gray-800 nombre-cell">${permiso.nombre}</td>
-            <td class="px-6 py-4 text-gray-600 descripcion-cell">${permiso.descripcion || "—"}</td>
+            <td class="px-6 py-4 font-medium text-gray-800 nombre-cell">${
+              permiso.nombre
+            }</td>
+            <td class="px-6 py-4 text-gray-600 descripcion-cell">${
+              permiso.descripcion || "—"
+            }</td>
             <td class="px-6 py-4 text-center">
               <div class="flex justify-center gap-3">
                 <!-- Botón Asignar Roles -->
@@ -551,7 +583,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btnAddPermiso.addEventListener("click", () => {
       // Resetear formulario
       if (permisoForm) permisoForm.reset();
-      if (permisoFormModalTitle) permisoFormModalTitle.textContent = "Agregar Nuevo Permiso";
+      if (permisoFormModalTitle)
+        permisoFormModalTitle.textContent = "Agregar Nuevo Permiso";
       if (hiddenPermisoId) hiddenPermisoId.value = "";
 
       // Mostrar modal
@@ -572,12 +605,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Resetear formulario
     if (permisoForm) permisoForm.reset();
-    if (permisoFormModalTitle) permisoFormModalTitle.textContent = "Editar Permiso";
+    if (permisoFormModalTitle)
+      permisoFormModalTitle.textContent = "Editar Permiso";
 
     const dataset = editBtn.dataset || {};
     if (hiddenPermisoId) hiddenPermisoId.value = dataset.id || "";
     if (inputPermisoNombre) inputPermisoNombre.value = dataset.nombre || "";
-    if (inputPermisoDescripcion) inputPermisoDescripcion.value = dataset.descripcion || "";
+    if (inputPermisoDescripcion)
+      inputPermisoDescripcion.value = dataset.descripcion || "";
 
     // Mostrar modal
     if (permisoFormModal) permisoFormModal.classList.remove("hidden");
@@ -594,8 +629,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.classList.remove("overflow-hidden");
   }
 
-  if (btnCancelPermisoForm) btnCancelPermisoForm.addEventListener("click", closePermisoFormModal);
-  if (btnCancelPermisoFormX) btnCancelPermisoFormX.addEventListener("click", closePermisoFormModal);
+  if (btnCancelPermisoForm)
+    btnCancelPermisoForm.addEventListener("click", closePermisoFormModal);
+  if (btnCancelPermisoFormX)
+    btnCancelPermisoFormX.addEventListener("click", closePermisoFormModal);
 
   // ---------- 5.6: GUARDAR PERMISO (CREAR O ACTUALIZAR) ----------
 
@@ -634,7 +671,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Definir endpoint
-      const url = isEditing ? `/admin/permisos/update` : `/admin/permisos/create`;
+      const url = isEditing
+        ? `/admin/permisos/update`
+        : `/admin/permisos/create`;
 
       try {
         const response = await fetch(url, {
@@ -652,13 +691,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (response.ok) {
           alert(
             result.message ||
-              (isEditing ? "Permiso actualizado con éxito." : "Permiso creado con éxito.")
+              (isEditing
+                ? "Permiso actualizado con éxito."
+                : "Permiso creado con éxito.")
           );
           // Recargar página para mostrar cambios
           window.location.reload();
         } else {
           let errorMessage = "Error al guardar el permiso. ";
-          if (result.errors) errorMessage += Object.values(result.errors).join(" ");
+          if (result.errors)
+            errorMessage += Object.values(result.errors).join(" ");
           else errorMessage += result.message || "Inténtalo de nuevo.";
           alert(errorMessage);
         }
@@ -678,7 +720,8 @@ document.addEventListener("DOMContentLoaded", () => {
    * Event listener delegado para abrir el modal de confirmación de eliminación
    */
   document.addEventListener("click", (e) => {
-    const deleteBtn = e.target.closest && e.target.closest(".btn-delete-permiso");
+    const deleteBtn =
+      e.target.closest && e.target.closest(".btn-delete-permiso");
     if (!deleteBtn) return;
 
     permisoIdToDelete = deleteBtn.dataset.id;
@@ -746,11 +789,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---------- 6.1: ELEMENTOS DEL DOM ----------
   const assignRolesModal = document.getElementById("assign-roles-modal");
-  const btnCancelAssignRoles = document.getElementById("btn-cancel-assign-roles");
-  const btnCancelAssignRolesX = document.getElementById("btn-cancel-assign-roles-x");
+  const btnCancelAssignRoles = document.getElementById(
+    "btn-cancel-assign-roles"
+  );
+  const btnCancelAssignRolesX = document.getElementById(
+    "btn-cancel-assign-roles-x"
+  );
   const btnSaveAssignRoles = document.getElementById("btn-save-assign-roles");
-  const assignRolesPermisoNombre = document.getElementById("assign-roles-permiso-nombre");
-  const assignRolesPermisoId = document.getElementById("assign-roles-permiso-id");
+  const assignRolesPermisoNombre = document.getElementById(
+    "assign-roles-permiso-nombre"
+  );
+  const assignRolesPermisoId = document.getElementById(
+    "assign-roles-permiso-id"
+  );
   const rolesCheckboxesContainer = document.getElementById("roles-checkboxes");
 
   // ---------- 6.2: CARGAR TODOS LOS ROLES ----------
@@ -788,21 +839,25 @@ document.addEventListener("DOMContentLoaded", () => {
    * @param {String} permisoId - ID del permiso para el cual se asignan roles
    */
   async function renderRolesCheckboxes(permisoId) {
-    rolesCheckboxesContainer.innerHTML = '<p class="text-gray-500 text-sm">Cargando roles...</p>';
+    rolesCheckboxesContainer.innerHTML =
+      '<p class="text-gray-500 text-sm">Cargando roles...</p>';
 
     try {
       // Obtener roles que ya tienen este permiso
       let rolesConPermiso = [];
-      
+
       // Recorremos todos los roles y verificamos cuáles tienen este permiso
       for (const rol of todosLosRoles) {
-        const response = await fetch(`/admin/roles/get-permisos?role_id=${rol.id}`, {
-          method: "GET",
-          headers: {
-            "X-CSRF-TOKEN": csrfToken,
-            "X-Requested-With": "XMLHttpRequest",
-          },
-        });
+        const response = await fetch(
+          `/admin/roles/get-permisos?role_id=${rol.id}`,
+          {
+            method: "GET",
+            headers: {
+              "X-CSRF-TOKEN": csrfToken,
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          }
+        );
 
         if (response.ok) {
           const permisos = await response.json();
@@ -851,7 +906,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const permisoId = assignBtn.dataset.id;
     const permisoNombre = assignBtn.dataset.nombre;
 
-    if (assignRolesPermisoNombre) assignRolesPermisoNombre.textContent = permisoNombre;
+    if (assignRolesPermisoNombre)
+      assignRolesPermisoNombre.textContent = permisoNombre;
     if (assignRolesPermisoId) assignRolesPermisoId.value = permisoId;
 
     // Renderizar checkboxes de roles
@@ -872,8 +928,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.classList.remove("overflow-hidden");
   }
 
-  if (btnCancelAssignRoles) btnCancelAssignRoles.addEventListener("click", closeAssignRolesModal);
-  if (btnCancelAssignRolesX) btnCancelAssignRolesX.addEventListener("click", closeAssignRolesModal);
+  if (btnCancelAssignRoles)
+    btnCancelAssignRoles.addEventListener("click", closeAssignRolesModal);
+  if (btnCancelAssignRolesX)
+    btnCancelAssignRolesX.addEventListener("click", closeAssignRolesModal);
 
   // ---------- 6.5: GUARDAR ASIGNACIÓN DE ROLES ----------
 
@@ -888,8 +946,10 @@ document.addEventListener("DOMContentLoaded", () => {
       btnSaveAssignRoles.textContent = "Guardando...";
 
       const permisoId = assignRolesPermisoId.value;
-      const checkboxes = rolesCheckboxesContainer.querySelectorAll('input[name="roles[]"]');
-      
+      const checkboxes = rolesCheckboxesContainer.querySelectorAll(
+        'input[name="roles[]"]'
+      );
+
       try {
         // Para cada rol, actualizamos sus permisos
         for (const checkbox of checkboxes) {
@@ -897,13 +957,16 @@ document.addEventListener("DOMContentLoaded", () => {
           const shouldHavePermiso = checkbox.checked;
 
           // Obtener permisos actuales del rol
-          const response = await fetch(`/admin/roles/get-permisos?role_id=${rolId}`, {
-            method: "GET",
-            headers: {
-              "X-CSRF-TOKEN": csrfToken,
-              "X-Requested-With": "XMLHttpRequest",
-            },
-          });
+          const response = await fetch(
+            `/admin/roles/get-permisos?role_id=${rolId}`,
+            {
+              method: "GET",
+              headers: {
+                "X-CSRF-TOKEN": csrfToken,
+                "X-Requested-With": "XMLHttpRequest",
+              },
+            }
+          );
 
           let permisosActuales = [];
           if (response.ok) {
@@ -919,14 +982,18 @@ document.addEventListener("DOMContentLoaded", () => {
             nuevosPermisos.push(parseInt(permisoId));
           } else if (!shouldHavePermiso && tienePermiso) {
             // Quitar permiso
-            nuevosPermisos = nuevosPermisos.filter((p) => p !== parseInt(permisoId));
+            nuevosPermisos = nuevosPermisos.filter(
+              (p) => p !== parseInt(permisoId)
+            );
           } else {
             // Sin cambios para este rol
             continue;
           }
 
           // Obtener datos del rol
-          const rolRow = document.querySelector(`.btn-edit-rol[data-id="${rolId}"]`);
+          const rolRow = document.querySelector(
+            `.btn-edit-rol[data-id="${rolId}"]`
+          );
           const rolNombre = rolRow ? rolRow.dataset.nombre : "";
           const rolDescripcion = rolRow ? rolRow.dataset.descripcion : "";
 

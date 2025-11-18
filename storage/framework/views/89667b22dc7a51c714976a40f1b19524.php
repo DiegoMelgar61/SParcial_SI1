@@ -146,7 +146,7 @@
   </main>
 
   <footer class="text-center py-4 text-xs text-gray-500 border-t border-gray-200 bg-white mt-10 md:ml-64">
-    © <?php echo e(date('Y')); ?> Grupo 32 — UAGRM | INF342 - SA
+    © <?php echo e(date('Y')); ?> Grupo 31 — UAGRM | INF342 - SA
   </footer>
 
   <script src="<?php echo e(asset('static/scripts/mod_docencia.js')); ?>"></script>
