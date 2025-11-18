@@ -6,35 +6,59 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Gestión de Licencias — Plataforma Universitaria INF342</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif']
+            },
+            colors: {
+              navy: {
+                900: '#0f2942',
+                800: '#1e3a5f'
+              },
+              gold: {
+                500: '#c9a961',
+                600: '#b8974f'
+              }
+            }
+          }
+        }
+      }
+    </script>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col font-sans antialiased">
 
     <!-- Barra superior -->
-  <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <header class="bg-navy-900 border-b-4 border-gold-500 sticky top-0 z-40">
     <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
       <div class="flex items-center gap-4">
-        <button id="menu-toggle" class="block md:hidden p-2 text-gray-600 hover:text-sky-600 rounded-md transition">
+        <button id="menu-toggle" class="block md:hidden p-2 text-gold-500 hover:text-gold-600 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
         </button>
-        <h1 class="text-lg md:text-xl font-semibold text-gray-800 tracking-wide">Módulo Docencia</h1>
+        <h1 class="text-lg md:text-xl font-semibold text-white tracking-wide">Módulo Docencia</h1>
       </div>
 
       <div class="flex items-center gap-4">
         <div class="hidden sm:block text-right">
-          <p class="font-medium text-gray-800">{{ $user['nomb_comp'] }}</p>
-          <p class="text-xs text-sky-600 font-medium">{{ ucfirst($user['rol']) }}</p>
+          <p class="font-medium text-white">{{ $user['nomb_comp'] }}</p>
+          <p class="text-xs text-gold-500 font-medium">{{ ucfirst($user['rol']) }}</p>
         </div>
 
         <div id="user-avatar"
-             class="w-10 h-10 rounded-full bg-sky-600 text-white flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
+             class="w-10 h-10 bg-gold-500 text-navy-900 flex items-center justify-center font-semibold shadow-sm cursor-pointer select-none">
           {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
         </div>
 
         <a href="/"
-           class="text-sm bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md font-medium transition shadow-sm">
+           class="text-sm bg-gold-500 hover:bg-gold-600 text-navy-900 px-4 py-2 border-b-4 border-gold-600 font-medium transition shadow-sm">
           Inicio
         </a>
       </div>
@@ -43,15 +67,15 @@
 
     <!-- Panel lateral de usuario -->
     <aside id="user-aside"
-        class="hidden fixed top-16 right-4 w-64 bg-white shadow-2xl rounded-xl border border-gray-200 z-50 transition-all duration-300 opacity-0 scale-95 origin-top-right">
-        <div class="p-5 text-sm text-gray-700">
+        class="hidden fixed top-16 right-4 w-64 bg-white shadow-2xl  border border-gray-200 z-50 transition-all duration-300 opacity-0 scale-95 origin-top-right">
+        <div class="p-5 text-sm text-white">
             <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow-sm">
+                <div class="w-10 h-10  bg-navy-900 text-white flex items-center justify-center font-semibold shadow-sm">
                     {{ strtoupper(substr($user['nomb_comp'], 0, 1)) }}
                 </div>
                 <div>
                     <p class="font-semibold text-gray-800 leading-tight">{{ $user['nomb_comp'] }}</p>
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
+                    <span class="text-xs px-2 py-0.5  bg-gold-500 text-navy-900 font-medium">
                         {{ ucfirst($user['rol']) }}
                     </span>
                 </div>
@@ -64,7 +88,7 @@
             </ul>
             <div class="mt-4 pt-3 border-t border-gray-100">
                 <a href="/perfil"
-                    class="text-indigo-600 text-sm font-medium hover:underline hover:text-indigo-700 transition">
+                    class="text-gold-500 text-sm font-medium hover:underline hover:text-navy-900 transition">
                     Ver perfil completo →
                 </a>
             </div>
@@ -73,13 +97,13 @@
 
     <!-- Sidebar -->
     <aside id="docencia-sidebar"
-    class="fixed top-0 left-0 w-64 bg-white shadow-lg h-full z-30 border-r border-gray-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-        <div class="flex flex-col h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+    class="fixed top-0 left-0 w-64 bg-navy-900 shadow-lg h-full z-30 border-r-4 border-gold-500 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="flex flex-col h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gold-500 scrollbar-track-navy-800">
             
             <!-- Encabezado -->
-            <div class="p-4 border-b border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-800">Panel de Docencia</h3>
-            <p class="text-xs text-sky-600 mt-1 font-medium">Gestión docente</p>
+            <div class="p-4 border-b-2 border-gold-500">
+            <h3 class="text-sm font-semibold text-white">Panel de Docencia</h3>
+            <p class="text-xs text-gold-500 mt-1 font-medium">Gestión docente</p>
             </div>
 
             <!-- Navegación -->
@@ -89,7 +113,7 @@
                 <!-- Panel principal -->
                 <li>
                 <a href="/docen/mod-doc"
-                    class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-sky-50 hover:text-sky-700 rounded-lg transition">
+                    class="flex items-center gap-2 px-3 py-2 text-white hover:bg-gold-500 hover:text-navy-900  transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
@@ -101,7 +125,7 @@
                 <!-- Asistencia -->
                 <li>
                 <a href="/docen/asistencia"
-                    class="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-sky-50 hover:text-sky-700 rounded-lg transition">
+                    class="flex items-center gap-2 px-3 py-2 text-white hover:bg-gold-500 hover:text-navy-900  transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
@@ -112,7 +136,7 @@
                 <!-- Licencia -->
                 <li>
                 <a href="/docencia/licencia"
-                    class="flex items-center gap-2 px-3 py-2 text-sky-700 bg-sky-50 rounded-lg font-semibold hover:bg-sky-100 transition">
+                    class="flex items-center gap-2 px-3 py-2 text-navy-900 bg-gold-500  font-semibold hover:bg-sky-100 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -124,7 +148,7 @@
             </nav>
 
             <!-- Footer -->
-            <div class="p-3 border-t border-gray-100 text-center text-[11px] text-gray-500">
+            <div class="p-3 border-t-2 border-gold-500 text-center text-[11px] text-gold-500">
             Módulo Docencia v1.0
             </div>
         </div>
@@ -144,11 +168,11 @@
         </div>
         
         <!-- TARJETA DE DÍAS DISPONIBLES -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="bg-white  shadow-sm border border-gray-200 p-6 mb-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div class="flex items-center gap-4">
-                    <div class="w-20 h-20 rounded-xl bg-indigo-100 flex items-center justify-center">
-                        <i class="fas fa-calendar-check text-4xl text-indigo-600"></i>
+                    <div class="w-20 h-20  bg-gold-500 flex items-center justify-center">
+                        <i class="fas fa-calendar-check text-4xl text-gold-500"></i>
                     </div>
                     <div>
                         <h3 class="text-xl font-bold text-gray-900">Días Disponibles</h3>
@@ -156,25 +180,25 @@
                     </div>
                 </div>
                 <div class="text-center md:text-right">
-                    <div class="text-6xl font-bold text-indigo-600" id="diasDisponibles">-</div>
-                    <p class="text-base text-gray-700 mt-2 font-medium">de 7 días este mes</p>
+                    <div class="text-6xl font-bold text-gold-500" id="diasDisponibles">-</div>
+                    <p class="text-base text-white mt-2 font-medium">de 7 días este mes</p>
                     <p class="text-sm text-gray-500 mt-1">Días usados: <span id="diasUsados" class="font-semibold">-</span></p>
                 </div>
             </div>
         </div>
 
         <!-- SECCIÓN DE LICENCIAS -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="bg-white  shadow-sm border border-gray-200">
             <!-- HEADER -->
             <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h3 class="text-xl font-bold text-gray-900">
-                        <i class="fas fa-list text-indigo-600 mr-2"></i>
+                        <i class="fas fa-list text-gold-500 mr-2"></i>
                         Mis Licencias
                     </h3>
                     <p class="text-sm text-gray-600 mt-1">Últimas 5 licencias solicitadas</p>
                 </div>
-                <button id="btnNuevaLicencia" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg shadow-md hover:bg-indigo-700 transition font-medium">
+                <button id="btnNuevaLicencia" class="inline-flex items-center gap-2 bg-navy-900 text-white px-5 py-2.5  shadow-md hover:bg-navy-800 transition font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -185,7 +209,7 @@
             <!-- SPINNER DE CARGA -->
             <div id="loadingSpinner" class="flex justify-center items-center py-16">
                 <div class="flex flex-col items-center gap-3">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                    <div class="animate-spin  h-12 w-12 border-b-2 border-navy-900"></div>
                     <span class="text-sm text-gray-600">Cargando licencias...</span>
                 </div>
             </div>
@@ -230,15 +254,15 @@
     </main>
 
     <!-- PIE DE PÁGINA -->
-    <footer class="md:ml-64 text-center py-4 text-xs text-gray-500 border-t border-gray-200 mt-auto">
+    <footer class="md:ml-64 text-center py-4 text-xs text-gold-500 border-t-4 border-gold-500 bg-navy-900 mt-auto">
         © 2025 Plataforma Universitaria INF342 — Sistema de Gestión de Licencias
     </footer>
 
     <!-- MODAL: CREAR/EDITAR LICENCIA -->
     <div id="modalLicencia" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="bg-white shadow-2xl border-2 border-navy-900 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <!-- Header -->
-            <div class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center sticky top-0">
+            <div class="bg-navy-900 border-b-4 border-gold-500 text-white px-6 py-4 flex justify-between items-center sticky top-0">
                 <h3 id="modalTitulo" class="text-xl font-semibold">
                     <i class="fas fa-file-medical mr-2"></i>
                     Nueva Solicitud de Licencia
@@ -268,7 +292,7 @@
 
                 <!-- Campo: Descripción -->
                 <div>
-                    <label for="inputDescripcion" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <label for="inputDescripcion" class="block text-sm font-semibold text-white mb-2">
                         <i class="fas fa-align-left mr-2 text-blue-600"></i>
                         Descripción de la Licencia *
                     </label>
@@ -276,7 +300,7 @@
                         id="inputDescripcion" 
                         name="descripcion" 
                         rows="3" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        class="w-full px-4 py-2 border border-gray-300  focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                         placeholder="Ej: Cita médica, asuntos personales, etc."
                         required
                         maxlength="500"
@@ -286,7 +310,7 @@
 
                 <!-- Campo: Fecha Inicio -->
                 <div>
-                    <label for="inputFechaInicio" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <label for="inputFechaInicio" class="block text-sm font-semibold text-white mb-2">
                         <i class="fas fa-calendar-day mr-2 text-blue-600"></i>
                         Fecha de Inicio *
                     </label>
@@ -294,7 +318,7 @@
                         type="date" 
                         id="inputFechaInicio" 
                         name="fecha_inicio"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full px-4 py-2 border border-gray-300  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                     >
                     <p class="text-xs text-gray-500 mt-1">No puede ser anterior a hoy</p>
@@ -302,14 +326,14 @@
 
                 <!-- Campo: Días de Licencia (Selector) -->
                 <div>
-                    <label for="inputDias" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <label for="inputDias" class="block text-sm font-semibold text-white mb-2">
                         <i class="fas fa-clock mr-2 text-blue-600"></i>
                         Cantidad de Días *
                     </label>
                     <select 
                         id="inputDias" 
                         name="dias"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full px-4 py-2 border border-gray-300  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                     >
                         <option value="">Selecciona los días...</option>
@@ -320,12 +344,12 @@
 
                 <!-- Campo: Fecha Fin (Calculada automáticamente) -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <label class="block text-sm font-semibold text-white mb-2">
                         <i class="fas fa-calendar-check mr-2 text-green-600"></i>
                         Fecha de Fin (Calculada)
                     </label>
-                    <div class="bg-gray-50 px-4 py-3 border border-gray-200 rounded-lg">
-                        <p id="fechaFinCalculada" class="text-gray-700 font-semibold">
+                    <div class="bg-gray-50 px-4 py-3 border border-gray-200 ">
+                        <p id="fechaFinCalculada" class="text-white font-semibold">
                             <i class="fas fa-calculator mr-2 text-gray-500"></i>
                             Selecciona la fecha de inicio y los días
                         </p>
@@ -335,11 +359,11 @@
 
                 <!-- Botones del Modal -->
                 <div class="flex justify-end space-x-3 pt-4 border-t">
-                    <button type="button" id="btnCancelarModal" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition">
+                    <button type="button" id="btnCancelarModal" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-white  font-medium transition">
                         <i class="fas fa-times mr-2"></i>
                         Cancelar
                     </button>
-                    <button type="submit" id="btnGuardarLicencia" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition shadow-sm">
+                    <button type="submit" id="btnGuardarLicencia" class="px-6 py-2.5 bg-navy-900 hover:bg-navy-800 text-white  font-medium transition shadow-sm">
                         <i class="fas fa-save mr-2"></i>
                         Guardar Licencia
                     </button>
@@ -350,7 +374,7 @@
 
     <!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN -->
     <div id="modalConfirmacion" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-2xl max-w-md w-full">
+        <div class="bg-white  shadow-2xl max-w-md w-full">
             <div class="bg-red-600 text-white px-6 py-4 rounded-t-lg">
                 <h3 class="text-xl font-semibold">
                     <i class="fas fa-exclamation-triangle mr-2"></i>
@@ -358,7 +382,7 @@
                 </h3>
             </div>
             <div class="p-6">
-                <p class="text-gray-700 mb-6">
+                <p class="text-white mb-6">
                     ¿Estás seguro de que deseas eliminar esta licencia? Esta acción no se puede deshacer.
                 </p>
                 <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 mb-6">
@@ -368,11 +392,11 @@
                     </p>
                 </div>
                 <div class="flex justify-end space-x-3">
-                    <button id="btnCancelarEliminar" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition">
+                    <button id="btnCancelarEliminar" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-white  font-medium transition">
                         <i class="fas fa-times mr-2"></i>
                         Cancelar
                     </button>
-                    <button id="btnConfirmarEliminar" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition">
+                    <button id="btnConfirmarEliminar" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white  font-medium transition">
                         <i class="fas fa-trash mr-2"></i>
                         Eliminar
                     </button>
@@ -383,15 +407,15 @@
 
     <!-- MODAL: MENSAJES DE ÉXITO/ERROR -->
     <div id="modalMensaje" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-2xl max-w-md w-full">
+        <div class="bg-white  shadow-2xl max-w-md w-full">
             <div id="mensajeHeader" class="px-6 py-4 rounded-t-lg flex items-center space-x-3">
                 <i id="mensajeIcono" class="text-3xl"></i>
                 <h3 id="mensajeTitulo" class="text-xl font-semibold"></h3>
             </div>
             <div class="p-6">
-                <p id="mensajeTexto" class="text-gray-700 mb-6"></p>
+                <p id="mensajeTexto" class="text-white mb-6"></p>
                 <div class="flex justify-end">
-                    <button id="btnCerrarMensaje" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">
+                    <button id="btnCerrarMensaje" class="px-6 py-2.5 bg-navy-900 hover:bg-navy-800 text-white  font-medium transition">
                         <i class="fas fa-check mr-2"></i>
                         Aceptar
                     </button>
