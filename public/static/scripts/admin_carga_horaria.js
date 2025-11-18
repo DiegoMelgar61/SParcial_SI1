@@ -87,51 +87,78 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function actualizarTablaDocentes(docentes) {
-        const tbody = document.getElementById("tbody-docentes");
-        if (!tbody) return;
+        const grid = document.getElementById("grid-docentes");
+        if (!grid) return;
 
-        tbody.innerHTML = "";
+        grid.innerHTML = "";
 
         if (docentes.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="px-6 py-8 text-center text-gray-500">
-                        <i class="fas fa-inbox text-4xl mb-2"></i>
-                        <p>No hay docentes registrados para esta gestión</p>
-                    </td>
-                </tr>
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12 text-gray-500">
+                    <svg class="w-20 h-20 mx-auto text-gold-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                    </svg>
+                    <p class="text-lg font-bold text-navy-900">No hay docentes registrados para esta gestión</p>
+                </div>
             `;
             return;
         }
 
         docentes.forEach((docente, index) => {
-            const tr = document.createElement("tr");
-            tr.className = "hover:bg-gray-50 transition-colors";
+            const card = document.createElement("div");
 
-            tr.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">${docente.nombre || ''}</div>
-                    <div class="text-sm text-gray-500">${docente.codigo}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        ${docente.materias_count || 0} ${(docente.materias_count || 0) === 1 ? 'materia' : 'materias'}
+            // Alternar diseños entre navy y gold
+            const isNavy = index % 2 === 0;
+
+            card.className = `group bg-white border-4 ${isNavy ? 'border-navy-900' : 'border-gold-500'} shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden`;
+
+            card.innerHTML = `
+                <!-- Header del Card -->
+                <div class="${isNavy ? 'bg-navy-900 border-b-4 border-gold-500' : 'bg-gold-500 border-b-4 border-navy-900'} p-6 text-center">
+                    <div class="w-20 h-20 mx-auto ${isNavy ? 'bg-gold-500' : 'bg-navy-900'} flex items-center justify-center text-4xl mb-3 border-4 border-white font-black ${isNavy ? 'text-navy-900' : 'text-gold-500'}">
+                        ${docente.nombre ? docente.nombre.charAt(0).toUpperCase() : '?'}
+                    </div>
+                    <span class="inline-block ${isNavy ? 'bg-gold-500 text-navy-900' : 'bg-navy-900 text-gold-500'} px-3 py-1 text-xs font-black uppercase tracking-wider">
+                        Docente #${index + 1}
                     </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                    ${docente.carga_horaria_total || 0} hrs
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button class="btn-ver-detalle text-blue-600 hover:text-blue-900 transition-colors"
+                </div>
+
+                <!-- Contenido del Card -->
+                <div class="p-6">
+                    <!-- Nombre del docente -->
+                    <h3 class="text-lg font-black text-navy-900 uppercase tracking-wide mb-2 text-center min-h-[3rem] flex items-center justify-center">
+                        ${docente.nombre || 'Sin nombre'}
+                    </h3>
+                    <p class="text-sm text-center text-gray-600 mb-4 font-mono">
+                        Código: <span class="font-bold text-navy-900">${docente.codigo}</span>
+                    </p>
+
+                    <!-- Estadísticas en mini-cards -->
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <div class="bg-slate-50 p-3 border-l-4 border-navy-900 text-center">
+                            <p class="text-xs uppercase font-bold text-slate-600 mb-1">Materias</p>
+                            <p class="text-2xl font-black text-navy-900">${docente.materias_count || 0}</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 border-l-4 border-gold-500 text-center">
+                            <p class="text-xs uppercase font-bold text-slate-600 mb-1">Horas</p>
+                            <p class="text-2xl font-black text-gold-600">${docente.carga_horaria_total || 0}</p>
+                        </div>
+                    </div>
+
+                    <!-- Botón Ver Detalle Mejorado -->
+                    <button class="btn-ver-detalle w-full py-3 ${isNavy ? 'bg-navy-900 hover:bg-navy-800 border-navy-800' : 'bg-gold-500 hover:bg-gold-600 border-gold-600'} text-${isNavy ? 'white' : 'navy-900'} font-bold uppercase tracking-wide transition-all border-b-4 group-hover:border-${isNavy ? 'gold-500' : 'navy-900'} flex items-center justify-center gap-2"
                             data-codigo="${docente.codigo}"
                             data-nombre="${docente.nombre || ''}">
-                        <i class="fas fa-eye mr-1"></i> Ver Detalle
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        <span>Ver Detalle Completo</span>
                     </button>
-                </td>
+                </div>
             `;
 
-            tbody.appendChild(tr);
+            grid.appendChild(card);
         });
 
         // Re-asignar event listeners a los nuevos botones
@@ -284,22 +311,22 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        materias.forEach(materia => {
+        materias.forEach((materia, idx) => {
             const tr = document.createElement("tr");
-            tr.className = "border-b border-gray-200 hover:bg-gray-100 transition";
-            
+            tr.className = "border-b border-gray-200 hover:bg-slate-50 transition";
+
             tr.innerHTML = `
-                <td class="px-4 py-3 font-mono text-xs">${materia.sigla}</td>
-                <td class="px-4 py-3 font-medium">${materia.nombre}</td>
+                <td class="px-4 py-3 font-mono text-xs font-bold text-navy-900">${materia.sigla}</td>
+                <td class="px-4 py-3 font-medium text-gray-900">${materia.nombre}</td>
                 <td class="px-4 py-3 text-center">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                    <span class="inline-flex items-center px-3 py-1 text-xs font-bold uppercase bg-navy-900 text-gold-500 border-2 border-gold-500">
                         ${materia.sigla_grupo}
                     </span>
                 </td>
-                <td class="px-4 py-3 text-center">${materia.semestre}°</td>
-                <td class="px-4 py-3 text-center font-semibold text-purple-600">${materia.carga_horaria} hrs</td>
+                <td class="px-4 py-3 text-center font-bold text-navy-900">${materia.semestre}°</td>
+                <td class="px-4 py-3 text-center font-bold text-gold-600">${materia.carga_horaria} hrs</td>
                 <td class="px-4 py-3 text-center">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <span class="inline-flex items-center px-3 py-1 text-xs font-bold bg-gold-500 text-navy-900 border-2 border-navy-900">
                         ${materia.total_clases}
                     </span>
                 </td>
@@ -360,14 +387,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Crear tabla de horario
         let html = `
-            <table class="w-full text-sm border-collapse">
+            <table class="w-full text-sm border-collapse border-4 border-navy-900">
                 <thead>
-                    <tr class="bg-gray-200">
-                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold">Día</th>
-                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold">Horario</th>
-                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold">Materia</th>
-                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold">Grupo</th>
-                        <th class="border border-gray-300 px-3 py-2 text-left font-semibold">Aula</th>
+                    <tr class="bg-navy-900 text-white">
+                        <th class="border-2 border-gold-500 px-3 py-3 text-left font-bold uppercase">Día</th>
+                        <th class="border-2 border-gold-500 px-3 py-3 text-left font-bold uppercase">Horario</th>
+                        <th class="border-2 border-gold-500 px-3 py-3 text-left font-bold uppercase">Materia</th>
+                        <th class="border-2 border-gold-500 px-3 py-3 text-left font-bold uppercase">Grupo</th>
+                        <th class="border-2 border-gold-500 px-3 py-3 text-left font-bold uppercase">Aula</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -375,27 +402,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
         dias.forEach(dia => {
             const horariosDelDia = horariosPorDia[dia] || [];
-            
+
             if (horariosDelDia.length > 0) {
                 horariosDelDia.forEach((horario, index) => {
                     html += `
-                        <tr class="hover:bg-gray-50 transition">
-                            ${index === 0 ? `<td class="border border-gray-300 px-3 py-2 font-semibold bg-gray-50" rowspan="${horariosDelDia.length}">${dia}</td>` : ''}
-                            <td class="border border-gray-300 px-3 py-2 font-mono text-xs">
+                        <tr class="hover:bg-slate-50 transition">
+                            ${index === 0 ? `<td class="border-2 border-gray-300 px-3 py-2 font-bold bg-gold-500 text-navy-900" rowspan="${horariosDelDia.length}">${dia}</td>` : ''}
+                            <td class="border-2 border-gray-300 px-3 py-2 font-mono text-xs font-bold text-navy-900">
                                 ${horario.hora_inicio} - ${horario.hora_fin}
                             </td>
-                            <td class="border border-gray-300 px-3 py-2">
-                                <div class="font-medium text-gray-900">${horario.materia_nombre}</div>
-                                <div class="text-xs text-gray-500">${horario.materia_sigla}</div>
+                            <td class="border-2 border-gray-300 px-3 py-2">
+                                <div class="font-bold text-navy-900">${horario.materia_nombre}</div>
+                                <div class="text-xs text-gray-600 font-semibold">${horario.materia_sigla}</div>
                             </td>
-                            <td class="border border-gray-300 px-3 py-2 text-center">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                            <td class="border-2 border-gray-300 px-3 py-2 text-center">
+                                <span class="inline-flex items-center px-3 py-1 text-xs font-bold uppercase bg-navy-900 text-gold-500 border-2 border-gold-500">
                                     ${horario.grupo}
                                 </span>
                             </td>
-                            <td class="border border-gray-300 px-3 py-2 text-center">
-                                <span class="font-semibold text-purple-600">${horario.aula}</span>
-                                <span class="text-xs text-gray-500">${horario.modulo}</span>
+                            <td class="border-2 border-gray-300 px-3 py-2 text-center">
+                                <div class="font-bold text-gold-600 text-lg">${horario.aula}</div>
+                                <div class="text-xs text-gray-600">${horario.modulo}</div>
                             </td>
                         </tr>
                     `;

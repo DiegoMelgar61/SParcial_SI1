@@ -324,28 +324,16 @@
             </div>
         </div>
 
-        <!-- Tabla de Docentes -->
+        <!-- Grid de Docentes tipo Paquetes -->
         <div class="bg-white shadow-sm border-2 border-navy-900">
             <div class="p-6 border-b-4 border-gold-500 bg-navy-900">
                 <h3 class="text-lg font-bold text-white">Listado de Docentes</h3>
-                <p class="text-sm text-gold-500 mt-1">Haz clic en "Ver Detalle" para revisar la carga horaria completa</p>
+                <p class="text-sm text-gold-500 mt-1">Haz clic en cada paquete para revisar la carga horaria completa</p>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-navy-900 border-b-2 border-gold-500">
-                        <tr>
-                            <th class="px-6 py-3 text-left font-bold text-white">#</th>
-                            <th class="px-6 py-3 text-left font-bold text-white">Docente</th>
-                            <th class="px-6 py-3 text-center font-bold text-white">Materias</th>
-                            <th class="px-6 py-3 text-center font-bold text-white">Carga Horaria</th>
-                            <th class="px-6 py-3 text-right font-bold text-white">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-docentes" class="divide-y divide-gray-200">
-                        <!-- Los datos se cargan dinámicamente por JavaScript -->
-                    </tbody>
-                </table>
+            <!-- Grid de Cards de Docentes -->
+            <div id="grid-docentes" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Los datos se cargan dinámicamente por JavaScript -->
             </div>
         </div>
         </div><!-- Fin carga-content-wrapper -->
