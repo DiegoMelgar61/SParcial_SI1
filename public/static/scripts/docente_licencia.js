@@ -236,39 +236,33 @@ async function cargarDiasDisponibles() {
                 'X-CSRF-TOKEN': getCsrfToken()
             }
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             diasDisponiblesGlobal = data.dias_disponibles;
-            
-            // Actualizar UI principal
+
+            // Actualizar UI principal - Nuevos widgets estadísticos
             const diasDisponiblesEl = document.getElementById('diasDisponibles');
             const diasUsadosEl = document.getElementById('diasUsados');
-            
+
             if (diasDisponiblesEl) diasDisponiblesEl.textContent = data.dias_disponibles;
             if (diasUsadosEl) diasUsadosEl.textContent = data.dias_usados;
-            
-            // Cambiar color según días disponibles
-            const cardDias = document.querySelector('.bg-gradient-to-r.from-green-500');
-            if (cardDias) {
-                if (data.dias_disponibles === 0) {
-                    cardDias.classList.remove('from-green-500', 'to-green-600');
-                    cardDias.classList.add('from-red-500', 'to-red-600');
-                } else if (data.dias_disponibles <= 2) {
-                    cardDias.classList.remove('from-green-500', 'to-green-600');
-                    cardDias.classList.add('from-yellow-500', 'to-yellow-600');
-                }
-            }
-            
+
             // Deshabilitar botón si no hay días disponibles
             const btnNuevaLicencia = document.getElementById('btnNuevaLicencia');
-            if (btnNuevaLicencia && data.dias_disponibles === 0) {
-                btnNuevaLicencia.disabled = true;
-                btnNuevaLicencia.classList.add('opacity-50', 'cursor-not-allowed');
-                btnNuevaLicencia.title = 'Has alcanzado el límite de días este mes';
+            if (btnNuevaLicencia) {
+                if (data.dias_disponibles === 0) {
+                    btnNuevaLicencia.disabled = true;
+                    btnNuevaLicencia.classList.add('opacity-50', 'cursor-not-allowed');
+                    btnNuevaLicencia.title = 'Has alcanzado el límite de días este mes';
+                } else {
+                    btnNuevaLicencia.disabled = false;
+                    btnNuevaLicencia.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btnNuevaLicencia.title = '';
+                }
             }
-            
+
             console.log(`✅ Días disponibles: ${data.dias_disponibles} de 7`);
         } else {
             console.error('❌ Error al obtener días disponibles:', data.message);
@@ -334,28 +328,27 @@ function actualizarSelectorDias(diasDisponibles) {
  */
 async function cargarLicencias() {
     const loadingSpinner = document.getElementById('loadingSpinner');
-    const tablaContainer = document.getElementById('tablaContainer');
+    const gridLicencias = document.getElementById('gridLicencias');
     const noLicencias = document.getElementById('noLicencias');
-    const tablaLicencias = document.getElementById('tablaLicencias');
-    
+    const totalLicenciasEl = document.getElementById('totalLicencias');
+
     console.log('🔍 DEBUG: Iniciando cargarLicencias()');
-    console.log('🔍 tablaContainer:', tablaContainer);
-    console.log('🔍 tablaLicencias:', tablaLicencias);
-    
+    console.log('🔍 gridLicencias:', gridLicencias);
+
     // Verificar que los elementos existan
-    if (!tablaContainer || !tablaLicencias) {
-        console.warn('⚠️ Elementos de tabla no encontrados, abortando cargarLicencias()');
+    if (!gridLicencias) {
+        console.warn('⚠️ Elemento gridLicencias no encontrado, abortando cargarLicencias()');
         return;
     }
-    
+
     try {
         // Mostrar spinner
         if (loadingSpinner) loadingSpinner.classList.remove('hidden');
-        tablaContainer.classList.add('hidden');
+        gridLicencias.classList.add('hidden');
         if (noLicencias) noLicencias.classList.add('hidden');
-        
+
         console.log('🔍 Haciendo fetch a /docente/licencias/listar');
-        
+
         const response = await fetch('/docente/licencias/listar', {
             method: 'GET',
             headers: {
@@ -363,169 +356,156 @@ async function cargarLicencias() {
                 'X-CSRF-TOKEN': getCsrfToken()
             }
         });
-        
+
         const data = await response.json();
-        
+
         console.log('🔍 Respuesta recibida:', data);
         console.log('🔍 Cantidad de licencias:', data.licencias?.length);
-        
+
         if (data.success) {
             // Ocultar spinner
             if (loadingSpinner) loadingSpinner.classList.add('hidden');
-            
+
+            // Actualizar contador de Total Licencias
+            if (totalLicenciasEl) {
+                totalLicenciasEl.textContent = data.licencias.length;
+            }
+
             if (data.licencias.length === 0) {
                 console.log('📋 No hay licencias, mostrando mensaje');
                 // Mostrar mensaje de no hay licencias
                 if (noLicencias) noLicencias.classList.remove('hidden');
             } else {
-                console.log('✅ Mostrando tabla con', data.licencias.length, 'licencias');
-                // Mostrar tabla
-                tablaContainer.classList.remove('hidden');
-                console.log('🔍 tablaContainer clases después de remove hidden:', tablaContainer.className);
-                
-                // Limpiar tabla y cards
-                tablaLicencias.innerHTML = '';
-                const cardsLicencias = document.getElementById('cardsLicencias');
-                if (cardsLicencias) cardsLicencias.innerHTML = '';
-                
-                // Llenar tabla y cards con datos
-                data.licencias.forEach(licencia => {
-                    // ===== GENERAR FILA DE TABLA =====
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-gray-50 transition';
-                    
-                    // Botones de acción (solo si puede modificar)
-                    let botonesAccion = '';
-                    if (licencia.puede_modificar) {
-                        botonesAccion = `
-                            <button onclick="editarLicencia(${licencia.nro})" class="text-blue-600 hover:text-blue-800 mr-3" title="Editar">
-                                <i class="fas fa-edit text-lg"></i>
-                            </button>
-                            <button onclick="eliminarLicencia(${licencia.nro})" class="text-red-600 hover:text-red-800" title="Eliminar">
-                                <i class="fas fa-trash text-lg"></i>
-                            </button>
-                        `;
-                    } else {
-                        botonesAccion = '<span class="text-gray-400 text-xs"><i class="fas fa-lock mr-1"></i>Bloqueada</span>';
-                    }
-                    
-                    tr.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${licencia.nro}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700">
-                            <div class="max-w-xs truncate" title="${licencia.descripcion}">
-                                ${licencia.descripcion}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            <i class="fas fa-calendar-alt text-gray-400 mr-2"></i>
-                            ${licencia.fecha_hora_formato}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            ${licencia.fecha_i_formato}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            ${licencia.fecha_f_formato}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                                ${licencia.dias_licencia} ${licencia.dias_licencia === 1 ? 'día' : 'días'}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            ${botonesAccion}
-                        </td>
-                    `;
-                    
-                    tablaLicencias.appendChild(tr);
-                    
-                    // ===== GENERAR CARD MÓVIL =====
+                console.log('✅ Mostrando grid con', data.licencias.length, 'licencias');
+                // Mostrar grid
+                gridLicencias.classList.remove('hidden');
+                console.log('🔍 gridLicencias clases después de remove hidden:', gridLicencias.className);
+
+                // Limpiar grid
+                gridLicencias.innerHTML = '';
+
+                // Generar cards en formato paquete corporativo
+                data.licencias.forEach((licencia, index) => {
+                    const isNavy = index % 2 === 0;
+
+                    // ===== GENERAR CARD CORPORATIVA =====
                     const card = document.createElement('div');
-                    card.className = 'bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition';
-                    
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-xl font-bold text-indigo-600">#${licencia.nro}</span>
-                        </div>
-                        
-                        <div class="space-y-3 mb-4">
-                            <div>
-                                <p class="text-xs font-medium text-gray-500 mb-1">Descripción</p>
-                                <p class="text-sm text-gray-900">${licencia.descripcion}</p>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-3 pt-3 border-t border-gray-100">
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 mb-1">
-                                        <i class="fas fa-calendar-alt text-gray-400 mr-1"></i>
-                                        Solicitada
-                                    </p>
-                                    <p class="text-sm text-gray-800">${licencia.fecha_hora_formato}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 mb-1">
-                                        <i class="fas fa-clock text-gray-400 mr-1"></i>
-                                        Duración
-                                    </p>
-                                    <span class="inline-block bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                        ${licencia.dias_licencia} ${licencia.dias_licencia === 1 ? 'día' : 'días'}
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-3 pt-3 border-t border-gray-100">
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 mb-1">
-                                        <i class="fas fa-play text-green-500 mr-1"></i>
-                                        Inicio
-                                    </p>
-                                    <p class="text-sm font-semibold text-gray-800">${licencia.fecha_i_formato}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 mb-1">
-                                        <i class="fas fa-stop text-red-500 mr-1"></i>
-                                        Fin
-                                    </p>
-                                    <p class="text-sm font-semibold text-gray-800">${licencia.fecha_f_formato}</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        ${licencia.puede_modificar ? `
-                            <div class="flex gap-2 pt-4 border-t border-gray-200">
-                                <button onclick="editarLicencia(${licencia.nro})" class="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2">
-                                    <i class="fas fa-edit"></i>
+                    card.className = `group bg-white border-4 ${isNavy ? 'border-navy-900' : 'border-gold-500'} shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden`;
+
+                    // Determinar estado y color
+                    const puedeModificar = licencia.puede_modificar;
+                    const estadoBadge = puedeModificar
+                        ? '<span class="inline-block bg-green-500 text-white px-2 py-1 text-xs font-black uppercase">Editable</span>'
+                        : '<span class="inline-block bg-red-500 text-white px-2 py-1 text-xs font-black uppercase"><i class="fas fa-lock mr-1"></i>Bloqueada</span>';
+
+                    // Botones de acción
+                    let botonesHTML = '';
+                    if (puedeModificar) {
+                        botonesHTML = `
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="editarLicencia(${licencia.nro})" class="py-3 ${isNavy ? 'bg-gold-500 hover:bg-gold-600 border-b-4 border-gold-600' : 'bg-navy-900 hover:bg-navy-800 border-b-4 border-navy-800'} text-white font-bold uppercase tracking-wide transition-all flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
                                     <span>Editar</span>
                                 </button>
-                                <button onclick="eliminarLicencia(${licencia.nro})" class="flex-1 bg-red-50 hover:bg-red-100 text-red-700 py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2">
-                                    <i class="fas fa-trash"></i>
+                                <button onclick="eliminarLicencia(${licencia.nro})" class="py-3 bg-red-600 hover:bg-red-700 border-b-4 border-red-700 text-white font-bold uppercase tracking-wide transition-all flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
                                     <span>Eliminar</span>
                                 </button>
                             </div>
-                        ` : `
-                            <div class="pt-4 border-t border-gray-200 text-center">
-                                <span class="text-gray-400 text-sm flex items-center justify-center gap-2">
+                        `;
+                    } else {
+                        botonesHTML = `
+                            <div class="py-4 text-center bg-slate-100 border-t-4 border-slate-300">
+                                <span class="text-slate-500 text-sm font-bold uppercase tracking-wide flex items-center justify-center gap-2">
                                     <i class="fas fa-lock"></i>
-                                    <span>No se puede modificar (ha pasado 1 hora)</span>
+                                    <span>No modificable (pasó 1 hora)</span>
                                 </span>
                             </div>
-                        `}
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <!-- Header del Card -->
+                        <div class="${isNavy ? 'bg-navy-900 border-b-4 border-gold-500' : 'bg-gold-500 border-b-4 border-navy-900'} p-5 text-center">
+                            <div class="w-16 h-16 mx-auto ${isNavy ? 'bg-gold-500' : 'bg-navy-900'} flex items-center justify-center text-3xl mb-3 border-4 border-white font-black ${isNavy ? 'text-navy-900' : 'text-gold-500'}">
+                                #${licencia.nro}
+                            </div>
+                            ${estadoBadge}
+                        </div>
+
+                        <!-- Cuerpo del Card -->
+                        <div class="p-6">
+                            <!-- Descripción -->
+                            <div class="mb-5">
+                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Descripción</h4>
+                                <p class="text-sm text-navy-900 font-semibold leading-relaxed">${licencia.descripcion}</p>
+                            </div>
+
+                            <!-- Mini-estadísticas -->
+                            <div class="grid grid-cols-2 gap-3 mb-5">
+                                <!-- Fecha Solicitada -->
+                                <div class="bg-slate-50 border-l-4 ${isNavy ? 'border-navy-900' : 'border-gold-500'} p-3">
+                                    <p class="text-xs font-bold text-slate-500 uppercase mb-1">
+                                        <i class="fas fa-calendar-plus ${isNavy ? 'text-navy-900' : 'text-gold-500'} mr-1"></i>
+                                        Solicitada
+                                    </p>
+                                    <p class="text-xs text-navy-900 font-bold">${licencia.fecha_hora_formato}</p>
+                                </div>
+
+                                <!-- Duración -->
+                                <div class="bg-slate-50 border-l-4 ${isNavy ? 'border-navy-900' : 'border-gold-500'} p-3">
+                                    <p class="text-xs font-bold text-slate-500 uppercase mb-1">
+                                        <i class="fas fa-clock ${isNavy ? 'text-navy-900' : 'text-gold-500'} mr-1"></i>
+                                        Duración
+                                    </p>
+                                    <p class="text-xl font-black ${isNavy ? 'text-navy-900' : 'text-gold-500'}">${licencia.dias_licencia} ${licencia.dias_licencia === 1 ? 'día' : 'días'}</p>
+                                </div>
+                            </div>
+
+                            <!-- Fechas de Inicio y Fin -->
+                            <div class="grid grid-cols-2 gap-3 mb-5 pb-5 border-b-2 border-slate-100">
+                                <!-- Fecha Inicio -->
+                                <div>
+                                    <p class="text-xs font-bold text-slate-500 uppercase mb-1">
+                                        <i class="fas fa-play text-green-600 mr-1"></i>
+                                        Inicio
+                                    </p>
+                                    <p class="text-sm font-bold text-navy-900">${licencia.fecha_i_formato}</p>
+                                </div>
+
+                                <!-- Fecha Fin -->
+                                <div>
+                                    <p class="text-xs font-bold text-slate-500 uppercase mb-1">
+                                        <i class="fas fa-stop text-red-600 mr-1"></i>
+                                        Fin
+                                    </p>
+                                    <p class="text-sm font-bold text-navy-900">${licencia.fecha_f_formato}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        ${botonesHTML}
                     `;
-                    
-                    cardsLicencias.appendChild(card);
+
+                    gridLicencias.appendChild(card);
                 });
-                
-                console.log(`✅ Cargadas ${data.licencias.length} licencias`);
-                console.log('🔍 Filas en tabla:', tablaLicencias.children.length);
-                console.log('🔍 Cards generados:', cardsLicencias.children.length);
+
+                console.log(`✅ Cargadas ${data.licencias.length} licencias en grid corporativo`);
+                console.log('🔍 Cards en grid:', gridLicencias.children.length);
             }
         } else {
             console.error('❌ Error al cargar licencias:', data.message);
-            loadingSpinner.classList.add('hidden');
+            if (loadingSpinner) loadingSpinner.classList.add('hidden');
             mostrarMensaje('error', 'Error', data.message);
         }
     } catch (error) {
         console.error('❌ Error en cargarLicencias:', error);
-        loadingSpinner.classList.add('hidden');
+        if (loadingSpinner) loadingSpinner.classList.add('hidden');
         mostrarMensaje('error', 'Error', 'No se pudieron cargar las licencias');
     }
 }

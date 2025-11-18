@@ -156,98 +156,103 @@
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="md:ml-64 flex-1 p-6">
-        
+
         <!-- Header del módulo -->
-        <div class="mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <div class="mb-8">
+            <div class="bg-white border-l-4 border-gold-500 shadow-md px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">Gestión de Licencias</h2>
-                    <p class="text-sm text-gray-600 mt-1">Administre sus solicitudes de licencia</p>
+                    <h2 class="text-3xl font-black text-navy-900 uppercase tracking-tight">Gestión de Licencias</h2>
+                    <p class="text-sm text-slate-600 font-semibold uppercase tracking-wide">Administre sus solicitudes de licencia docente</p>
                 </div>
+                <button id="btnNuevaLicencia" class="flex items-center justify-center gap-2 bg-navy-900 hover:bg-navy-800 text-white px-6 py-3 border-b-4 border-gold-500 font-bold uppercase tracking-wide transition shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>Nueva Licencia</span>
+                </button>
             </div>
         </div>
-        
-        <!-- TARJETA DE DÍAS DISPONIBLES -->
-        <div class="bg-white  shadow-sm border border-gray-200 p-6 mb-6">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                <div class="flex items-center gap-4">
-                    <div class="w-20 h-20  bg-gold-500 flex items-center justify-center">
-                        <i class="fas fa-calendar-check text-4xl text-gold-500"></i>
+
+        <!-- GRID DE ESTADÍSTICAS (REORGANIZADO) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+            <!-- Widget: Días Disponibles (DESTACADO) -->
+            <div class="bg-white border-4 border-gold-500 shadow-lg hover:shadow-2xl transition-all duration-300">
+                <div class="bg-gold-500 p-5 text-center border-b-4 border-navy-900">
+                    <div class="w-16 h-16 mx-auto bg-navy-900 flex items-center justify-center text-4xl mb-3 border-4 border-white">
+                        📅
                     </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900">Días Disponibles</h3>
-                        <p class="text-sm text-gray-600 mt-1">Límite mensual de licencias</p>
-                    </div>
+                    <span class="inline-block bg-navy-900 text-gold-500 px-3 py-1 text-xs font-black uppercase tracking-wider">Principal</span>
                 </div>
-                <div class="text-center md:text-right">
-                    <div class="text-6xl font-bold text-gold-500" id="diasDisponibles">-</div>
-                    <p class="text-base text-white mt-2 font-medium">de 7 días este mes</p>
-                    <p class="text-sm text-gray-500 mt-1">Días usados: <span id="diasUsados" class="font-semibold">-</span></p>
+                <div class="p-6 text-center">
+                    <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wide mb-3">Días Disponibles</h3>
+                    <div class="text-6xl font-black text-gold-500 mb-3" id="diasDisponibles">-</div>
+                    <p class="text-sm text-navy-900 font-bold">de 7 días este mes</p>
+                </div>
+            </div>
+
+            <!-- Widget: Días Usados -->
+            <div class="bg-white border-4 border-navy-900 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div class="bg-navy-900 p-5 text-center border-b-4 border-gold-500">
+                    <div class="w-16 h-16 mx-auto bg-gold-500 flex items-center justify-center text-4xl mb-3 border-4 border-white">
+                        ⏱️
+                    </div>
+                    <span class="inline-block bg-gold-500 text-navy-900 px-3 py-1 text-xs font-black uppercase tracking-wider">Consumo</span>
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wide mb-3">Días Usados</h3>
+                    <div class="text-6xl font-black text-navy-900 mb-3" id="diasUsados">-</div>
+                    <p class="text-sm text-slate-600 font-bold">días en este mes</p>
+                </div>
+            </div>
+
+            <!-- Widget: Total Licencias -->
+            <div class="bg-white border-4 border-slate-300 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div class="bg-slate-100 p-5 text-center border-b-4 border-gold-500">
+                    <div class="w-16 h-16 mx-auto bg-navy-900 flex items-center justify-center text-4xl mb-3 border-2 border-gold-500">
+                        📋
+                    </div>
+                    <span class="inline-block bg-navy-900 text-gold-500 px-3 py-1 text-xs font-black uppercase tracking-wider">Historial</span>
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wide mb-3">Total Licencias</h3>
+                    <div class="text-6xl font-black text-navy-900 mb-3" id="totalLicencias">-</div>
+                    <p class="text-sm text-slate-600 font-bold">registradas</p>
                 </div>
             </div>
         </div>
 
-        <!-- SECCIÓN DE LICENCIAS -->
-        <div class="bg-white  shadow-sm border border-gray-200">
+        <!-- SECCIÓN DE LICENCIAS CON DISEÑO DE PAQUETES -->
+        <div class="bg-white shadow-md border-2 border-navy-900">
             <!-- HEADER -->
-            <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h3 class="text-xl font-bold text-gray-900">
-                        <i class="fas fa-list text-gold-500 mr-2"></i>
-                        Mis Licencias
-                    </h3>
-                    <p class="text-sm text-gray-600 mt-1">Últimas 5 licencias solicitadas</p>
-                </div>
-                <button id="btnNuevaLicencia" class="inline-flex items-center gap-2 bg-navy-900 text-white px-5 py-2.5  shadow-md hover:bg-navy-800 transition font-medium">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    <span>Pedir Licencia</span>
-                </button>
+            <div class="bg-navy-900 px-6 py-4 border-b-4 border-gold-500">
+                <h3 class="text-lg font-black text-white uppercase tracking-wide">
+                    📄 Mis Solicitudes de Licencia
+                </h3>
+                <p class="text-sm text-gold-500 mt-1 font-semibold uppercase tracking-wide">Últimas licencias solicitadas</p>
             </div>
 
             <!-- SPINNER DE CARGA -->
             <div id="loadingSpinner" class="flex justify-center items-center py-16">
                 <div class="flex flex-col items-center gap-3">
-                    <div class="animate-spin  h-12 w-12 border-b-2 border-navy-900"></div>
-                    <span class="text-sm text-gray-600">Cargando licencias...</span>
+                    <div class="animate-spin h-12 w-12 border-b-4 border-navy-900"></div>
+                    <span class="text-sm text-gray-600 font-semibold">Cargando licencias...</span>
                 </div>
             </div>
 
-            <!-- TABLA RESPONSIVE -->
-            <div id="tablaContainer" class="hidden">
-                <!-- Vista de tabla para pantallas grandes -->
-                <div class="overflow-x-auto block">
-                    <table class="min-w-full divide-y divide-gray-200 hidden md:table">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Solicitud</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Inicio</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Fin</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Días</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaLicencias" class="bg-white divide-y divide-gray-200">
-                            <!-- Filas generadas por JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Vista de cards para móviles -->
-                <div id="cardsLicencias" class="md:hidden p-4 space-y-4">
-                    <!-- Cards generados por JavaScript -->
-                </div>
+            <!-- GRID DE CARDS (Reemplaza la tabla) -->
+            <div id="gridLicencias" class="hidden p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards generados por JavaScript -->
             </div>
 
             <!-- MENSAJE CUANDO NO HAY LICENCIAS -->
             <div id="noLicencias" class="hidden text-center py-16">
                 <div class="flex flex-col items-center gap-3">
-                    <i class="fas fa-inbox text-6xl text-gray-300"></i>
-                    <p class="text-lg font-semibold text-gray-600">No tienes licencias registradas</p>
-                    <p class="text-sm text-gray-500">Haz clic en "Pedir Licencia" para crear una nueva</p>
+                    <svg class="w-20 h-20 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                    </svg>
+                    <p class="text-lg font-bold text-navy-900">No tienes licencias registradas</p>
+                    <p class="text-sm text-gray-600">Haz clic en "Nueva Licencia" para crear una solicitud</p>
                 </div>
             </div>
         </div>
